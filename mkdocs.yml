@@ -107,11 +107,31 @@ nav:
     - Troubleshooting: reference/troubleshooting.md
 
 # Extra
+# Custom CSS
+extra_css:
+  - stylesheets/extra.css
+
 extra:
+  author:
+    name: "Sudharsan Kesavanarayanan"
+    title: "Azure AI Search Expert & Technical Author"
+    bio: "Passionate about making Azure AI Search accessible to developers worldwide. This handbook represents years of hands-on experience and best practices in search technology."
+    bio_short: "Azure AI Search Expert sharing practical knowledge and best practices."
+    avatar: "assets/images/profile.jpg"
+    # Profile display options (set to true/false to enable/disable)
+    show_footer_profile: true      # Shows profile in footer of all pages
+    show_header_banner: false      # Shows profile banner at top of pages
+    show_sidebar_card: false       # Shows profile card in sidebar
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/sudharsank/azure-ai-search-handbook
-      name: GitHub Repository
+      link: https://github.com/sudharsank
+      name: GitHub Profile
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/your-linkedin-profile
+      name: LinkedIn Profile
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/your-twitter-handle
+      name: Twitter Profile
   version:
     provider: mike
   generator: false

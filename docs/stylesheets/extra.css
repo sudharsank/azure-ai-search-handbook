@@ -1,0 +1,231 @@
+/* Custom styles for Azure AI Search Handbook */
+
+/* Author profile styles */
+.author-profile {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--md-default-bg-color);
+    border-radius: 1rem;
+    border: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.author-avatar {
+    flex-shrink: 0;
+}
+
+.author-avatar img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid var(--md-primary-fg-color);
+}
+
+.author-info h2 {
+    margin-top: 0;
+    color: var(--md-primary-fg-color);
+}
+
+.author-info h3 {
+    color: var(--md-default-fg-color--light);
+    font-weight: 400;
+    margin: 0.5rem 0;
+}
+
+/* Social links styling */
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+.social-links a:hover {
+    opacity: 0.8;
+}
+
+/* Footer enhancement */
+.md-footer-meta {
+    border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* Simple footer navigation (next/previous) */
+.md-footer__link {
+    text-decoration: none;
+    color: var(--md-default-fg-color) !important;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+.md-footer__link:hover {
+    color: var(--md-primary-fg-color) !important;
+    opacity: 1;
+}
+
+.md-footer__title {
+    font-weight: normal;
+    color: var(--md-default-fg-color) !important;
+}
+
+.md-footer__link:hover .md-footer__title {
+    color: var(--md-primary-fg-color) !important;
+}
+
+.md-footer__direction {
+    display: none; /* Hide the "Previous" and "Next" labels */
+}
+
+/* Ensure footer has proper background contrast */
+.md-footer {
+    background-color: var(--md-footer-bg-color);
+}
+
+.md-footer-nav {
+    background-color: var(--md-footer-bg-color);
+}
+
+/* Enhanced "Back to Top" button */
+.md-top {
+    background-color: var(--md-primary-fg-color) !important;
+    color: white !important;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.md-top:hover {
+    background-color: var(--md-accent-fg-color) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.md-top:focus,
+.md-top:active {
+    background-color: var(--md-primary-fg-color) !important;
+}
+
+/* Ensure back to top button is always visible on long pages */
+.md-top[data-md-state="hidden"] {
+    transform: translateY(0) !important;
+    opacity: 0.7;
+}
+
+.md-top[data-md-state="hidden"]:hover {
+    opacity: 1;
+}
+
+/* Responsive design for mobile */
+@media screen and (max-width: 768px) {
+    .author-profile {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .author-avatar img {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+/* Enhanced code blocks */
+.highlight {
+    border-radius: 0.5rem;
+}
+
+/* Better table styling */
+.md-typeset table:not([class]) {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+/* Improved admonition styling */
+.md-typeset .admonition {
+    border-radius: 0.5rem;
+}
+
+/* Custom styling for the handbook */
+.md-typeset h1 {
+    color: var(--md-primary-fg-color);
+}
+
+/* Navigation enhancement */
+.md-nav__title {
+    font-weight: 600;
+}
+
+/* Search enhancement */
+.md-search__form {
+    border-radius: 2rem;
+}
+
+/* Button styling */
+.md-button {
+    border-radius: 0.5rem;
+}
+
+/* Custom colors for different sections */
+.beginner-section {
+    border-left: 4px solid #4CAF50;
+    padding-left: 1rem;
+}
+
+.intermediate-section {
+    border-left: 4px solid #FF9800;
+    padding-left: 1rem;
+}
+
+.advanced-section {
+    border-left: 4px solid #F44336;
+    padding-left: 1rem;
+}
+
+/* Smooth scrolling for better UX */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Ensure long content pages have proper spacing */
+.md-content__inner {
+    padding-bottom: 2rem;
+}
+
+/* Better visibility for long pages */
+.md-typeset {
+    line-height: 1.6;
+}
+
+/* Enhanced readability for long content */
+.md-typeset p {
+    margin-bottom: 1rem;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.md-typeset h1:first-child,
+.md-typeset h2:first-child,
+.md-typeset h3:first-child {
+    margin-top: 0;
+}

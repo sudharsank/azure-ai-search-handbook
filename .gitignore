@@ -93,6 +93,7 @@ test_readme_setup.py
 
 # Development documentation and notes
 DEV_CLEANUP_GUIDE.md
+ADD_PROFILE_PICTURE.md
 CONTRIBUTING.md
 CHANGELOG.md
 TODO.md
