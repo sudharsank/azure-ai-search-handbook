@@ -202,7 +202,7 @@ for result in results:
 
 **Key Features:**
 - Strongly-typed SDK with IntelliSense support
-- Async/await patterns for scalable applications
+- Comprehensive examples for scalable applications
 - Excellent integration with .NET ecosystem
 - Enterprise-grade error handling
 
@@ -214,7 +214,7 @@ dotnet run
 
 **Examples Included:**
 - ✅ **Strongly-typed models** for search results
-- ✅ **Async/await patterns** for scalable code
+- ✅ **Comprehensive patterns** for scalable code
 - ✅ **LINQ-style querying** for familiar syntax
 - ✅ **Comprehensive error handling** with try-catch patterns
 - ✅ **Configuration management** with appsettings.json
@@ -224,8 +224,8 @@ dotnet run
 ```csharp
 var searchClient = new SearchClient(endpoint, indexName, credential);
 
-var searchResults = await searchClient.SearchAsync<SearchDocument>("python programming");
-await foreach (var result in searchResults.Value.GetResultsAsync())
+var searchResults = searchClient.Search<SearchDocument>("python programming");
+foreach (var result in searchResults.Value.GetResults())
 {
     Console.WriteLine($"Title: {result.Document["title"]}");
     Console.WriteLine($"Score: {result.Score}");
@@ -238,7 +238,7 @@ await foreach (var result in searchResults.Value.GetResultsAsync())
 
 **Key Features:**
 - Works in both browser and Node.js environments
-- Promise-based async operations
+- Promise-based operations
 - Excellent for real-time search interfaces
 - Easy integration with web frameworks
 
@@ -251,11 +251,11 @@ node basic_search_examples.js
 
 **Examples Included:**
 - ✅ **Browser and Node.js** compatible code
-- ✅ **Promise-based async** operations
+- ✅ **Promise-based** operations
 - ✅ **Real-time search** implementation
 - ✅ **Web framework integration** examples
 - ✅ **CORS handling** for browser applications
-- ✅ **Modern ES6+ syntax** with async/await
+- ✅ **Modern ES6+ syntax** with comprehensive examples
 
 **Sample Code Preview:**
 ```javascript
@@ -263,9 +263,9 @@ const { SearchClient, AzureKeyCredential } = require("@azure/search-documents");
 
 const searchClient = new SearchClient(endpoint, indexName, new AzureKeyCredential(apiKey));
 
-async function searchDocuments(query) {
-    const searchResults = await searchClient.search(query);
-    for await (const result of searchResults.results) {
+function searchDocuments(query) {
+    const searchResults = searchClient.search(query);
+    for (const result of searchResults.results) {
         console.log(`Title: ${result.document.title}`);
         console.log(`Score: ${result.score}`);
     }
