@@ -89,6 +89,7 @@ nav:
         - Search Operations: beginner/module-02-basic-search/search-troubleshooting.md
         - Prerequisites Setup: beginner/module-02-basic-search/prerequisites-troubleshooting.md
       - Code Samples: beginner/module-02-basic-search/code-samples/README.md
+      - Exercises: beginner/module-02-basic-search/exercises/README.md
     - Module 3 - Index Management: beginner/module-03-index-management/documentation.md
     - Module 4 - Simple Queries: beginner/module-04-simple-queries/documentation.md
   - Intermediate:
