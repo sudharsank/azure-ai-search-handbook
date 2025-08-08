@@ -75,3 +75,47 @@ docs/_build/
 
 # Kiro
 .kiro/
+
+# Development and deployment files (not for end users)
+DEPLOYMENT_SUMMARY.md
+GITHUB_PAGES_SETUP.md
+deployment/
+scripts/verify-deployment.py
+scripts/deploy-local.sh
+cleanup_global_install.py
+cleanup_dev_files.py
+serve-docs.sh
+
+# Development-only notebooks (keep user-facing notebooks in docs/)
+notebooks/
+test_readme_setup.py
+
+# Development documentation and notes
+DEV_CLEANUP_GUIDE.md
+CONTRIBUTING.md
+CHANGELOG.md
+TODO.md
+NOTES.md
+dev_notes.md
+*.notes
+*.todo
+
+# Local development files and directories
+.local/
+local_*
+dev_*
+debug_*
+temp_*
+
+# Backup and temporary development files
+*.bak
+*.backup
+*_backup.*
+*_old.*
+*_temp.*
+*_draft.*
+
+# Development testing files
+*_dev.py
+*_debug.py
+*_local.py

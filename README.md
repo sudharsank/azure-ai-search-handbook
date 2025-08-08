@@ -229,12 +229,30 @@ python setup/setup_cli.py quick --name my-project  # Quick setup everything
 
 ## 🌐 Online Documentation
 
-Visit the online documentation at: [https://azure-ai-search-handbook.github.io](https://azure-ai-search-handbook.github.io)
+Visit the online documentation at: [https://your-username.github.io/azure-ai-search-handbook](https://your-username.github.io/azure-ai-search-handbook)
 
-Or run locally:
+### Local Development
+
+Run the documentation locally:
 ```bash
 mkdocs serve
 ```
+
+### GitHub Pages Deployment
+
+The documentation is automatically deployed to GitHub Pages on every push to the main branch:
+
+1. **Automatic Deployment**: GitHub Actions builds and deploys the site
+2. **Live Updates**: Changes are reflected within minutes of pushing
+3. **Build Status**: Check the Actions tab for deployment status
+
+To set up GitHub Pages for your fork:
+1. Go to repository Settings → Pages
+2. Set Source to "GitHub Actions"
+3. Update the repository URLs in `mkdocs.yml`
+4. Push to main branch to trigger deployment
+
+See [deployment/github-pages-setup.md](deployment/github-pages-setup.md) for detailed setup instructions.
 
 ## 🔍 Environment Testing
 

@@ -1,11 +1,12 @@
 site_name: Azure AI Search Handbook
 site_description: Comprehensive learning resource for Azure AI Search from beginner to expert
 site_author: Azure AI Search Handbook Contributors
-site_url: https://azure-ai-search-handbook.github.io
+site_url: https://sudharsank.github.io/azure-ai-search-handbook
 
 # Repository
 repo_name: azure-ai-search-handbook
-repo_url: https://github.com/your-username/azure-ai-search-handbook
+repo_url: https://github.com/sudharsank/azure-ai-search-handbook
+edit_uri: edit/main/docs/
 
 # Configuration
 theme:
@@ -31,10 +32,13 @@ theme:
     - navigation.expand
     - navigation.path
     - navigation.top
+    - navigation.footer
     - search.highlight
     - search.share
     - content.code.copy
     - content.code.annotate
+    - content.action.edit
+    - content.action.view
 
 # Extensions
 markdown_extensions:
@@ -67,7 +71,6 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
       fallback_to_build_date: true
-      enabled: !ENV [ENABLE_GIT_PLUGIN, true]
 
 # Navigation
 nav:
@@ -108,6 +111,8 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/your-username/azure-ai-search-handbook
+      link: https://github.com/sudharsank/azure-ai-search-handbook
+      name: GitHub Repository
   version:
     provider: mike
+  generator: false
