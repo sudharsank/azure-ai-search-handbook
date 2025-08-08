@@ -84,6 +84,7 @@ scripts/verify-deployment.py
 scripts/deploy-local.sh
 cleanup_global_install.py
 cleanup_dev_files.py
+test_github_actions.py
 serve-docs.sh
 
 # Development-only notebooks (keep user-facing notebooks in docs/)
