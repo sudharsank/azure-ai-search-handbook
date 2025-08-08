@@ -1,0 +1,339 @@
+# Field-Specific Search - Module 2 REST API Examples
+# Searching within specific fields using Azure AI Search REST API
+#
+# This file demonstrates:
+# - Searching specific fields
+# - Field selection for results
+# - Multi-field searches
+# - Field weighting concepts
+# - When to use field-specific search
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+
+### Variables
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. Search All Fields (Default Behavior)
+# Standard search across all searchable fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python programming",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 2. Search Specific Field - Title Only
+# Search only in the title field
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "searchFields": "title",
+    "top": 5
+}
+
+### 3. Search Multiple Specific Fields
+# Search in title and description fields only
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "searchFields": "title,description",
+    "top": 8
+}
+
+### 4. Search with Field Selection
+# Return only specific fields in results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "javascript tutorial",
+    "select": "id,title,author,url",
+    "top": 5
+}
+
+### 5. Combined Field Search and Selection
+# Search specific fields and return selected fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "data science",
+    "searchFields": "title,content",
+    "select": "title,author,publishedDate",
+    "top": 5
+}
+
+### 6. Content-Only Search
+# Search only in content field for detailed information
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "artificial intelligence",
+    "searchFields": "content",
+    "top": 5
+}
+
+### 7. Author-Specific Search
+# Search for content by specific authors
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "John Smith",
+    "searchFields": "author",
+    "top": 10
+}
+
+### 8. Multi-Field Search with Highlighting
+# Search multiple fields and highlight matches
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "searchFields": "title,description,content",
+    "highlight": "title,description,content",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "top": 5
+}
+
+### 9. Metadata Fields Search
+# Search in metadata fields like category, tags
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "searchFields": "category,tags",
+    "select": "title,category,tags",
+    "top": 8
+}
+
+### 10. Title and Author Combined Search
+# Search across title and author fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming guide",
+    "searchFields": "title,author",
+    "top": 5
+}
+
+### 11. Field-Specific Boolean Search
+# Use boolean operators within specific fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "javascript AND framework",
+    "searchFields": "title,description",
+    "top": 5
+}
+
+### 12. Exclude Fields Strategy
+# Search all fields except specific ones (by specifying only desired fields)
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "searchFields": "title,description,content",
+    "top": 5
+}
+
+### 13. High-Value Fields Priority Search
+# Search high-value fields first (title, description)
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "searchFields": "title,description",
+    "select": "title,description,author,url",
+    "top": 8
+}
+
+### 14. Field Search with Facets
+# Get facets while searching specific fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "searchFields": "title,content",
+    "facets": ["category", "author", "publishedYear"],
+    "top": 5
+}
+
+### 15. Field Search with Filters
+# Combine field search with filters
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "searchFields": "title,description",
+    "filter": "category eq 'programming'",
+    "select": "title,category,author",
+    "top": 8
+}
+
+### 16. Progressive Field Search Strategy
+# Start with title, then expand to more fields
+# Step 1: Title only
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "react hooks",
+    "searchFields": "title",
+    "top": 3
+}
+
+### 17. Progressive Field Search Strategy
+# Step 2: Title + Description
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "react hooks",
+    "searchFields": "title,description",
+    "top": 5
+}
+
+### 18. Progressive Field Search Strategy
+# Step 3: All searchable fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "react hooks",
+    "top": 8
+}
+
+###
+# Field Search Strategies:
+#
+# 1. Precision Strategy:
+#    - Start with high-value fields (title, description)
+#    - Gradually expand to more fields if needed
+#    - Use for when you want highly relevant results
+#
+# 2. Comprehensive Strategy:
+#    - Search all available fields
+#    - Use when you want maximum coverage
+#    - Good for exploratory searches
+#
+# 3. Targeted Strategy:
+#    - Search specific fields based on query type
+#    - Author queries → author field
+#    - Technical terms → title, description
+#    - Detailed info → content field
+
+###
+# Field Selection Best Practices:
+#
+# ✅ Use searchFields when:
+# - You know which fields contain relevant information
+# - You want more precise results
+# - You need to exclude certain fields from search
+# - Performance is important (fewer fields = faster search)
+#
+# ✅ Use select when:
+# - You only need specific fields in results
+# - You want to reduce response size
+# - You're building previews or summaries
+# - Network bandwidth is limited
+#
+# ⚠️ Consider these factors:
+# - Field names must exist in your index schema
+# - Fields must be marked as "searchable" to be searched
+# - Fields must be marked as "retrievable" to be selected
+# - Searching fewer fields may miss relevant content
+
+###
+# Performance Optimization:
+#
+# Fast to Slow (generally):
+# 1. Single field search (title only)
+# 2. Multiple specific fields (title, description)
+# 3. All fields search (default)
+#
+# Response Size Optimization:
+# 1. Use select to return only needed fields
+# 2. Limit top parameter to reasonable number
+# 3. Use pagination for large result sets
+# 4. Consider field size when selecting fields
+
+###
+# Common Field Search Patterns:
+#
+# Title-focused search:
+# "searchFields": "title"
+# - Most precise, good for finding specific documents
+#
+# Content-focused search:
+# "searchFields": "content"
+# - Good for detailed information searches
+#
+# Metadata search:
+# "searchFields": "author,category,tags"
+# - Good for filtering and categorization
+#
+# Balanced search:
+# "searchFields": "title,description,content"
+# - Good balance of precision and coverage
+
+###
+# Troubleshooting Field Search:
+#
+# No results found:
+# 1. Verify field names exist in index
+# 2. Check if fields are marked as searchable
+# 3. Try expanding to more fields
+# 4. Verify data exists in specified fields
+#
+# Unexpected results:
+# 1. Check field content and data quality
+# 2. Verify field is searchable in index schema
+# 3. Consider field analyzer settings
+# 4. Test with simpler queries first
+#
+# Performance issues:
+# 1. Reduce number of search fields
+# 2. Use select to limit returned fields
+# 3. Add filters to narrow results
+# 4. Consider field-specific indexes

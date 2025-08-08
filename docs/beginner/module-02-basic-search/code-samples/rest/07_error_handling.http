@@ -1,0 +1,353 @@
+# Error Handling - Module 2 REST API Examples
+# Basic error handling for Azure AI Search REST API operations
+#
+# This file demonstrates:
+# - Common error scenarios and responses
+# - Input validation through API parameters
+# - HTTP status code handling
+# - Error recovery strategies
+# - Best practices for error handling
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+# - Use a REST client like VS Code REST Client extension
+
+### Variables (replace with your actual values)
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. Valid Search Request (Baseline)
+# This should work - use as reference for comparison
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python programming",
+    "top": 5
+}
+
+### 2. Empty Search Query (400 Bad Request)
+# This will cause a validation error
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "",
+    "top": 5
+}
+
+### 3. Missing Search Parameter (400 Bad Request)
+# Request without required search parameter
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "top": 5
+}
+
+### 4. Invalid Top Parameter (400 Bad Request)
+# Top parameter with invalid value
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": -1
+}
+
+### 5. Top Parameter Too Large (400 Bad Request)
+# Exceeding maximum allowed results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 10000
+}
+
+### 6. Invalid Field in Select (400 Bad Request)
+# Selecting a field that doesn't exist
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "select": "nonexistent_field,title",
+    "top": 5
+}
+
+### 7. Invalid Search Fields (400 Bad Request)
+# Searching in fields that don't exist
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "searchFields": "nonexistent_field",
+    "top": 5
+}
+
+### 8. Invalid Query Syntax (400 Bad Request)
+# Using complex query syntax incorrectly
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "title:(unclosed parenthesis",
+    "queryType": "full",
+    "top": 5
+}
+
+### 9. Invalid OrderBy Field (400 Bad Request)
+# Ordering by non-sortable field
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "orderby": "nonexistent_field",
+    "top": 5
+}
+
+### 10. Missing API Key (401 Unauthorized)
+# Request without authentication
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+
+{
+    "search": "programming",
+    "top": 5
+}
+
+### 11. Invalid API Key (401 Unauthorized)
+# Request with wrong API key
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: invalid-api-key-12345
+
+{
+    "search": "programming",
+    "top": 5
+}
+
+### 12. Wrong Index Name (404 Not Found)
+# Searching in non-existent index
+POST {{endpoint}}/indexes/nonexistent-index/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5
+}
+
+### 13. Missing API Version (400 Bad Request)
+# Request without required api-version parameter
+POST {{endpoint}}/indexes/{{index-name}}/docs/search
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5
+}
+
+### 14. Invalid API Version (400 Bad Request)
+# Request with unsupported API version
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version=2019-01-01
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5
+}
+
+### 15. Invalid Content-Type (415 Unsupported Media Type)
+# Request with wrong content type
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: text/plain
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5
+}
+
+### 16. Malformed JSON (400 Bad Request)
+# Request with invalid JSON syntax
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5,
+    // This comment makes it invalid JSON
+}
+
+### 17. Service Health Check
+# Check if service is available
+GET {{endpoint}}/servicestats?api-version={{api-version}}
+api-key: {{api-key}}
+
+### 18. Index Statistics (for validation)
+# Verify index exists and get stats
+GET {{endpoint}}/indexes/{{index-name}}/stats?api-version={{api-version}}
+api-key: {{api-key}}
+
+### 19. List Indexes (for validation)
+# Check available indexes
+GET {{endpoint}}/indexes?api-version={{api-version}}
+api-key: {{api-key}}
+
+### 20. Fallback Search Strategy - Broad Terms
+# If specific search fails, try broader terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "searchMode": "any",
+    "top": 5
+}
+
+### 21. Fallback Search Strategy - Wildcard
+# Use wildcard as last resort
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "prog*",
+    "top": 5
+}
+
+### 22. Safe Search with Minimal Parameters
+# Minimal request that should always work
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*"
+}
+
+###
+# Common HTTP Status Codes and Their Meanings:
+#
+# 200 OK - Request successful
+# 400 Bad Request - Invalid request parameters or syntax
+# 401 Unauthorized - Missing or invalid API key
+# 403 Forbidden - API key lacks required permissions
+# 404 Not Found - Index or service endpoint not found
+# 415 Unsupported Media Type - Wrong Content-Type header
+# 429 Too Many Requests - Rate limit exceeded
+# 500 Internal Server Error - Server-side error
+# 503 Service Unavailable - Service temporarily down
+
+###
+# Error Response Examples:
+#
+# 400 Bad Request - Invalid Parameter:
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The request is invalid. Details: parameter 'top' must be between 0 and 1000."
+#   }
+# }
+#
+# 400 Bad Request - Invalid Query:
+# {
+#   "error": {
+#     "code": "InvalidQuery",
+#     "message": "Invalid expression: Could not find a property named 'nonexistent_field' on type 'search.document'."
+#   }
+# }
+#
+# 401 Unauthorized:
+# {
+#   "error": {
+#     "code": "Unauthorized",
+#     "message": "Access denied due to invalid subscription key or wrong API endpoint. Make sure to provide a valid key for an active subscription and use a correct regional API endpoint for your resource."
+#   }
+# }
+#
+# 404 Not Found:
+# {
+#   "error": {
+#     "code": "ResourceNotFound",
+#     "message": "The index 'nonexistent-index' for service 'your-service' was not found."
+#   }
+# }
+
+###
+# Error Handling Best Practices:
+#
+# 1. Input Validation:
+#    - Always validate query parameters before sending
+#    - Check for empty or null search terms
+#    - Validate field names against index schema
+#    - Ensure numeric parameters are within valid ranges
+#
+# 2. Authentication Handling:
+#    - Store API keys securely
+#    - Handle 401 errors by checking key validity
+#    - Implement key rotation strategies
+#    - Use managed identities when possible
+#
+# 3. Request Validation:
+#    - Always include required headers (Content-Type, api-key)
+#    - Use supported API versions
+#    - Validate JSON syntax before sending
+#    - Check endpoint URLs for typos
+#
+# 4. Error Recovery:
+#    - Implement retry logic for 429 (rate limiting)
+#    - Use exponential backoff for retries
+#    - Have fallback search strategies
+#    - Gracefully handle service unavailability
+#
+# 5. User Experience:
+#    - Translate technical errors to user-friendly messages
+#    - Provide suggestions for fixing common errors
+#    - Log detailed errors for debugging
+#    - Don't expose sensitive information in error messages
+#
+# 6. Monitoring:
+#    - Track error rates and patterns
+#    - Monitor service health endpoints
+#    - Set up alerts for critical errors
+#    - Log all API interactions for troubleshooting
+
+###
+# Fallback Strategy Implementation:
+#
+# 1. Primary Search: Exact user query
+# 2. Fallback 1: Broader search terms
+# 3. Fallback 2: Wildcard search
+# 4. Fallback 3: Search all documents
+# 5. Final: Return helpful error message
+
+###
+# Testing Error Scenarios:
+# Use the requests above to test your error handling:
+# 1. Run valid request first (request #1)
+# 2. Try each error scenario (requests #2-16)
+# 3. Observe different HTTP status codes
+# 4. Parse error response JSON
+# 5. Implement appropriate handling for each case

@@ -1,0 +1,239 @@
+# Simple Text Search - Module 2 REST API Examples
+# Basic text search operations using Azure AI Search REST API
+#
+# This file demonstrates:
+# - Simple text queries via HTTP
+# - Basic result handling
+# - REST API request structure
+# - Understanding search responses
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+# - Use a REST client like VS Code REST Client extension
+
+### Variables (replace with your actual values)
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. Basic Text Search
+# Simple search for "python programming"
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python programming",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 2. Search with Limited Results
+# Search with only top 5 results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 3. Get All Documents (Browse)
+# Retrieve all documents using wildcard
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*",
+    "top": 20
+}
+
+### 4. Search with Selected Fields
+# Return only specific fields in results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "select": "id,title,author,url",
+    "top": 5
+}
+
+### 5. Search with Score Threshold
+# Only return results above a certain score
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "minimumCoverage": 80,
+    "top": 10
+}
+
+### 6. Search with Highlighting
+# Highlight matching terms in results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "javascript",
+    "highlight": "title,content",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "top": 5
+}
+
+### 7. Paginated Search - Page 1
+# First page of results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5,
+    "skip": 0,
+    "includeTotalCount": true
+}
+
+### 8. Paginated Search - Page 2
+# Second page of results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "top": 5,
+    "skip": 5,
+    "includeTotalCount": true
+}
+
+### 9. Search with Count Only
+# Get just the count of matching documents
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "data science",
+    "top": 0,
+    "includeTotalCount": true
+}
+
+### 10. Search with Query Type
+# Specify simple query syntax explicitly
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "artificial intelligence",
+    "queryType": "simple",
+    "top": 5
+}
+
+### 11. Empty Search (All Documents)
+# Get all documents without any search criteria
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*",
+    "top": 10
+}
+
+### 12. Search with Search Mode
+# Control how multiple terms are handled
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python tutorial",
+    "searchMode": "all",
+    "top": 5
+}
+
+### 13. Search with Any Mode
+# Match documents containing any of the terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python tutorial",
+    "searchMode": "any",
+    "top": 5
+}
+
+### 14. Get Index Statistics
+# Get information about the index
+GET {{endpoint}}/indexes/{{index-name}}/stats?api-version={{api-version}}
+api-key: {{api-key}}
+
+### 15. Test Service Availability
+# Simple health check
+GET {{endpoint}}/servicestats?api-version={{api-version}}
+api-key: {{api-key}}
+
+###
+# Response Structure Examples:
+#
+# Typical search response:
+# {
+#   "@odata.context": "...",
+#   "@odata.count": 42,
+#   "value": [
+#     {
+#       "@search.score": 1.234,
+#       "@search.highlights": {
+#         "title": ["<mark>python</mark> tutorial"]
+#       },
+#       "id": "doc1",
+#       "title": "Python Programming Tutorial",
+#       "author": "John Doe",
+#       "content": "Learn Python programming...",
+#       "url": "https://example.com/python-tutorial"
+#     }
+#   ]
+# }
+#
+# Error response:
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The request is invalid. Details: parameter 'search' cannot be empty."
+#   }
+# }
+
+###
+# Common HTTP Status Codes:
+# 200 OK - Successful search
+# 400 Bad Request - Invalid query syntax or parameters
+# 401 Unauthorized - Invalid or missing API key
+# 403 Forbidden - API key doesn't have required permissions
+# 404 Not Found - Index doesn't exist
+# 429 Too Many Requests - Rate limit exceeded
+# 503 Service Unavailable - Service temporarily unavailable
+
+###
+# Tips for Using REST API:
+# 1. Always include api-version parameter
+# 2. Use POST for search requests (more flexible than GET)
+# 3. Include Content-Type: application/json header
+# 4. Use api-key header for authentication
+# 5. Handle HTTP status codes appropriately
+# 6. Use includeTotalCount for pagination scenarios
+# 7. Limit top parameter to avoid large responses
+# 8. Use select parameter to return only needed fields

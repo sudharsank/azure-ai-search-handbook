@@ -1,0 +1,439 @@
+# Search Patterns - Module 2 REST API Examples
+# Common search patterns and strategies using Azure AI Search REST API
+#
+# This file demonstrates:
+# - Progressive search strategies
+# - Search with fallback patterns
+# - Multi-strategy search approaches
+# - Search pattern best practices
+# - When to use different patterns
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+# - Use a REST client like VS Code REST Client extension
+
+### Variables (replace with your actual values)
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+###
+# PROGRESSIVE SEARCH PATTERN
+# Start with most specific, progressively broaden until results found
+###
+
+### 1. Progressive Search - Step 1: Exact Phrase (Most Specific)
+# Search for exact phrase match
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"machine learning\"",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 2. Progressive Search - Step 2: All Terms (Moderate Specificity)
+# All terms must be present
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "searchMode": "all",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 3. Progressive Search - Step 3: Any Terms (Broad)
+# Any terms can be present
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "searchMode": "any",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 4. Progressive Search - Step 4: Wildcard (Broadest)
+# Partial term matching
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine* OR learn*",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+###
+# FALLBACK SEARCH PATTERN
+# Automatic fallback to broader strategies
+###
+
+### 5. Fallback Pattern - Primary: Specific Query
+# Try specific query first
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "artificial intelligence neural networks",
+    "searchMode": "all",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 6. Fallback Pattern - Secondary: Broader Terms
+# If primary fails, try broader terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "artificial intelligence",
+    "searchMode": "any",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 7. Fallback Pattern - Tertiary: Single Key Term
+# Further fallback to single most important term
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "intelligence",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 8. Fallback Pattern - Final: Wildcard
+# Last resort with wildcard
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "intel*",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+###
+# MULTI-FIELD PRIORITY SEARCH PATTERN
+# Search across fields in order of importance
+###
+
+### 9. Multi-Field - Priority 1: Title Field
+# Search in most important field first
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "searchFields": "title",
+    "top": 5,
+    "select": "id,title,@search.score"
+}
+
+### 10. Multi-Field - Priority 2: Title + Description
+# Expand to include description field
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "searchFields": "title,description",
+    "top": 5,
+    "select": "id,title,description,@search.score"
+}
+
+### 11. Multi-Field - Priority 3: All Text Fields
+# Search across all relevant text fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "searchFields": "title,description,content,tags",
+    "top": 10,
+    "select": "id,title,description,@search.score"
+}
+
+### 12. Multi-Field - Combined Results
+# Search all fields without restriction
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "top": 10,
+    "select": "id,title,description,content,@search.score"
+}
+
+###
+# QUALITY-BASED SEARCH PATTERNS
+# Focus on result quality and relevance
+###
+
+### 13. High-Quality Results Only
+# Filter for high-scoring results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "minimumCoverage": 80,
+    "top": 10,
+    "orderby": "@search.score desc"
+}
+
+### 14. Balanced Quality and Quantity
+# Moderate quality threshold
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "minimumCoverage": 50,
+    "top": 20,
+    "orderby": "@search.score desc"
+}
+
+### 15. Maximum Coverage
+# Get all relevant results regardless of score
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "searchMode": "any",
+    "top": 50,
+    "orderby": "@search.score desc"
+}
+
+###
+# EXPLORATORY SEARCH PATTERNS
+# For discovering content and understanding data
+###
+
+### 16. Faceted Exploration
+# Discover content categories
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "facets": ["author", "tags", "category"],
+    "top": 10,
+    "select": "id,title,author,tags"
+}
+
+### 17. Browse by Category
+# Explore specific category
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*",
+    "filter": "category eq 'tutorial'",
+    "orderby": "publishedDate desc",
+    "top": 20
+}
+
+### 18. Recent Content Discovery
+# Find recently published content
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*",
+    "orderby": "publishedDate desc",
+    "top": 10,
+    "select": "id,title,author,publishedDate"
+}
+
+###
+# PERFORMANCE-OPTIMIZED PATTERNS
+# Patterns focused on speed and efficiency
+###
+
+### 19. Fast Search - Minimal Fields
+# Return only essential fields for speed
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "select": "id,title,@search.score",
+    "top": 10
+}
+
+### 20. Count-First Pattern
+# Get count before fetching results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming tutorial",
+    "top": 0,
+    "includeTotalCount": true
+}
+
+### 21. Paginated Efficient Search
+# Efficient pagination for large result sets
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "select": "id,title,author",
+    "top": 25,
+    "skip": 0,
+    "includeTotalCount": true
+}
+
+###
+# SPECIALIZED SEARCH PATTERNS
+# Patterns for specific use cases
+###
+
+### 22. Autocomplete Pattern
+# For search-as-you-type functionality
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "prog*",
+    "searchFields": "title",
+    "select": "title",
+    "top": 5
+}
+
+### 23. Similar Content Pattern
+# Find content similar to a specific document
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python tutorial beginner",
+    "searchMode": "any",
+    "select": "id,title,tags,@search.score",
+    "top": 10,
+    "orderby": "@search.score desc"
+}
+
+### 24. Content Validation Pattern
+# Verify content exists with specific criteria
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "filter": "author eq 'John Doe'",
+    "select": "id,title,author",
+    "top": 1
+}
+
+###
+# PATTERN SELECTION GUIDELINES
+#
+# Use Progressive Search when:
+# ✅ User experience is priority
+# ✅ You want comprehensive coverage
+# ✅ Quality is more important than speed
+# ✅ Users expect refined results
+#
+# Use Fallback Search when:
+# ✅ You need guaranteed results
+# ✅ Speed is important
+# ✅ Simple implementation is preferred
+# ✅ Automated systems need reliability
+#
+# Use Multi-Field Priority when:
+# ✅ Fields have different importance
+# ✅ You have structured data
+# ✅ You want to avoid duplicates
+# ✅ Content has rich metadata
+#
+# Use Quality-Based when:
+# ✅ Relevance is critical
+# ✅ You have high-volume data
+# ✅ Users prefer fewer, better results
+# ✅ Performance allows for filtering
+#
+# Use Exploratory when:
+# ✅ Users are browsing/discovering
+# ✅ Content categorization is important
+# ✅ Analytics and insights are needed
+# ✅ User engagement is the goal
+
+###
+# IMPLEMENTATION BEST PRACTICES
+#
+# 1. Start Simple:
+#    - Begin with basic search patterns
+#    - Add complexity based on user needs
+#    - Monitor which patterns work best
+#
+# 2. Performance Considerations:
+#    - Use select to limit returned fields
+#    - Implement appropriate page sizes
+#    - Cache results when possible
+#    - Monitor query performance
+#
+# 3. User Experience:
+#    - Provide feedback about search strategy used
+#    - Allow users to refine searches
+#    - Show result counts and pagination info
+#    - Handle no-results scenarios gracefully
+#
+# 4. Error Handling:
+#    - Implement fallback strategies
+#    - Handle service unavailability
+#    - Validate inputs before searching
+#    - Log search patterns for analysis
+#
+# 5. Analytics:
+#    - Track which patterns are most successful
+#    - Monitor user search behavior
+#    - Analyze result quality metrics
+#    - Optimize based on usage patterns
+
+###
+# TESTING SEARCH PATTERNS
+#
+# To test these patterns effectively:
+# 1. Run each pattern with the same query
+# 2. Compare result counts and quality
+# 3. Measure response times
+# 4. Analyze user satisfaction
+# 5. A/B test different approaches
+# 6. Monitor long-term usage patterns

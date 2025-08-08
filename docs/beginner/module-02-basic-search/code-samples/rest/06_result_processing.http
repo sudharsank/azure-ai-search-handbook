@@ -1,0 +1,293 @@
+# Result Processing - Module 2 REST API Examples
+# Processing and formatting search results from Azure AI Search REST API
+#
+# This file demonstrates:
+# - Different result formatting options
+# - Field selection and projection
+# - Result highlighting and snippets
+# - Score analysis through API parameters
+# - Pagination and result limiting
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+# - Use a REST client like VS Code REST Client extension
+
+### Variables (replace with your actual values)
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. Basic Search with Full Results
+# Get complete document structure for processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python programming",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 2. Selective Field Projection
+# Return only specific fields for efficient processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "select": "id,title,author,content,url",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 3. Search with Content Highlighting
+# Get highlighted snippets for preview generation
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "select": "id,title,author,url",
+    "highlight": "title,content,description",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "top": 5
+}
+
+### 4. Search with Custom Highlighting Tags
+# Use custom tags for different processing needs
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "javascript development",
+    "select": "title,content,author",
+    "highlight": "title,content",
+    "highlightPreTag": "**",
+    "highlightPostTag": "**",
+    "top": 3
+}
+
+### 5. Score-Based Filtering
+# Get only high-quality results for processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "minimumCoverage": 80,
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 6. Paginated Results for Batch Processing
+# First page - useful for processing large result sets
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "select": "id,title,author,content",
+    "top": 20,
+    "skip": 0,
+    "includeTotalCount": true
+}
+
+### 7. Next Page of Results
+# Continue processing with pagination
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "select": "id,title,author,content",
+    "top": 20,
+    "skip": 20,
+    "includeTotalCount": true
+}
+
+### 8. Search with Ordering for Consistent Processing
+# Order by score (default) for consistent result processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "data science",
+    "orderby": "@search.score desc",
+    "select": "id,title,author,content",
+    "top": 10
+}
+
+### 9. Search with Multiple Ordering Criteria
+# Secondary sort for tie-breaking in processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "artificial intelligence",
+    "orderby": "@search.score desc, title asc",
+    "select": "id,title,author,content",
+    "top": 10
+}
+
+### 10. Count-Only Query for Statistics
+# Get result count for processing planning
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial",
+    "top": 0,
+    "includeTotalCount": true
+}
+
+### 11. Search with Facets for Analysis
+# Get faceted results for result categorization
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming",
+    "facets": ["author", "tags"],
+    "select": "id,title,author,tags",
+    "top": 10
+}
+
+### 12. Search with Search Fields for Targeted Processing
+# Search specific fields for more relevant processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python",
+    "searchFields": "title,description,tags",
+    "select": "id,title,description,tags,content",
+    "top": 5
+}
+
+### 13. Minimal Response for Lightweight Processing
+# Get only essential fields for efficient processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development",
+    "select": "id,title,@search.score",
+    "top": 20
+}
+
+### 14. Search with Query Type for Processing Control
+# Use simple query type for predictable processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning tutorial",
+    "queryType": "simple",
+    "searchMode": "all",
+    "select": "id,title,author,content",
+    "top": 10
+}
+
+### 15. Export-Ready Search Results
+# Get comprehensive data for export processing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*",
+    "select": "id,title,author,content,url,tags,publishedDate",
+    "orderby": "publishedDate desc",
+    "top": 100
+}
+
+###
+# Result Processing Patterns:
+#
+# 1. Preview Generation:
+# - Use highlight parameter for content previews
+# - Select only necessary fields to reduce payload
+# - Limit results with top parameter
+#
+# 2. Score Analysis:
+# - Include @search.score in select
+# - Use minimumCoverage for quality filtering
+# - Order by score for ranking analysis
+#
+# 3. Batch Processing:
+# - Use pagination (top/skip) for large datasets
+# - Process in chunks to avoid memory issues
+# - Include totalCount for progress tracking
+#
+# 4. Export Processing:
+# - Select all required fields explicitly
+# - Use consistent ordering for reproducible exports
+# - Consider using search "*" for complete exports
+
+###
+# Response Processing Examples:
+#
+# Basic Response Structure:
+# {
+#   "@odata.context": "...",
+#   "@odata.count": 42,
+#   "value": [
+#     {
+#       "@search.score": 1.234,
+#       "@search.highlights": {
+#         "title": ["<mark>python</mark> tutorial"],
+#         "content": ["Learn <mark>python</mark> programming..."]
+#       },
+#       "id": "doc1",
+#       "title": "Python Programming Tutorial",
+#       "author": "John Doe",
+#       "content": "Complete guide to Python...",
+#       "url": "https://example.com/python"
+#     }
+#   ]
+# }
+#
+# Faceted Response Structure:
+# {
+#   "@odata.context": "...",
+#   "@search.facets": {
+#     "author": [
+#       { "value": "John Doe", "count": 5 },
+#       { "value": "Jane Smith", "count": 3 }
+#     ],
+#     "tags": [
+#       { "value": "python", "count": 8 },
+#       { "value": "tutorial", "count": 6 }
+#     ]
+#   },
+#   "value": [...]
+# }
+
+###
+# Processing Best Practices:
+# 1. Always handle @odata.count for pagination
+# 2. Check @search.score for relevance filtering
+# 3. Use @search.highlights for preview generation
+# 4. Process @search.facets for categorization
+# 5. Handle missing fields gracefully
+# 6. Implement proper error handling for HTTP status codes
+# 7. Use appropriate page sizes (top parameter) for performance
+# 8. Cache processed results when appropriate

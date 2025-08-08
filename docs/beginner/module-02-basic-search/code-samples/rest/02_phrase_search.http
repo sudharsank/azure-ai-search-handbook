@@ -1,0 +1,262 @@
+# Phrase Search - Module 2 REST API Examples
+# Exact phrase matching using Azure AI Search REST API
+#
+# This file demonstrates:
+# - Exact phrase search with quotes
+# - Comparing phrase vs individual terms
+# - Understanding when to use phrase search
+# - Phrase search best practices
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+# - Use a REST client like VS Code REST Client extension
+
+### Variables (replace with your actual values)
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. Exact Phrase Search
+# Search for exact phrase "machine learning"
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"machine learning\"",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 2. Individual Terms Search (for comparison)
+# Search for individual terms without quotes
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine learning",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 3. Exact Phrase with Highlighting
+# Highlight the exact phrase in results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"web development\"",
+    "highlight": "title,content",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "top": 5
+}
+
+### 4. Multiple Exact Phrases (OR)
+# Search for multiple exact phrases
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"artificial intelligence\" OR \"machine learning\" OR \"data science\"",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 5. Phrase Search in Specific Fields
+# Search for exact phrase only in title field
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"python programming\"",
+    "searchFields": "title",
+    "top": 5
+}
+
+### 6. Phrase Search with Field Selection
+# Return only specific fields for phrase search
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"software engineering\"",
+    "select": "id,title,author,url",
+    "top": 5
+}
+
+### 7. Complex Phrase Query
+# Combine phrase search with other terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"React hooks\" AND tutorial",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 8. Phrase Search with NOT operator
+# Find documents with phrase but exclude certain terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"machine learning\" NOT deprecated",
+    "top": 5
+}
+
+### 9. Nested Phrase Search
+# Search for documents containing multiple phrases
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"deep learning\" AND \"neural networks\"",
+    "top": 5
+}
+
+### 10. Phrase Search with Wildcards
+# Combine exact phrases with wildcard terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"web development\" OR program*",
+    "top": 8
+}
+
+### 11. Case-Sensitive Phrase Search
+# Note: Azure Search is case-insensitive by default
+# This will work the same as lowercase
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"JavaScript Framework\"",
+    "top": 5
+}
+
+### 12. Long Phrase Search
+# Search for longer exact phrases
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"introduction to machine learning algorithms\"",
+    "top": 5,
+    "includeTotalCount": true
+}
+
+### 13. Phrase Search with Search Mode
+# Use searchMode to control how terms are handled
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"data science\" python",
+    "searchMode": "all",
+    "top": 5
+}
+
+### 14. Phrase Search with Scoring Profile
+# Apply scoring profile to phrase search (if you have one configured)
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"REST API\"",
+    "scoringProfile": "your-scoring-profile-name",
+    "top": 5
+}
+
+### 15. Phrase Search with Facets
+# Get facets along with phrase search results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"web development\"",
+    "facets": ["category", "author"],
+    "top": 5
+}
+
+###
+# Comparison Examples:
+# 
+# Example 1: Exact phrase vs individual terms
+# Exact phrase: "machine learning" - finds documents with exact phrase
+# Individual terms: machine learning - finds documents with both words (any order)
+#
+# Example 2: Phrase specificity
+# "artificial intelligence" - very specific
+# artificial intelligence - broader, includes documents with both terms
+# artificial OR intelligence - broadest, includes documents with either term
+
+###
+# Best Practices for Phrase Search:
+#
+# ✅ Good use cases:
+# - Technical terms: "REST API", "machine learning", "React hooks"
+# - Proper names: "John Smith", "Microsoft Azure"
+# - Exact titles: "Introduction to Python"
+# - Specific concepts: "dependency injection"
+#
+# ❌ Avoid for:
+# - General topics (use individual terms instead)
+# - When you want broader results
+# - Uncertain exact wording
+# - Very long phrases (may be too restrictive)
+
+###
+# Response Analysis:
+#
+# Phrase search typically returns:
+# - Fewer, more precise results
+# - Higher relevance scores for exact matches
+# - Better precision but potentially lower recall
+#
+# Compare with individual terms search:
+# - More results, broader coverage
+# - May include less relevant matches
+# - Better recall but potentially lower precision
+
+###
+# Troubleshooting Phrase Search:
+#
+# No results found:
+# 1. Try individual terms instead of exact phrase
+# 2. Check spelling and exact wording
+# 3. Use broader terms or synonyms
+# 4. Verify the phrase exists in your data
+#
+# Too few results:
+# 1. Remove quotes to search individual terms
+# 2. Use OR with alternative phrasings
+# 3. Combine with wildcard searches
+# 4. Check if phrase is too specific
+
+###
+# Performance Considerations:
+#
+# - Phrase searches are generally fast
+# - Exact matches are efficiently indexed
+# - Complex phrase combinations may be slower
+# - Consider caching for frequently used phrases

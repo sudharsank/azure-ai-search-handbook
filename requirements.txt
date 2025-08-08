@@ -1,0 +1,42 @@
+# Azure AI Search SDK
+azure-search-documents>=11.4.0
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# Data processing and utilities
+requests>=2.31.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Jupyter notebook support
+jupyter>=1.0.0
+ipykernel>=6.25.0
+notebook>=7.0.0
+
+# Documentation generation
+mkdocs>=1.5.0
+mkdocs-material>=9.4.0
+mkdocs-git-revision-date-localized-plugin>=1.2.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.7.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# Additional Azure services (optional)
+azure-identity>=1.14.0
+azure-keyvault-secrets>=4.7.0
+azure-storage-blob>=12.17.0
+
+# AI and ML libraries for advanced modules
+openai>=0.28.0
+sentence-transformers>=2.2.0
+scikit-learn>=1.3.0
+
+# Visualization and plotting
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0

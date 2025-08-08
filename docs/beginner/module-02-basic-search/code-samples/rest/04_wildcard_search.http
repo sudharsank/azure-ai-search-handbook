@@ -1,0 +1,287 @@
+# Wildcard Search - Module 2 REST API Examples
+# Pattern matching with wildcards using Azure AI Search REST API
+#
+# This file demonstrates:
+# - Prefix matching with *
+# - Suffix matching with *
+# - Pattern matching strategies
+# - When to use wildcards
+# - Wildcard search limitations
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+
+### Variables
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. Prefix Wildcard - Terms starting with "program"
+# Find terms like: program, programming, programmer, programs
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "program*",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 2. Suffix Wildcard - Terms ending with "ing"
+# Find terms like: programming, learning, developing
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*ing",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 3. Contains Wildcard - Terms containing "script"
+# Find terms like: javascript, typescript, script, scripting
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*script*",
+    "top": 10
+}
+
+### 4. Multiple Wildcard Patterns with OR
+# Find various programming language variations
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "java* OR python* OR web*",
+    "top": 12
+}
+
+### 5. Wildcard with Boolean AND
+# Combine wildcard with specific terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "develop* AND tutorial",
+    "top": 8
+}
+
+### 6. Wildcard in Specific Fields
+# Apply wildcard search to specific fields only
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "program*",
+    "searchFields": "title,description",
+    "top": 5
+}
+
+### 7. Technology Family Wildcard Search
+# Find all Microsoft technologies
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "micro*",
+    "top": 8
+}
+
+### 8. File Type Wildcard Search
+# Find content about different script types
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "*script OR *doc OR *file",
+    "top": 10
+}
+
+### 9. Wildcard with NOT Operator
+# Find programming content but exclude specific variations
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "program* NOT programming",
+    "top": 8
+}
+
+### 10. Complex Wildcard Query
+# Combine multiple wildcard patterns with boolean logic
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(web* OR mobile*) AND develop*",
+    "top": 10
+}
+
+### 11. Wildcard with Exact Phrases
+# Combine wildcards with exact phrase matching
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"machine learning\" OR data*",
+    "top": 8
+}
+
+### 12. Short Prefix Wildcard (be careful)
+# Very short prefixes can return many results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "ap*",
+    "top": 5
+}
+
+### 13. Wildcard with Highlighting
+# Highlight wildcard matches in results
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial*",
+    "highlight": "title,content",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "top": 5
+}
+
+### 14. Language Variation Wildcard
+# Find different programming language mentions
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python* OR java* OR c#* OR javascript*",
+    "top": 12
+}
+
+### 15. Educational Content Wildcard
+# Find various types of educational content
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "learn* OR teach* OR train*",
+    "top": 10
+}
+
+###
+# Wildcard Pattern Types:
+#
+# Prefix (term*):
+# - Matches terms starting with "term"
+# - Examples: program* matches program, programming, programmer
+# - Generally faster than other wildcard types
+#
+# Suffix (*term):
+# - Matches terms ending with "term"
+# - Examples: *ing matches programming, learning, developing
+# - Can be slower than prefix wildcards
+#
+# Contains (*term*):
+# - Matches terms containing "term" anywhere
+# - Examples: *script* matches javascript, typescript, script
+# - Slowest wildcard type, use carefully
+
+###
+# Best Practices:
+#
+# ✅ Good wildcard usage:
+# - Specific prefixes (3+ characters): "program*"
+# - Technology families: "micro*", "java*"
+# - Word variations: "develop*" (develop, developer, development)
+# - File types or categories: "*tutorial", "*guide"
+#
+# ❌ Avoid these patterns:
+# - Very short prefixes: "a*", "th*" (too broad)
+# - Multiple wildcards in one term: "*a*b*" (very slow)
+# - Leading wildcards when possible: "*term" (slower than "term*")
+# - Wildcards on very common words
+
+###
+# Performance Considerations:
+#
+# Fast to Slow (generally):
+# 1. Prefix wildcards (term*)
+# 2. Suffix wildcards (*term)  
+# 3. Contains wildcards (*term*)
+# 4. Multiple wildcards in complex queries
+#
+# Tips for better performance:
+# - Use specific prefixes (3+ characters)
+# - Combine with other terms to narrow results
+# - Prefer prefix wildcards over suffix/contains
+# - Test with your data to understand performance impact
+
+###
+# Common Use Cases:
+#
+# Technology searches:
+# - "java*" → java, javascript, javadoc
+# - "python*" → python, pythonic
+# - "react*" → react, reactive
+#
+# Content type searches:
+# - "*tutorial" → tutorial, video-tutorial
+# - "*guide" → guide, user-guide, style-guide
+# - "*doc*" → document, documentation, docs
+#
+# Skill level searches:
+# - "begin*" → beginner, beginning
+# - "advanc*" → advanced, advancement
+# - "inter*" → intermediate, intermediate-level
+
+###
+# Troubleshooting Wildcard Searches:
+#
+# Too many results:
+# - Make prefix more specific (longer)
+# - Combine with AND conditions
+# - Use field-specific search
+# - Add NOT conditions to exclude unwanted matches
+#
+# Too few results:
+# - Check if prefix is too specific
+# - Try different wildcard positions
+# - Verify terms exist in your data
+# - Use OR with alternative patterns
+#
+# Slow performance:
+# - Avoid very short prefixes
+# - Reduce use of suffix/contains wildcards
+# - Combine with specific terms
+# - Consider using synonyms instead of wildcards
+
+###
+# Alternative Approaches:
+#
+# Instead of wildcards, consider:
+# - Synonym maps for related terms
+# - Multiple specific terms with OR
+# - Custom analyzers for better tokenization
+# - Faceted search for categorization

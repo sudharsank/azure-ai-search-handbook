@@ -1,0 +1,9 @@
+{
+  "endpoint": "https://your-service-name.search.windows.net",
+  "api_key": "your-api-key-here",
+  "index_name": "sample-index",
+  "use_managed_identity": false,
+  "client_id": "your-client-id-for-managed-identity",
+  "client_secret": "your-client-secret-for-managed-identity",
+  "tenant_id": "your-tenant-id-for-managed-identity"
+}

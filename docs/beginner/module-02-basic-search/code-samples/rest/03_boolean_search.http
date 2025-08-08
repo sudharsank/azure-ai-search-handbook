@@ -1,0 +1,286 @@
+# Boolean Search - Module 2 REST API Examples
+# Boolean operators (AND, OR, NOT) using Azure AI Search REST API
+#
+# This file demonstrates:
+# - AND operator for required terms
+# - OR operator for alternative terms
+# - NOT operator for exclusions
+# - Combining boolean operators
+# - Boolean search best practices
+#
+# Prerequisites:
+# - Replace {{endpoint}} with your search service endpoint
+# - Replace {{api-key}} with your API key
+# - Replace {{index-name}} with your index name
+
+### Variables
+@endpoint = https://your-service.search.windows.net
+@api-key = your-api-key-here
+@index-name = your-index-name
+@api-version = 2023-11-01
+
+### 1. AND Operator - Both terms required
+# Find documents containing both "python" AND "tutorial"
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python AND tutorial",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 2. OR Operator - Either term acceptable
+# Find documents containing "javascript" OR "typescript"
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "javascript OR typescript",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 3. NOT Operator - Exclude terms
+# Find documents with "programming" but NOT "advanced"
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming NOT advanced",
+    "top": 10,
+    "includeTotalCount": true
+}
+
+### 4. Complex Boolean Query with Parentheses
+# Find documents about (web OR mobile) AND development
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(web OR mobile) AND development",
+    "top": 10
+}
+
+### 5. Multiple AND Conditions
+# All terms must be present
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "machine AND learning AND python",
+    "top": 8
+}
+
+### 6. Multiple OR Conditions
+# Any of these terms can be present
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "tutorial OR guide OR introduction OR basics",
+    "top": 10
+}
+
+### 7. Combined AND/OR/NOT
+# Complex query combining all operators
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(python OR javascript) AND tutorial NOT deprecated",
+    "top": 10
+}
+
+### 8. Boolean with Exact Phrases
+# Combine boolean operators with exact phrases
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "\"machine learning\" AND (python OR r)",
+    "top": 8
+}
+
+### 9. Field-Specific Boolean Search
+# Apply boolean logic to specific fields
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python AND tutorial",
+    "searchFields": "title,description",
+    "top": 5
+}
+
+### 10. Boolean with Wildcards
+# Combine boolean operators with wildcard patterns
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "program* AND (web OR mobile)",
+    "top": 8
+}
+
+### 11. Nested Boolean Logic
+# Complex nested boolean expressions
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(python AND tutorial) OR (javascript AND guide)",
+    "top": 10
+}
+
+### 12. Boolean with Search Mode
+# Use searchMode to control default behavior
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "web development tutorial",
+    "searchMode": "all",
+    "top": 5
+}
+
+### 13. Boolean Search with Highlighting
+# Highlight matching terms in boolean search
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "python AND (tutorial OR guide)",
+    "highlight": "title,content",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "top": 5
+}
+
+### 14. Exclude Multiple Terms
+# Use NOT with multiple terms
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "programming NOT (deprecated OR obsolete OR old)",
+    "top": 8
+}
+
+### 15. Boolean Search for Beginners vs Advanced
+# Find beginner content, exclude advanced
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(beginner OR introduction OR basics) AND tutorial NOT (advanced OR expert)",
+    "top": 10
+}
+
+### 16. Technology Stack Search
+# Find content about specific technology combinations
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(react OR vue OR angular) AND (javascript OR typescript)",
+    "top": 8
+}
+
+### 17. Content Type Boolean Search
+# Search for specific types of content
+POST {{endpoint}}/indexes/{{index-name}}/docs/search?api-version={{api-version}}
+Content-Type: application/json
+api-key: {{api-key}}
+
+{
+    "search": "(tutorial OR guide OR documentation) AND NOT (video OR audio)",
+    "top": 10
+}
+
+###
+# Boolean Operator Precedence:
+# 1. Parentheses () - highest precedence
+# 2. NOT - negation
+# 3. AND - conjunction  
+# 4. OR - disjunction (lowest precedence)
+#
+# Examples:
+# "A OR B AND C" is interpreted as "A OR (B AND C)"
+# Use parentheses for clarity: "(A OR B) AND C"
+
+###
+# Best Practices:
+#
+# ✅ Use AND when:
+# - You need ALL terms to be present
+# - You want more specific, focused results
+# - You're narrowing down a broad topic
+#
+# ✅ Use OR when:
+# - You want ANY of the terms
+# - You're searching for synonyms or alternatives
+# - You want broader, more inclusive results
+#
+# ✅ Use NOT when:
+# - You want to exclude specific content
+# - You know what you don't want
+# - You're filtering out irrelevant results
+#
+# ⚠️ Common mistakes:
+# - Using AND when you mean OR
+# - Overusing NOT (can exclude relevant content)
+# - Forgetting parentheses in complex queries
+# - Making queries too restrictive with multiple ANDs
+
+###
+# Query Building Strategy:
+#
+# 1. Start simple: "python tutorial"
+# 2. Add specificity: "python AND tutorial AND beginner"
+# 3. Add alternatives: "python AND (tutorial OR guide) AND beginner"
+# 4. Exclude unwanted: "python AND tutorial AND beginner NOT advanced"
+# 5. Test and refine based on results
+
+###
+# Performance Tips:
+#
+# - Simple boolean queries are fast
+# - Complex nested queries may be slower
+# - Use specific terms before broad terms
+# - Consider using searchMode as alternative to explicit boolean
+# - Test query performance with your data
+
+###
+# Troubleshooting:
+#
+# No results:
+# - Check if AND conditions are too restrictive
+# - Verify all terms exist in your data
+# - Try OR instead of AND for broader results
+#
+# Too many results:
+# - Add more AND conditions to narrow down
+# - Use NOT to exclude irrelevant content
+# - Make terms more specific
+#
+# Unexpected results:
+# - Check operator precedence
+# - Add parentheses for clarity
+# - Verify field names in field-specific searches

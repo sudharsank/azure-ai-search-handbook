@@ -1,0 +1,113 @@
+site_name: Azure AI Search Handbook
+site_description: Comprehensive learning resource for Azure AI Search from beginner to expert
+site_author: Azure AI Search Handbook Contributors
+site_url: https://azure-ai-search-handbook.github.io
+
+# Repository
+repo_name: azure-ai-search-handbook
+repo_url: https://github.com/your-username/azure-ai-search-handbook
+
+# Configuration
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+# Plugins
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+      fallback_to_build_date: true
+      enabled: !ENV [ENABLE_GIT_PLUGIN, true]
+
+# Navigation
+nav:
+  - Home: index.md
+  - Setup:
+    - Getting Started: setup/README.md
+    - Azure AI Search Setup: setup/azure-ai-search-setup.md
+    - Quick Reference: setup/quick-reference.md
+  - Beginner:
+    - Module 1 - Introduction & Setup: beginner/module-01-introduction-setup/documentation.md
+    - Module 2 - Basic Search: 
+      - Overview: beginner/module-02-basic-search/documentation.md
+      - Prerequisites: beginner/module-02-basic-search/prerequisites.md
+      - Best Practices: beginner/module-02-basic-search/best-practices.md
+      - Practice & Implementation: beginner/module-02-basic-search/practice-implementation.md
+      - Troubleshooting:
+        - Search Operations: beginner/module-02-basic-search/search-troubleshooting.md
+        - Prerequisites Setup: beginner/module-02-basic-search/prerequisites-troubleshooting.md
+      - Code Samples: beginner/module-02-basic-search/code-samples/README.md
+    - Module 3 - Index Management: beginner/module-03-index-management/documentation.md
+    - Module 4 - Simple Queries: beginner/module-04-simple-queries/documentation.md
+  - Intermediate:
+    - Module 5 - Advanced Querying: intermediate/module-05-advanced-querying/documentation.md
+    - Module 6 - Analyzers & Scoring: intermediate/module-06-analyzers-scoring/documentation.md
+    - Module 7 - Facets & Aggregations: intermediate/module-07-facets-aggregations/documentation.md
+    - Module 8 - Security & Access: intermediate/module-08-security-access/documentation.md
+  - Advanced:
+    - Module 9 - AI Enrichment: advanced/module-09-ai-enrichment/documentation.md
+    - Module 10 - Vector & Semantic Search: advanced/module-10-vector-semantic-search/documentation.md
+    - Module 11 - Performance Optimization: advanced/module-11-performance-optimization/documentation.md
+    - Module 12 - Production Deployment: advanced/module-12-production-deployment/documentation.md
+  - Reference:
+    - API Reference: reference/api-reference.md
+    - Quick Reference: reference/quick-reference.md
+    - Troubleshooting: reference/troubleshooting.md
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-username/azure-ai-search-handbook
+  version:
+    provider: mike
