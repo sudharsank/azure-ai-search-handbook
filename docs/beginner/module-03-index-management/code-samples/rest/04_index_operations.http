@@ -1,0 +1,646 @@
+###
+# Module 3: Index Management - Index Operations and Maintenance (REST API)
+# ========================================================================
+# 
+# This example demonstrates various index management operations including updating schemas,
+# managing documents, monitoring index health, and performing maintenance tasks using
+# direct REST API calls.
+# 
+# Learning Objectives:
+# - Perform index lifecycle operations (create, update, delete)
+# - Update index schemas safely
+# - Monitor index health and statistics
+# - Manage document operations (update, merge, delete)
+# - Handle index versioning and maintenance
+# 
+# Prerequisites:
+# - Completed previous examples (01-03)
+# - Understanding of index schemas and data ingestion
+# - Azure AI Search service with admin access
+# - HTTP client with REST API support
+# 
+# Author: Azure AI Search Handbook
+# Module: Beginner - Module 3: Index Management
+###
+
+# Variables (configure these for your environment)
+@endpoint = {{$dotenv AZURE_SEARCH_SERVICE_ENDPOINT}}
+@adminKey = {{$dotenv AZURE_SEARCH_ADMIN_KEY}}
+@apiVersion = 2023-11-01
+@indexName = index-operations-demo-rest
+
+###
+# 1. Create Operations Test Index
+# ==============================
+# Create a sample index for operations testing
+
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "{{indexName}}",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+###
+# 2. Get Index Information
+# ========================
+# Retrieve detailed information about the index
+
+GET {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 3. Upload Initial Documents
+# ===========================
+# Upload sample documents for operations testing
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "ops-doc-1",
+      "title": "Index Operations and Maintenance",
+      "content": "Comprehensive guide to managing Azure AI Search indexes including operations, monitoring, and maintenance tasks.",
+      "category": "Operations",
+      "author": "Operations Team",
+      "publishedDate": "2024-02-10T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 200,
+      "tags": ["operations", "maintenance", "guide"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "ops-doc-2",
+      "title": "Schema Design Best Practices",
+      "content": "Learn how to design effective schemas for Azure AI Search indexes with performance and maintainability in mind.",
+      "category": "Best Practices",
+      "author": "Architecture Team",
+      "publishedDate": "2024-02-11T14:30:00Z",
+      "rating": 4.7,
+      "viewCount": 180,
+      "tags": ["schema", "design", "best-practices"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "ops-doc-3",
+      "title": "Performance Monitoring Strategies",
+      "content": "Effective strategies for monitoring and optimizing the performance of your Azure AI Search implementation.",
+      "category": "Performance",
+      "author": "Performance Team",
+      "publishedDate": "2024-02-12T09:15:00Z",
+      "rating": 4.3,
+      "viewCount": 150,
+      "tags": ["performance", "monitoring", "optimization"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 4. Update Index Schema (Add New Field)
+# ======================================
+# Add a new field to the existing index schema
+
+PUT {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "{{indexName}}",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "readingTime",
+      "type": "Edm.Int32",
+      "key": false,
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+###
+# 5. Update Existing Documents (Merge)
+# ====================================
+# Update existing documents with new data
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "merge",
+      "id": "ops-doc-1",
+      "title": "Updated: Index Operations and Maintenance",
+      "rating": 4.8,
+      "viewCount": 250,
+      "readingTime": 15
+    }
+  ]
+}
+
+###
+# 6. Upsert Operations (Merge or Upload)
+# ======================================
+# Demonstrate merge or upload operations
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "ops-doc-4",
+      "title": "New Document via Upsert",
+      "content": "This document was created via merge or upload operation.",
+      "category": "Operations",
+      "author": "Operations Manager",
+      "publishedDate": "2024-02-15T10:00:00Z",
+      "rating": 4.2,
+      "viewCount": 50,
+      "tags": ["operations", "upsert", "new"],
+      "isPublished": true,
+      "readingTime": 8
+    },
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "ops-doc-2",
+      "content": "Updated content for existing document via upsert.",
+      "rating": 4.9,
+      "readingTime": 12
+    }
+  ]
+}
+
+###
+# 7. Get Document Count
+# =====================
+# Check the current number of documents in the index
+
+GET {{endpoint}}/indexes/{{indexName}}/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 8. Search Documents (Verify Updates)
+# ====================================
+# Search to verify document updates
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,rating,viewCount,readingTime&$top=10
+api-key: {{adminKey}}
+
+###
+# 9. Delete Specific Documents
+# ============================
+# Delete specific documents from the index
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "ops-doc-3"
+    }
+  ]
+}
+
+###
+# 10. Monitor Index Health - Get Service Statistics
+# =================================================
+# Get overall service statistics
+
+GET {{endpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 11. Monitor Index Health - Get Index Statistics
+# ===============================================
+# Get statistics for the specific index
+
+GET {{endpoint}}/indexes/{{indexName}}/stats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 12. Test Search Performance
+# ===========================
+# Test different types of searches for performance monitoring
+
+# Simple search
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=operations&$count=true&$top=5
+api-key: {{adminKey}}
+
+###
+# Filtered search
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=operations&$filter=category eq 'Operations'&$count=true&$top=5
+api-key: {{adminKey}}
+
+###
+# Faceted search
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&facet=category&facet=author&$count=true&$top=5
+api-key: {{adminKey}}
+
+###
+# 13. Analyze Field Usage
+# =======================
+# Get sample documents to analyze field usage
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=100&$count=true
+api-key: {{adminKey}}
+
+###
+# 14. Check for Large Documents
+# =============================
+# Search for documents with large content fields
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,content&$top=50
+api-key: {{adminKey}}
+
+###
+# 15. Validate Index Integrity
+# ============================
+# Check for duplicate IDs (shouldn't happen with proper key field)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id&$top=1000
+api-key: {{adminKey}}
+
+###
+# 16. Check Required Field Completeness
+# =====================================
+# Sample documents to check for required field completeness
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title&$top=10
+api-key: {{adminKey}}
+
+###
+# 17. List All Indexes (Index Management)
+# =======================================
+# Get list of all indexes in the service
+
+GET {{endpoint}}/indexes?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 18. Get Detailed Index Schema
+# =============================
+# Get the complete index definition including all properties
+
+GET {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 19. Test Index Operations - Backup Simulation
+# ==============================================
+# Export all documents (simulating backup)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=1000
+api-key: {{adminKey}}
+
+###
+# 20. Performance Test - Batch Document Operations
+# ================================================
+# Upload multiple documents in a single batch
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "perf-doc-1",
+      "title": "Performance Test Document 1",
+      "content": "This is a performance test document for batch operations testing.",
+      "category": "Testing",
+      "author": "Test User",
+      "publishedDate": "2024-02-16T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 10,
+      "tags": ["performance", "test", "batch"],
+      "isPublished": true,
+      "readingTime": 5
+    },
+    {
+      "@search.action": "upload",
+      "id": "perf-doc-2",
+      "title": "Performance Test Document 2",
+      "content": "This is another performance test document for batch operations testing.",
+      "category": "Testing",
+      "author": "Test User",
+      "publishedDate": "2024-02-16T11:00:00Z",
+      "rating": 4.1,
+      "viewCount": 15,
+      "tags": ["performance", "test", "batch"],
+      "isPublished": true,
+      "readingTime": 6
+    },
+    {
+      "@search.action": "upload",
+      "id": "perf-doc-3",
+      "title": "Performance Test Document 3",
+      "content": "This is yet another performance test document for batch operations testing.",
+      "category": "Testing",
+      "author": "Test User",
+      "publishedDate": "2024-02-16T12:00:00Z",
+      "rating": 4.2,
+      "viewCount": 20,
+      "tags": ["performance", "test", "batch"],
+      "isPublished": true,
+      "readingTime": 7
+    }
+  ]
+}
+
+###
+# 21. Final Document Count Check
+# ==============================
+# Check final document count after all operations
+
+GET {{endpoint}}/indexes/{{indexName}}/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 22. Final Index Health Check
+# ============================
+# Final verification of index health
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,category,author&$top=10&$count=true
+api-key: {{adminKey}}
+
+###
+# 23. Clean Up - Delete Test Documents (Optional)
+# ===============================================
+# Clean up performance test documents
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "perf-doc-1"
+    },
+    {
+      "@search.action": "delete",
+      "id": "perf-doc-2"
+    },
+    {
+      "@search.action": "delete",
+      "id": "perf-doc-3"
+    }
+  ]
+}
+
+###
+# 24. Optional - Delete Index (Cleanup)
+# =====================================
+# Uncomment to delete the test index
+
+# DELETE {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+# api-key: {{adminKey}}
+
+###
+# Summary of Operations Demonstrated:
+# ==================================
+# ✅ Index creation and schema design
+# ✅ Index schema updates (adding fields)
+# ✅ Document upload operations
+# ✅ Document update operations (merge)
+# ✅ Document upsert operations (mergeOrUpload)
+# ✅ Document deletion operations
+# ✅ Index health monitoring
+# ✅ Service statistics retrieval
+# ✅ Performance testing
+# ✅ Field usage analysis
+# ✅ Index integrity validation
+# ✅ Batch operations
+# ✅ Index management operations
+#
+# Next Steps:
+# 1. Implement index monitoring in your applications
+# 2. Set up automated maintenance procedures
+# 3. Run the next example: 05_performance_optimization.http
+# 4. Plan index lifecycle management for production

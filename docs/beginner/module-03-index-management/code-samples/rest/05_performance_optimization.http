@@ -1,0 +1,910 @@
+###
+# Module 3: Index Management - Performance Optimization (REST API)
+# ================================================================
+# 
+# This example demonstrates performance optimization techniques for Azure AI Search
+# index management using REST API calls, including batch sizing, monitoring,
+# and optimization strategies.
+# 
+# Learning Objectives:
+# - Optimize batch sizes for different document types
+# - Monitor and measure performance metrics
+# - Apply performance best practices
+# - Handle large dataset operations efficiently
+# - Implement performance monitoring strategies
+# 
+# Prerequisites:
+# - Completed previous examples (01-04)
+# - Understanding of data ingestion and index operations
+# - Azure AI Search service with admin access
+# - HTTP client with REST API support and timing capabilities
+# 
+# Author: Azure AI Search Handbook
+# Module: Beginner - Module 3: Index Management
+###
+
+# Variables (configure these for your environment)
+@endpoint = {{$dotenv AZURE_SEARCH_SERVICE_ENDPOINT}}
+@adminKey = {{$dotenv AZURE_SEARCH_ADMIN_KEY}}
+@apiVersion = 2023-11-01
+@indexName = performance-test-rest
+
+###
+# 1. Create Performance Test Index
+# ================================
+# Create an optimized index for performance testing
+
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "{{indexName}}",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+###
+# 2. Performance Test - Small Batch (10 documents)
+# ================================================
+# Test upload performance with small batch size
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "small-batch-1",
+      "title": "Small Batch Document 1: Technology Article",
+      "content": "This is sample content for document 1. It contains information about technology topics and is written for performance testing purposes.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-01T10:00:00Z",
+      "rating": 4.1,
+      "viewCount": 110,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-2",
+      "title": "Small Batch Document 2: Science Article",
+      "content": "This is sample content for document 2. It contains information about science topics and is written for performance testing purposes.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-02T10:00:00Z",
+      "rating": 4.2,
+      "viewCount": 120,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-3",
+      "title": "Small Batch Document 3: Business Article",
+      "content": "This is sample content for document 3. It contains information about business topics and is written for performance testing purposes.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-03T10:00:00Z",
+      "rating": 4.3,
+      "viewCount": 130,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-4",
+      "title": "Small Batch Document 4: Health Article",
+      "content": "This is sample content for document 4. It contains information about health topics and is written for performance testing purposes.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-02-04T10:00:00Z",
+      "rating": 4.4,
+      "viewCount": 140,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-5",
+      "title": "Small Batch Document 5: Education Article",
+      "content": "This is sample content for document 5. It contains information about education topics and is written for performance testing purposes.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-02-05T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 150,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-6",
+      "title": "Small Batch Document 6: Technology Article",
+      "content": "This is sample content for document 6. It contains information about technology topics and is written for performance testing purposes.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-06T10:00:00Z",
+      "rating": 3.6,
+      "viewCount": 160,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-7",
+      "title": "Small Batch Document 7: Science Article",
+      "content": "This is sample content for document 7. It contains information about science topics and is written for performance testing purposes.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-07T10:00:00Z",
+      "rating": 3.7,
+      "viewCount": 170,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-8",
+      "title": "Small Batch Document 8: Business Article",
+      "content": "This is sample content for document 8. It contains information about business topics and is written for performance testing purposes.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-08T10:00:00Z",
+      "rating": 3.8,
+      "viewCount": 180,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-9",
+      "title": "Small Batch Document 9: Health Article",
+      "content": "This is sample content for document 9. It contains information about health topics and is written for performance testing purposes.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-02-09T10:00:00Z",
+      "rating": 3.9,
+      "viewCount": 190,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": false
+    },
+    {
+      "@search.action": "upload",
+      "id": "small-batch-10",
+      "title": "Small Batch Document 10: Education Article",
+      "content": "This is sample content for document 10. It contains information about education topics and is written for performance testing purposes.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-02-10T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 200,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": false
+    }
+  ]
+}
+
+###
+# 3. Check Document Count After Small Batch
+# =========================================
+
+GET {{endpoint}}/indexes/{{indexName}}/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 4. Performance Test - Medium Batch (25 documents)
+# =================================================
+# Test upload performance with medium batch size
+# Note: This is a larger payload - monitor response time
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-1",
+      "title": "Medium Batch Document 1: Technology Article",
+      "content": "This is sample content for document 1. It contains information about technology topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-11T10:00:00Z",
+      "rating": 4.1,
+      "viewCount": 210,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-2",
+      "title": "Medium Batch Document 2: Science Article",
+      "content": "This is sample content for document 2. It contains information about science topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-12T10:00:00Z",
+      "rating": 4.2,
+      "viewCount": 220,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-3",
+      "title": "Medium Batch Document 3: Business Article",
+      "content": "This is sample content for document 3. It contains information about business topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-13T10:00:00Z",
+      "rating": 4.3,
+      "viewCount": 230,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-4",
+      "title": "Medium Batch Document 4: Health Article",
+      "content": "This is sample content for document 4. It contains information about health topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-02-14T10:00:00Z",
+      "rating": 4.4,
+      "viewCount": 240,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-5",
+      "title": "Medium Batch Document 5: Education Article",
+      "content": "This is sample content for document 5. It contains information about education topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-02-15T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 250,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-6",
+      "title": "Medium Batch Document 6: Technology Article",
+      "content": "This is sample content for document 6. It contains information about technology topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-16T10:00:00Z",
+      "rating": 3.6,
+      "viewCount": 260,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-7",
+      "title": "Medium Batch Document 7: Science Article",
+      "content": "This is sample content for document 7. It contains information about science topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-17T10:00:00Z",
+      "rating": 3.7,
+      "viewCount": 270,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-8",
+      "title": "Medium Batch Document 8: Business Article",
+      "content": "This is sample content for document 8. It contains information about business topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-18T10:00:00Z",
+      "rating": 3.8,
+      "viewCount": 280,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-9",
+      "title": "Medium Batch Document 9: Health Article",
+      "content": "This is sample content for document 9. It contains information about health topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-02-19T10:00:00Z",
+      "rating": 3.9,
+      "viewCount": 290,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": false
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-10",
+      "title": "Medium Batch Document 10: Education Article",
+      "content": "This is sample content for document 10. It contains information about education topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-02-20T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 300,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": false
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-11",
+      "title": "Medium Batch Document 11: Technology Article",
+      "content": "This is sample content for document 11. It contains information about technology topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-21T10:00:00Z",
+      "rating": 4.1,
+      "viewCount": 310,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-12",
+      "title": "Medium Batch Document 12: Science Article",
+      "content": "This is sample content for document 12. It contains information about science topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-22T10:00:00Z",
+      "rating": 4.2,
+      "viewCount": 320,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-13",
+      "title": "Medium Batch Document 13: Business Article",
+      "content": "This is sample content for document 13. It contains information about business topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-23T10:00:00Z",
+      "rating": 4.3,
+      "viewCount": 330,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-14",
+      "title": "Medium Batch Document 14: Health Article",
+      "content": "This is sample content for document 14. It contains information about health topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-02-24T10:00:00Z",
+      "rating": 4.4,
+      "viewCount": 340,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-15",
+      "title": "Medium Batch Document 15: Education Article",
+      "content": "This is sample content for document 15. It contains information about education topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-02-25T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 350,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-16",
+      "title": "Medium Batch Document 16: Technology Article",
+      "content": "This is sample content for document 16. It contains information about technology topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-26T10:00:00Z",
+      "rating": 3.6,
+      "viewCount": 360,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-17",
+      "title": "Medium Batch Document 17: Science Article",
+      "content": "This is sample content for document 17. It contains information about science topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-27T10:00:00Z",
+      "rating": 3.7,
+      "viewCount": 370,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-18",
+      "title": "Medium Batch Document 18: Business Article",
+      "content": "This is sample content for document 18. It contains information about business topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-28T10:00:00Z",
+      "rating": 3.8,
+      "viewCount": 380,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-19",
+      "title": "Medium Batch Document 19: Health Article",
+      "content": "This is sample content for document 19. It contains information about health topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-03-01T10:00:00Z",
+      "rating": 3.9,
+      "viewCount": 390,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": false
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-20",
+      "title": "Medium Batch Document 20: Education Article",
+      "content": "This is sample content for document 20. It contains information about education topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-03-02T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 400,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": false
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-21",
+      "title": "Medium Batch Document 21: Technology Article",
+      "content": "This is sample content for document 21. It contains information about technology topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-03-03T10:00:00Z",
+      "rating": 4.1,
+      "viewCount": 410,
+      "tags": ["technology", "sample", "tag1"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-22",
+      "title": "Medium Batch Document 22: Science Article",
+      "content": "This is sample content for document 22. It contains information about science topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Science",
+      "author": "Bob Smith",
+      "publishedDate": "2024-03-04T10:00:00Z",
+      "rating": 4.2,
+      "viewCount": 420,
+      "tags": ["science", "sample", "tag2"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-23",
+      "title": "Medium Batch Document 23: Business Article",
+      "content": "This is sample content for document 23. It contains information about business topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Business",
+      "author": "Carol Davis",
+      "publishedDate": "2024-03-05T10:00:00Z",
+      "rating": 4.3,
+      "viewCount": 430,
+      "tags": ["business", "sample", "tag3"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-24",
+      "title": "Medium Batch Document 24: Health Article",
+      "content": "This is sample content for document 24. It contains information about health topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Health",
+      "author": "David Wilson",
+      "publishedDate": "2024-03-06T10:00:00Z",
+      "rating": 4.4,
+      "viewCount": 440,
+      "tags": ["health", "sample", "tag4"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "medium-batch-25",
+      "title": "Medium Batch Document 25: Education Article",
+      "content": "This is sample content for document 25. It contains information about education topics and is written for performance testing purposes. This document is part of a medium-sized batch upload test.",
+      "category": "Education",
+      "author": "Eve Brown",
+      "publishedDate": "2024-03-07T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 450,
+      "tags": ["education", "sample", "tag0"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 5. Check Document Count After Medium Batch
+# ==========================================
+
+GET {{endpoint}}/indexes/{{indexName}}/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 6. Performance Test - Search Operations
+# =======================================
+# Test different search operations for performance
+
+# Simple search performance test
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=technology&$count=true&$top=10
+api-key: {{adminKey}}
+
+###
+# Filtered search performance test
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=technology&$filter=category eq 'Technology'&$count=true&$top=10
+api-key: {{adminKey}}
+
+###
+# Faceted search performance test
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&facet=category&facet=author&$count=true&$top=10
+api-key: {{adminKey}}
+
+###
+# Sorted search performance test
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc&$count=true&$top=10
+api-key: {{adminKey}}
+
+###
+# Complex query performance test
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=technology OR science&$filter=rating gt 4.0 and isPublished eq true&$orderby=publishedDate desc&facet=category&$count=true&$top=10
+api-key: {{adminKey}}
+
+###
+# 7. Performance Test - Document Size Optimization
+# ================================================
+# Test with larger document content
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "large-doc-1",
+      "title": "Large Document Performance Test 1",
+      "content": "This is a large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is a large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is a large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is a large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is a large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents.",
+      "category": "Performance",
+      "author": "Performance Tester",
+      "publishedDate": "2024-03-08T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 500,
+      "tags": ["performance", "large", "test"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "large-doc-2",
+      "title": "Large Document Performance Test 2",
+      "content": "This is another large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is another large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is another large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is another large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents. This is another large document with extensive content for performance testing. This content is repeated multiple times to simulate larger documents.",
+      "category": "Performance",
+      "author": "Performance Tester",
+      "publishedDate": "2024-03-09T10:00:00Z",
+      "rating": 4.1,
+      "viewCount": 510,
+      "tags": ["performance", "large", "test"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 8. Performance Monitoring - Service Statistics
+# ==============================================
+# Monitor service-level performance metrics
+
+GET {{endpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 9. Performance Monitoring - Index Statistics
+# ============================================
+# Monitor index-specific performance metrics
+
+GET {{endpoint}}/indexes/{{indexName}}/stats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 10. Best Practice Test - Optimal Field Selection
+# ================================================
+# Test performance with selective field retrieval
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,category&$top=50&$count=true
+api-key: {{adminKey}}
+
+###
+# 11. Best Practice Test - Efficient Filtering
+# =============================================
+# Test performance with efficient filter operations
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=isPublished eq true and rating gt 4.0&$select=id,title,rating&$top=20&$count=true
+api-key: {{adminKey}}
+
+###
+# 12. Best Practice Test - Pagination Performance
+# ===============================================
+# Test pagination performance with skip and top
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$skip=0&$top=10&$count=true
+api-key: {{adminKey}}
+
+###
+# Next page
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$skip=10&$top=10&$count=true
+api-key: {{adminKey}}
+
+###
+# 13. Performance Analysis - Field Usage
+# ======================================
+# Analyze which fields are being used most
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,category,author,rating&$top=100
+api-key: {{adminKey}}
+
+###
+# 14. Performance Test - Bulk Update Operations
+# =============================================
+# Test performance of bulk update operations
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "merge",
+      "id": "small-batch-1",
+      "rating": 4.6,
+      "viewCount": 600
+    },
+    {
+      "@search.action": "merge",
+      "id": "small-batch-2",
+      "rating": 4.7,
+      "viewCount": 610
+    },
+    {
+      "@search.action": "merge",
+      "id": "small-batch-3",
+      "rating": 4.8,
+      "viewCount": 620
+    },
+    {
+      "@search.action": "merge",
+      "id": "small-batch-4",
+      "rating": 4.9,
+      "viewCount": 630
+    },
+    {
+      "@search.action": "merge",
+      "id": "small-batch-5",
+      "rating": 5.0,
+      "viewCount": 640
+    }
+  ]
+}
+
+###
+# 15. Performance Test - Bulk Delete Operations
+# =============================================
+# Test performance of bulk delete operations
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "large-doc-1"
+    },
+    {
+      "@search.action": "delete",
+      "id": "large-doc-2"
+    }
+  ]
+}
+
+###
+# 16. Final Performance Check
+# ===========================
+# Final document count and performance verification
+
+GET {{endpoint}}/indexes/{{indexName}}/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 17. Performance Summary - Sample Results
+# ========================================
+# Get sample of final results for performance analysis
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,category,rating,viewCount&$top=10&$count=true
+api-key: {{adminKey}}
+
+###
+# 18. Clean Up - Delete Performance Test Documents (Optional)
+# ==========================================================
+# Clean up test documents to reset for next test
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "small-batch-6"
+    },
+    {
+      "@search.action": "delete",
+      "id": "small-batch-7"
+    },
+    {
+      "@search.action": "delete",
+      "id": "small-batch-8"
+    },
+    {
+      "@search.action": "delete",
+      "id": "small-batch-9"
+    },
+    {
+      "@search.action": "delete",
+      "id": "small-batch-10"
+    }
+  ]
+}
+
+###
+# 19. Optional - Delete Index (Cleanup)
+# =====================================
+# Uncomment to delete the performance test index
+
+# DELETE {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+# api-key: {{adminKey}}
+
+###
+# Performance Optimization Summary:
+# =================================
+# ✅ Tested different batch sizes (10, 25+ documents)
+# ✅ Monitored upload performance and response times
+# ✅ Tested various search operation performance
+# ✅ Applied field selection optimization
+# ✅ Tested efficient filtering strategies
+# ✅ Analyzed pagination performance
+# ✅ Monitored service and index statistics
+# ✅ Tested bulk update and delete operations
+# ✅ Analyzed document size impact on performance
+#
+# Performance Best Practices Demonstrated:
+# - Use appropriate batch sizes (50-100 documents typically optimal)
+# - Select only required fields to reduce payload size
+# - Use efficient filter operations
+# - Monitor service statistics regularly
+# - Optimize document sizes for better performance
+# - Use pagination for large result sets
+# - Implement proper error handling and retry logic
+#
+# Next Steps:
+# 1. Experiment with different batch sizes for your data
+# 2. Implement performance monitoring in your applications
+# 3. Run the next example: 06_error_handling.http
+# 4. Monitor performance in your production environment

@@ -1,0 +1,587 @@
+###
+# Module 3: Index Management - Data Ingestion Strategies (REST API)
+# =================================================================
+# 
+# This example demonstrates efficient data ingestion strategies for Azure AI Search
+# using direct REST API calls. You'll learn about batch operations, large dataset
+# handling, progress tracking, and optimization techniques for document uploads.
+# 
+# Learning Objectives:
+# - Implement single and batch document uploads via REST
+# - Handle large datasets efficiently with HTTP requests
+# - Optimize batch sizes for performance
+# - Track upload progress and handle errors
+# - Use different document actions (upload, merge, delete)
+# 
+# Prerequisites:
+# - Completed 01_create_basic_index.http and 02_schema_design.http
+# - Understanding of index schemas
+# - Azure AI Search service with admin access
+# - HTTP client with REST API support
+# 
+# Author: Azure AI Search Handbook
+# Module: Beginner - Module 3: Index Management
+###
+
+# Variables (configure these for your environment)
+@endpoint = {{$dotenv AZURE_SEARCH_SERVICE_ENDPOINT}}
+@adminKey = {{$dotenv AZURE_SEARCH_ADMIN_KEY}}
+@apiVersion = 2023-11-01
+
+### 1. Create Sample Index for Data Ingestion Testing
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "data-ingestion-demo-rest",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+### 2. Single Document Upload Example
+# Upload a single document to demonstrate basic upload functionality
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "single-doc-1",
+      "title": "Single Document Upload Example",
+      "content": "This document demonstrates how to upload a single document to Azure AI Search using REST API calls.",
+      "category": "Tutorial",
+      "author": "Data Ingestion Manager",
+      "publishedDate": "2024-02-10T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 100,
+      "tags": ["tutorial", "single-upload", "example"],
+      "isPublished": true
+    }
+  ]
+}
+
+### 3. Verify Single Document Upload
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 4. Batch Document Upload Example (Small Batch)
+# Upload multiple documents in a single batch operation
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "batch-doc-1",
+      "title": "Batch Document 1: Azure AI Search Fundamentals",
+      "content": "This is the first document in a batch upload demonstrating Azure AI Search capabilities and features.",
+      "category": "Technology",
+      "author": "Alice Johnson",
+      "publishedDate": "2024-02-01T09:00:00Z",
+      "rating": 4.2,
+      "viewCount": 250,
+      "tags": ["azure", "search", "fundamentals"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "batch-doc-2",
+      "title": "Batch Document 2: Advanced Search Techniques",
+      "content": "The second document covers advanced search techniques including faceting, filtering, and custom scoring.",
+      "category": "Technology",
+      "author": "Bob Smith",
+      "publishedDate": "2024-02-02T14:30:00Z",
+      "rating": 4.7,
+      "viewCount": 180,
+      "tags": ["azure", "search", "advanced"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "batch-doc-3",
+      "title": "Batch Document 3: Performance Optimization",
+      "content": "This document focuses on performance optimization strategies for Azure AI Search implementations.",
+      "category": "Performance",
+      "author": "Carol Davis",
+      "publishedDate": "2024-02-03T11:15:00Z",
+      "rating": 4.4,
+      "viewCount": 320,
+      "tags": ["performance", "optimization", "azure"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "batch-doc-4",
+      "title": "Batch Document 4: Index Management Best Practices",
+      "content": "Learn best practices for managing Azure AI Search indexes including schema design and maintenance.",
+      "category": "Best Practices",
+      "author": "David Wilson",
+      "publishedDate": "2024-02-04T16:45:00Z",
+      "rating": 4.6,
+      "viewCount": 290,
+      "tags": ["index", "management", "best-practices"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "batch-doc-5",
+      "title": "Batch Document 5: Data Ingestion Strategies",
+      "content": "Comprehensive guide to data ingestion strategies for Azure AI Search including batch processing.",
+      "category": "Data Management",
+      "author": "Eve Brown",
+      "publishedDate": "2024-02-05T13:20:00Z",
+      "rating": 4.3,
+      "viewCount": 210,
+      "tags": ["data", "ingestion", "batch"],
+      "isPublished": true
+    }
+  ]
+}
+
+### 5. Verify Batch Upload
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 6. Large Batch Upload Example (Optimized Size)
+# Upload a larger batch of documents (recommended batch size: 100-1000 documents)
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "large-batch-1",
+      "title": "Large Batch Document 1: Machine Learning Integration",
+      "content": "This document explores machine learning integration with Azure AI Search for enhanced search experiences.",
+      "category": "Machine Learning",
+      "author": "Frank Miller",
+      "publishedDate": "2024-02-06T10:00:00Z",
+      "rating": 4.8,
+      "viewCount": 450,
+      "tags": ["machine-learning", "ai", "integration"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "large-batch-2",
+      "title": "Large Batch Document 2: Cognitive Services Integration",
+      "content": "Learn how to integrate Azure Cognitive Services with AI Search for content enrichment and analysis.",
+      "category": "Cognitive Services",
+      "author": "Grace Lee",
+      "publishedDate": "2024-02-07T15:30:00Z",
+      "rating": 4.5,
+      "viewCount": 380,
+      "tags": ["cognitive-services", "enrichment", "analysis"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "large-batch-3",
+      "title": "Large Batch Document 3: Security and Access Control",
+      "content": "Comprehensive guide to implementing security and access control in Azure AI Search applications.",
+      "category": "Security",
+      "author": "Henry Clark",
+      "publishedDate": "2024-02-08T09:45:00Z",
+      "rating": 4.7,
+      "viewCount": 520,
+      "tags": ["security", "access-control", "authentication"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "large-batch-4",
+      "title": "Large Batch Document 4: Monitoring and Analytics",
+      "content": "Best practices for monitoring Azure AI Search performance and analyzing search analytics data.",
+      "category": "Analytics",
+      "author": "Ivy Rodriguez",
+      "publishedDate": "2024-02-09T12:15:00Z",
+      "rating": 4.4,
+      "viewCount": 340,
+      "tags": ["monitoring", "analytics", "performance"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "large-batch-5",
+      "title": "Large Batch Document 5: Scaling and High Availability",
+      "content": "Strategies for scaling Azure AI Search and ensuring high availability in production environments.",
+      "category": "Scalability",
+      "author": "Jack Thompson",
+      "publishedDate": "2024-02-10T14:00:00Z",
+      "rating": 4.6,
+      "viewCount": 410,
+      "tags": ["scaling", "high-availability", "production"],
+      "isPublished": true
+    }
+  ]
+}
+
+### 7. Document Operations Demo - Upload Initial Documents
+# Demonstrate different document operations (upload, merge, delete)
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "ops-doc-1",
+      "title": "Original Title 1",
+      "content": "Original content for document 1",
+      "category": "Original",
+      "author": "Original Author",
+      "publishedDate": "2024-02-10T10:00:00Z",
+      "rating": 3.0,
+      "viewCount": 50,
+      "tags": ["original"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "ops-doc-2",
+      "title": "Original Title 2",
+      "content": "Original content for document 2",
+      "category": "Original",
+      "author": "Original Author",
+      "publishedDate": "2024-02-10T11:00:00Z",
+      "rating": 3.5,
+      "viewCount": 75,
+      "tags": ["original"],
+      "isPublished": true
+    }
+  ]
+}
+
+### 8. Document Operations Demo - Merge Operation (Partial Update)
+# Update specific fields of existing documents using merge action
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "merge",
+      "id": "ops-doc-1",
+      "title": "Updated Title 1",
+      "rating": 4.5,
+      "viewCount": 150
+    }
+  ]
+}
+
+### 9. Document Operations Demo - Merge or Upload (Upsert)
+# Demonstrate upsert operation - creates new document or updates existing
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "ops-doc-3",
+      "title": "New Document via Upsert",
+      "content": "This document was created via mergeOrUpload action",
+      "category": "Upsert",
+      "author": "Upsert Author",
+      "publishedDate": "2024-02-10T12:00:00Z",
+      "rating": 4.0,
+      "viewCount": 25,
+      "tags": ["upsert", "new"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "mergeOrUpload",
+      "id": "ops-doc-2",
+      "content": "Updated content for document 2",
+      "rating": 4.8
+    }
+  ]
+}
+
+### 10. Verify Document Operations
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 11. Search Updated Documents
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs?api-version={{apiVersion}}&search=*&$filter=rating gt 4.0&$orderby=rating desc&$select=id,title,rating,viewCount
+api-key: {{adminKey}}
+
+### 12. Document Operations Demo - Delete Operation
+# Delete a specific document using delete action
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "ops-doc-2"
+    }
+  ]
+}
+
+### 13. Verify Document Deletion
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 14. Batch Size Optimization Test - Small Batch (10 documents)
+# Test different batch sizes for performance optimization
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "perf-small-1",
+      "title": "Performance Test Small Batch 1",
+      "content": "This document is part of a small batch performance test.",
+      "category": "Performance Test",
+      "author": "Performance Tester",
+      "publishedDate": "2024-02-10T15:00:00Z",
+      "rating": 4.0,
+      "viewCount": 10,
+      "tags": ["performance", "small-batch"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "perf-small-2",
+      "title": "Performance Test Small Batch 2",
+      "content": "This document is part of a small batch performance test.",
+      "category": "Performance Test",
+      "author": "Performance Tester",
+      "publishedDate": "2024-02-10T15:01:00Z",
+      "rating": 4.1,
+      "viewCount": 11,
+      "tags": ["performance", "small-batch"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "perf-small-3",
+      "title": "Performance Test Small Batch 3",
+      "content": "This document is part of a small batch performance test.",
+      "category": "Performance Test",
+      "author": "Performance Tester",
+      "publishedDate": "2024-02-10T15:02:00Z",
+      "rating": 4.2,
+      "viewCount": 12,
+      "tags": ["performance", "small-batch"],
+      "isPublished": true
+    }
+  ]
+}
+
+### 15. Error Handling Example - Invalid Document Structure
+# This request will demonstrate error handling for invalid documents
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "title": "Document Missing Required ID Field",
+      "content": "This document is missing the required 'id' field and will cause an error.",
+      "category": "Error Test",
+      "author": "Error Tester",
+      "publishedDate": "2024-02-10T16:00:00Z",
+      "rating": 1.0,
+      "viewCount": 1,
+      "tags": ["error", "test"],
+      "isPublished": false
+    }
+  ]
+}
+
+### 16. Error Handling Example - Invalid Field Type
+# This request will demonstrate error handling for invalid field types
+POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "error-doc-1",
+      "title": "Document with Invalid Field Type",
+      "content": "This document has an invalid rating field type.",
+      "category": "Error Test",
+      "author": "Error Tester",
+      "publishedDate": "2024-02-10T16:00:00Z",
+      "rating": "not-a-number",
+      "viewCount": 1,
+      "tags": ["error", "test"],
+      "isPublished": false
+    }
+  ]
+}
+
+### 17. Get Final Document Count and Statistics
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 18. Sample Search to Verify Data Ingestion
+# Perform various searches to verify the ingested data
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs?api-version={{apiVersion}}&search=azure&$top=5&$select=id,title,author,category,rating
+api-key: {{adminKey}}
+
+### 19. Filter and Sort Example
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology' and rating gt 4.0&$orderby=rating desc&$select=id,title,rating,viewCount
+api-key: {{adminKey}}
+
+### 20. Faceted Search Example
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/docs?api-version={{apiVersion}}&search=*&facet=category&facet=author&$top=0
+api-key: {{adminKey}}
+
+### 21. Get Index Statistics
+GET {{endpoint}}/indexes/data-ingestion-demo-rest/stats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 22. Optional: Clean Up Test Data
+# Delete all test documents (uncomment to use)
+# POST {{endpoint}}/indexes/data-ingestion-demo-rest/docs/index?api-version={{apiVersion}}
+# Content-Type: application/json
+# api-key: {{adminKey}}
+# 
+# {
+#   "value": [
+#     {"@search.action": "delete", "id": "single-doc-1"},
+#     {"@search.action": "delete", "id": "batch-doc-1"},
+#     {"@search.action": "delete", "id": "batch-doc-2"},
+#     {"@search.action": "delete", "id": "batch-doc-3"},
+#     {"@search.action": "delete", "id": "batch-doc-4"},
+#     {"@search.action": "delete", "id": "batch-doc-5"}
+#   ]
+# }
+
+### 23. Optional: Delete Test Index
+# Uncomment and run this to clean up the test index
+# DELETE {{endpoint}}/indexes/data-ingestion-demo-rest?api-version={{apiVersion}}
+# api-key: {{adminKey}}
+
+###
+# 📚 What you learned:
+# ✅ How to implement single and batch document uploads via REST
+# ✅ How to handle large datasets efficiently with HTTP requests
+# ✅ How to optimize batch sizes for performance
+# ✅ How to track upload progress and handle errors
+# ✅ How to use different document actions (upload, merge, delete)
+# ✅ How to handle error scenarios and invalid data
+# ✅ How to verify data ingestion with searches and statistics
+#
+# 🚀 Next steps:
+# 1. Try ingesting your own data using these patterns
+# 2. Experiment with different batch sizes for your use case
+# 3. Run the next example: 04_index_operations.http
+# 4. Implement error handling and retry logic for production
+# 5. Set up monitoring for data ingestion processes
+###

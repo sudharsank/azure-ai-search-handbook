@@ -1,0 +1,424 @@
+###
+# Module 3: Index Management - Basic Index Creation (REST API)
+# ===========================================================
+# 
+# This example demonstrates the fundamentals of creating a search index in Azure AI Search
+# using direct REST API calls. You'll learn how to define field types, set attributes, and
+# create your first index using HTTP requests.
+# 
+# Learning Objectives:
+# - Understand the REST API structure for index management
+# - Define field types and attributes in JSON format
+# - Create a basic index schema using HTTP POST
+# - Handle index creation responses and errors
+# - Validate index creation with GET requests
+# 
+# Prerequisites:
+# - Azure AI Search service with admin access
+# - HTTP client (VS Code REST Client, Postman, curl, etc.)
+# - Environment variables or direct values configured
+# - Admin API key (not query key)
+# 
+# Author: Azure AI Search Handbook
+# Module: Beginner - Module 3: Index Management
+###
+
+# Variables (configure these for your environment)
+@endpoint = {{$dotenv AZURE_SEARCH_SERVICE_ENDPOINT}}
+@adminKey = {{$dotenv AZURE_SEARCH_ADMIN_KEY}}
+@apiVersion = 2023-11-01
+
+### 1. Test Connection - Get Service Statistics
+# This verifies your connection and admin key are working
+GET {{endpoint}}/servicestats?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+### 2. List Existing Indexes
+# See what indexes already exist in your service
+GET {{endpoint}}/indexes?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 3. Create Basic Blog Index
+# Create a comprehensive blog index with various field types and attributes
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "basic-blog-index-rest",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+### 4. Get Index Details
+# Retrieve the created index to validate its structure
+GET {{endpoint}}/indexes/basic-blog-index-rest?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 5. Get Index Statistics
+# Check the index statistics (document count, storage size)
+GET {{endpoint}}/indexes/basic-blog-index-rest/stats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 6. Test Index with Sample Document
+# Upload a test document to verify the index is working
+POST {{endpoint}}/indexes/basic-blog-index-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "test-doc-1",
+      "title": "Test Document for Index Validation",
+      "content": "This is a test document to validate that our newly created index is working correctly. It contains various fields that match our schema definition.",
+      "author": "Test Author",
+      "category": "Test",
+      "publishedDate": "2024-02-10T10:00:00Z",
+      "tags": ["test", "validation", "index"],
+      "rating": 5.0,
+      "viewCount": 1,
+      "isPublished": true
+    }
+  ]
+}
+
+### 7. Verify Document Upload
+# Check that the document was indexed successfully
+GET {{endpoint}}/indexes/basic-blog-index-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 8. Search Test Document
+# Perform a simple search to verify functionality
+GET {{endpoint}}/indexes/basic-blog-index-rest/docs?api-version={{apiVersion}}&search=test&$top=5
+api-key: {{adminKey}}
+
+### 9. Get Specific Document
+# Retrieve the test document by its key
+GET {{endpoint}}/indexes/basic-blog-index-rest/docs/test-doc-1?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 10. Clean Up Test Document
+# Delete the test document
+POST {{endpoint}}/indexes/basic-blog-index-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "test-doc-1"
+    }
+  ]
+}
+
+### 11. Verify Document Deletion
+# Confirm the test document was deleted
+GET {{endpoint}}/indexes/basic-blog-index-rest/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 12. Update Index Schema (Add New Field)
+# Demonstrate adding a new field to an existing index
+PUT {{endpoint}}/indexes/basic-blog-index-rest?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "basic-blog-index-rest",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "readingTimeMinutes",
+      "type": "Edm.Int32",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+### 13. Verify Schema Update
+# Check that the new field was added successfully
+GET {{endpoint}}/indexes/basic-blog-index-rest?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+### 14. Test Updated Schema
+# Upload a document with the new field
+POST {{endpoint}}/indexes/basic-blog-index-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "test-doc-2",
+      "title": "Updated Schema Test Document",
+      "content": "This document tests the updated schema with the new readingTimeMinutes field.",
+      "author": "Schema Tester",
+      "category": "Schema Test",
+      "publishedDate": "2024-02-10T11:00:00Z",
+      "tags": ["schema", "update", "test"],
+      "rating": 4.5,
+      "viewCount": 10,
+      "isPublished": true,
+      "readingTimeMinutes": 5
+    }
+  ]
+}
+
+### 15. Query with New Field
+# Search and filter using the new field
+GET {{endpoint}}/indexes/basic-blog-index-rest/docs?api-version={{apiVersion}}&search=*&$filter=readingTimeMinutes le 10&$orderby=readingTimeMinutes desc
+api-key: {{adminKey}}
+
+### 16. Clean Up Updated Test Document
+# Delete the second test document
+POST {{endpoint}}/indexes/basic-blog-index-rest/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "test-doc-2"
+    }
+  ]
+}
+
+### 17. Error Handling Example - Invalid Field Type
+# This request will fail to demonstrate error handling
+POST {{endpoint}}/indexes/invalid-index-test?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "invalid-index-test",
+  "fields": [
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true
+      // Missing required key field - this will cause a 400 error
+    }
+  ]
+}
+
+### 18. Error Handling Example - Invalid API Key
+# This request will fail with 403 Forbidden
+GET {{endpoint}}/indexes?api-version={{apiVersion}}
+api-key: invalid-key-example
+
+### 19. Optional: Delete Test Index
+# Uncomment and run this to clean up the test index
+# DELETE {{endpoint}}/indexes/basic-blog-index-rest?api-version={{apiVersion}}
+# api-key: {{adminKey}}
+
+###
+# 📚 What you learned:
+# ✅ How to create indexes using REST API calls
+# ✅ How to define field types and attributes in JSON
+# ✅ How to handle HTTP responses and errors
+# ✅ How to validate index creation with GET requests
+# ✅ How to test index functionality with document operations
+# ✅ How to update index schemas safely
+# ✅ How to handle common error scenarios
+#
+# 🚀 Next steps:
+# 1. Try modifying the schema with different field types
+# 2. Experiment with different field attributes
+# 3. Run the next example: 02_schema_design.http
+# 4. Upload real documents to your index
+# 5. Explore advanced index features like custom analyzers
+###

@@ -1,0 +1,740 @@
+###
+# Module 3: Index Management - Error Handling and Troubleshooting (REST API)
+# ==========================================================================
+# 
+# This example demonstrates comprehensive error handling patterns and troubleshooting
+# techniques for Azure AI Search index management operations using direct REST API calls.
+# 
+# Learning Objectives:
+# - Handle common error scenarios gracefully
+# - Understand HTTP status codes and error responses
+# - Validate inputs and handle edge cases
+# - Provide meaningful error messages and recovery options
+# - Debug and troubleshoot index management issues
+# 
+# Prerequisites:
+# - Completed previous examples (01-05)
+# - Understanding of index operations and performance
+# - Azure AI Search service with admin access
+# - HTTP client with REST API support and error handling
+# 
+# Author: Azure AI Search Handbook
+# Module: Beginner - Module 3: Index Management
+###
+
+# Variables (configure these for your environment)
+@endpoint = {{$dotenv AZURE_SEARCH_SERVICE_ENDPOINT}}
+@adminKey = {{$dotenv AZURE_SEARCH_ADMIN_KEY}}
+@apiVersion = 2023-11-01
+@indexName = error-handling-demo-rest
+
+###
+# 1. Test Connection and Authentication
+# ====================================
+# Verify basic connectivity and authentication
+
+GET {{endpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 2. Create Error Handling Demo Index
+# ===================================
+# Create a properly structured index for error testing
+
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "{{indexName}}",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true,
+      "analyzer": "en.microsoft"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "author",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "publishedDate",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "viewCount",
+      "type": "Edm.Int32",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false,
+      "retrievable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "isPublished",
+      "type": "Edm.Boolean",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": false,
+      "retrievable": true
+    }
+  ]
+}
+
+###
+# 3. Upload Valid Documents
+# =========================
+# Upload some valid documents first
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "doc-1",
+      "title": "Valid Document",
+      "content": "This is a valid document with all required fields.",
+      "category": "Technology",
+      "author": "John Doe",
+      "publishedDate": "2024-02-10T10:00:00Z",
+      "rating": 4.5,
+      "viewCount": 100,
+      "tags": ["technology", "valid"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "doc-2",
+      "title": "Another Valid Document",
+      "content": "This is another valid document for testing.",
+      "category": "Science",
+      "author": "Jane Smith",
+      "publishedDate": "2024-02-11T10:00:00Z",
+      "rating": 4.8,
+      "viewCount": 200,
+      "tags": ["science", "valid"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 4. Error Test - Invalid Authentication
+# ======================================
+# Test with invalid API key (should return 401 Unauthorized)
+
+GET {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+api-key: invalid-api-key-for-testing
+
+###
+# 5. Error Test - Invalid Index Name
+# ==================================
+# Test with invalid index name (should return 404 Not Found)
+
+GET {{endpoint}}/indexes/non-existent-index?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 6. Error Test - Invalid API Version
+# ===================================
+# Test with invalid API version (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}?api-version=invalid-version
+api-key: {{adminKey}}
+
+###
+# 7. Error Test - Malformed JSON
+# ==============================
+# Test with malformed JSON in request body (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "malformed-doc",
+      "title": "Malformed Document"
+      // Missing comma and closing brace - this will cause a JSON parse error
+    }
+  ]
+
+###
+# 8. Error Test - Missing Required Field
+# ======================================
+# Test document upload without required key field (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "title": "Document Missing ID",
+      "content": "This document is missing the required id field.",
+      "category": "Error Test",
+      "author": "Error Tester",
+      "publishedDate": "2024-02-12T10:00:00Z",
+      "rating": 3.0,
+      "viewCount": 50,
+      "tags": ["error", "test"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 9. Error Test - Invalid Data Type
+# =================================
+# Test with invalid data type for numeric field (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "invalid-type-doc",
+      "title": "Document with Invalid Data Type",
+      "content": "This document has an invalid data type for the rating field.",
+      "category": "Error Test",
+      "author": "Error Tester",
+      "publishedDate": "2024-02-12T10:00:00Z",
+      "rating": "invalid-rating-string",
+      "viewCount": 50,
+      "tags": ["error", "test"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 10. Error Test - Invalid Date Format
+# ====================================
+# Test with invalid date format (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "invalid-date-doc",
+      "title": "Document with Invalid Date",
+      "content": "This document has an invalid date format.",
+      "category": "Error Test",
+      "author": "Error Tester",
+      "publishedDate": "invalid-date-format",
+      "rating": 3.5,
+      "viewCount": 75,
+      "tags": ["error", "test"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 11. Error Test - Duplicate Key
+# ==============================
+# Test uploading document with duplicate key (should succeed with overwrite)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "doc-1",
+      "title": "Duplicate Key Document",
+      "content": "This document has the same ID as an existing document.",
+      "category": "Error Test",
+      "author": "Error Tester",
+      "publishedDate": "2024-02-13T10:00:00Z",
+      "rating": 3.0,
+      "viewCount": 25,
+      "tags": ["error", "test", "duplicate"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 12. Error Test - Invalid Search Query Syntax
+# =============================================
+# Test with malformed search query (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:test AND (
+api-key: {{adminKey}}
+
+###
+# 13. Error Test - Invalid Field Name in Query
+# ============================================
+# Test search with non-existent field name (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=nonexistent_field:test
+api-key: {{adminKey}}
+
+###
+# 14. Error Test - Invalid Filter Syntax
+# ======================================
+# Test with malformed filter syntax (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq Technology
+api-key: {{adminKey}}
+
+###
+# 15. Error Test - Invalid Filter Field
+# =====================================
+# Test filter with non-filterable field (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=title eq 'test'
+api-key: {{adminKey}}
+
+###
+# 16. Error Test - Invalid Sort Field
+# ===================================
+# Test sorting with non-sortable field (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=title
+api-key: {{adminKey}}
+
+###
+# 17. Error Test - Invalid Facet Field
+# ====================================
+# Test faceting with non-facetable field (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&facet=title
+api-key: {{adminKey}}
+
+###
+# 18. Error Test - Invalid Select Field
+# =====================================
+# Test selecting non-existent field (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=nonexistent_field
+api-key: {{adminKey}}
+
+###
+# 19. Error Test - Invalid Top Parameter
+# ======================================
+# Test with invalid top parameter (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=invalid
+api-key: {{adminKey}}
+
+###
+# 20. Error Test - Exceeding Top Limit
+# ====================================
+# Test with top parameter exceeding maximum (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=10000
+api-key: {{adminKey}}
+
+###
+# 21. Error Test - Invalid Skip Parameter
+# =======================================
+# Test with invalid skip parameter (should return 400 Bad Request)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$skip=invalid
+api-key: {{adminKey}}
+
+###
+# 22. Error Test - Create Index with Invalid Name
+# ===============================================
+# Test creating index with invalid characters in name (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "Invalid Index Name!",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true
+    }
+  ]
+}
+
+###
+# 23. Error Test - Create Index without Key Field
+# ===============================================
+# Test creating index without a key field (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "no-key-index",
+  "fields": [
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true
+    }
+  ]
+}
+
+###
+# 24. Error Test - Create Index with Multiple Key Fields
+# ======================================================
+# Test creating index with multiple key fields (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "name": "multi-key-index",
+  "fields": [
+    {
+      "name": "id1",
+      "type": "Edm.String",
+      "key": true
+    },
+    {
+      "name": "id2",
+      "type": "Edm.String",
+      "key": true
+    }
+  ]
+}
+
+###
+# 25. Error Test - Update Non-Existent Document
+# =============================================
+# Test merging a document that doesn't exist (should return mixed results)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "merge",
+      "id": "non-existent-doc",
+      "title": "Updated Title"
+    }
+  ]
+}
+
+###
+# 26. Error Test - Delete Non-Existent Document
+# =============================================
+# Test deleting a document that doesn't exist (should succeed silently)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "non-existent-doc-to-delete"
+    }
+  ]
+}
+
+###
+# 27. Error Test - Invalid Search Action
+# ======================================
+# Test with invalid search action (should return 400 Bad Request)
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "invalid-action",
+      "id": "invalid-action-doc",
+      "title": "Document with Invalid Action"
+    }
+  ]
+}
+
+###
+# 28. Error Test - Empty Search Query
+# ===================================
+# Test with empty search query (should work with wildcard behavior)
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=
+api-key: {{adminKey}}
+
+###
+# 29. Error Test - Rate Limiting Simulation
+# =========================================
+# Note: This won't actually trigger rate limiting in most cases,
+# but shows how to handle it when it occurs
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=1
+api-key: {{adminKey}}
+
+###
+# 30. Successful Recovery - Fix Invalid Date Document
+# ===================================================
+# Demonstrate fixing a previously failed document upload
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "fixed-date-doc",
+      "title": "Document with Fixed Date",
+      "content": "This document has a properly formatted date.",
+      "category": "Fixed",
+      "author": "Error Fixer",
+      "publishedDate": "2024-02-14T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 100,
+      "tags": ["fixed", "success"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 31. Successful Recovery - Valid Search Query
+# ============================================
+# Demonstrate a properly formatted search query
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:Valid OR content:document&$count=true&$top=5
+api-key: {{adminKey}}
+
+###
+# 32. Successful Recovery - Valid Filter Query
+# ============================================
+# Demonstrate a properly formatted filter query
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology' and rating gt 4.0&$count=true&$top=5
+api-key: {{adminKey}}
+
+###
+# 33. Error Handling Best Practices - Batch with Mixed Results
+# ============================================================
+# Upload a batch with both valid and invalid documents to see mixed results
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "upload",
+      "id": "mixed-batch-valid-1",
+      "title": "Valid Document in Mixed Batch",
+      "content": "This document should succeed.",
+      "category": "Mixed Test",
+      "author": "Batch Tester",
+      "publishedDate": "2024-02-15T10:00:00Z",
+      "rating": 4.2,
+      "viewCount": 120,
+      "tags": ["mixed", "valid"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "mixed-batch-invalid-1",
+      "title": "Invalid Document in Mixed Batch",
+      "content": "This document has an invalid date.",
+      "category": "Mixed Test",
+      "author": "Batch Tester",
+      "publishedDate": "invalid-date-again",
+      "rating": 3.8,
+      "viewCount": 80,
+      "tags": ["mixed", "invalid"],
+      "isPublished": true
+    },
+    {
+      "@search.action": "upload",
+      "id": "mixed-batch-valid-2",
+      "title": "Another Valid Document in Mixed Batch",
+      "content": "This document should also succeed.",
+      "category": "Mixed Test",
+      "author": "Batch Tester",
+      "publishedDate": "2024-02-16T10:00:00Z",
+      "rating": 4.0,
+      "viewCount": 100,
+      "tags": ["mixed", "valid"],
+      "isPublished": true
+    }
+  ]
+}
+
+###
+# 34. Final Verification - Check Current Index State
+# ==================================================
+# Verify the current state of the index after all error tests
+
+GET {{endpoint}}/indexes/{{indexName}}/docs/$count?api-version={{apiVersion}}
+api-key: {{adminKey}}
+
+###
+# 35. Final Verification - Sample Documents
+# =========================================
+# Get sample documents to verify what succeeded
+
+GET {{endpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,category&$top=10&$count=true
+api-key: {{adminKey}}
+
+###
+# 36. Clean Up - Delete Test Documents (Optional)
+# ===============================================
+# Clean up test documents
+
+POST {{endpoint}}/indexes/{{indexName}}/docs/index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{adminKey}}
+
+{
+  "value": [
+    {
+      "@search.action": "delete",
+      "id": "fixed-date-doc"
+    },
+    {
+      "@search.action": "delete",
+      "id": "mixed-batch-valid-1"
+    },
+    {
+      "@search.action": "delete",
+      "id": "mixed-batch-valid-2"
+    }
+  ]
+}
+
+###
+# 37. Optional - Delete Index (Cleanup)
+# =====================================
+# Uncomment to delete the error handling test index
+
+# DELETE {{endpoint}}/indexes/{{indexName}}?api-version={{apiVersion}}
+# api-key: {{adminKey}}
+
+###
+# Error Handling Summary:
+# =======================
+# Common HTTP Status Codes and Their Meanings:
+# - 200 OK: Request succeeded
+# - 201 Created: Resource created successfully
+# - 400 Bad Request: Invalid request syntax or parameters
+# - 401 Unauthorized: Invalid or missing authentication
+# - 403 Forbidden: Insufficient permissions
+# - 404 Not Found: Resource doesn't exist
+# - 409 Conflict: Resource already exists (for some operations)
+# - 429 Too Many Requests: Rate limiting in effect
+# - 500 Internal Server Error: Server-side error
+# - 503 Service Unavailable: Service temporarily unavailable
+#
+# Error Handling Best Practices:
+# ✅ Always check HTTP status codes
+# ✅ Parse error response bodies for detailed messages
+# ✅ Implement retry logic for transient errors (429, 500, 503)
+# ✅ Validate input data before sending requests
+# ✅ Handle partial failures in batch operations
+# ✅ Log errors with sufficient context for debugging
+# ✅ Provide meaningful error messages to users
+# ✅ Implement circuit breaker patterns for resilience
+#
+# Common Error Scenarios Tested:
+# ✅ Authentication and authorization errors
+# ✅ Invalid request syntax and parameters
+# ✅ Data type and format validation errors
+# ✅ Schema validation errors
+# ✅ Query syntax errors
+# ✅ Field attribute violations
+# ✅ Resource not found errors
+# ✅ Batch operation mixed results
+#
+# Next Steps:
+# 1. Implement comprehensive error handling in your applications
+# 2. Set up monitoring and alerting for production systems
+# 3. Create error recovery procedures for your team
+# 4. Move on to Module 4: Advanced Search Techniques
