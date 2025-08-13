@@ -1,0 +1,691 @@
+### Indexer Scheduling & Automation - REST API Examples
+### This file demonstrates how to configure indexer schedules and automation patterns
+### for Azure AI Search indexers using the REST API.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Existing data sources and indexes
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. Create Data Source for Scheduling Examples
+### Create a sample data source for scheduling demonstrations
+PUT {{searchEndpoint}}/datasources/scheduling-demo-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "scheduling-demo-datasource",
+  "type": "azuresql",
+  "connectionString": "{{SQL_CONNECTION_STRING}}",
+  "container": {
+    "name": "Hotels"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "LastModified"
+  },
+  "description": "Demo data source for scheduling examples"
+}
+
+###
+
+### 3. Create Index for Scheduling Examples
+PUT {{searchEndpoint}}/indexes/scheduling-demo-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "scheduling-demo-index",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false
+    },
+    {
+      "name": "name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "description",
+      "type": "Edm.String",
+      "searchable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "lastModified",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true
+    }
+  ]
+}
+
+###
+
+### 4. Create Hourly Scheduled Indexer
+### Example: E-commerce catalog that updates every hour
+PUT {{searchEndpoint}}/indexers/hourly-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "hourly-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer that runs every hour for frequent updates",
+  "schedule": {
+    "interval": "PT1H",
+    "startTime": "2024-01-01T08:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10
+  }
+}
+
+###
+
+### 5. Create Daily Scheduled Indexer
+### Example: Document repository that updates once daily
+PUT {{searchEndpoint}}/indexers/daily-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "daily-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer that runs daily at 2 AM",
+  "schedule": {
+    "interval": "P1D",
+    "startTime": "2024-01-01T02:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 200,
+    "maxFailedItems": 20
+  }
+}
+
+###
+
+### 6. Create High-Frequency Scheduled Indexer
+### Example: News/social media content that updates every 15 minutes
+PUT {{searchEndpoint}}/indexers/high-frequency-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "high-frequency-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer that runs every 15 minutes for real-time updates",
+  "schedule": {
+    "interval": "PT15M",
+    "startTime": "2024-01-01T00:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 50,
+    "maxFailedItems": 5,
+    "maxFailedItemsPerBatch": 2
+  }
+}
+
+###
+
+### 7. Create Weekly Scheduled Indexer
+### Example: Archive data that updates weekly
+PUT {{searchEndpoint}}/indexers/weekly-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "weekly-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer that runs weekly on Sundays at 1 AM",
+  "schedule": {
+    "interval": "P7D",
+    "startTime": "2024-01-07T01:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 500,
+    "maxFailedItems": 50
+  }
+}
+
+###
+
+### 8. Get All Indexers to View Schedules
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 9. Get Specific Indexer Schedule Details
+### View hourly indexer schedule
+GET {{searchEndpoint}}/indexers/hourly-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View daily indexer schedule
+GET {{searchEndpoint}}/indexers/daily-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View high-frequency indexer schedule
+GET {{searchEndpoint}}/indexers/high-frequency-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View weekly indexer schedule
+GET {{searchEndpoint}}/indexers/weekly-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 10. Monitor Scheduled Indexer Status
+### Check hourly indexer execution history
+GET {{searchEndpoint}}/indexers/hourly-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Check daily indexer execution history
+GET {{searchEndpoint}}/indexers/daily-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Check high-frequency indexer execution history
+GET {{searchEndpoint}}/indexers/high-frequency-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Check weekly indexer execution history
+GET {{searchEndpoint}}/indexers/weekly-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 11. Manually Run Scheduled Indexer (Override Schedule)
+### Run hourly indexer immediately
+POST {{searchEndpoint}}/indexers/hourly-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run daily indexer immediately
+POST {{searchEndpoint}}/indexers/daily-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 12. Update Indexer Schedule
+### Change hourly indexer to run every 2 hours
+PUT {{searchEndpoint}}/indexers/hourly-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "hourly-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer that runs every 2 hours (updated schedule)",
+  "schedule": {
+    "interval": "PT2H",
+    "startTime": "2024-01-01T08:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 150,
+    "maxFailedItems": 15
+  }
+}
+
+###
+
+### 13. Disable Indexer Schedule (Make Manual)
+### Remove schedule from daily indexer
+PUT {{searchEndpoint}}/indexers/daily-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "daily-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer with schedule disabled - manual execution only",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 200,
+    "maxFailedItems": 20
+  }
+}
+
+###
+
+### 14. Create Staggered Indexers (Load Balancing)
+### Create multiple indexers with staggered start times to avoid conflicts
+
+### Indexer 1: Starts at :00 minutes
+PUT {{searchEndpoint}}/indexers/staggered-indexer-1?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "staggered-indexer-1",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Staggered indexer 1 - starts at :00",
+  "schedule": {
+    "interval": "PT1H",
+    "startTime": "2024-01-01T08:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### Indexer 2: Starts at :15 minutes
+PUT {{searchEndpoint}}/indexers/staggered-indexer-2?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "staggered-indexer-2",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Staggered indexer 2 - starts at :15",
+  "schedule": {
+    "interval": "PT1H",
+    "startTime": "2024-01-01T08:15:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### Indexer 3: Starts at :30 minutes
+PUT {{searchEndpoint}}/indexers/staggered-indexer-3?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "staggered-indexer-3",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Staggered indexer 3 - starts at :30",
+  "schedule": {
+    "interval": "PT1H",
+    "startTime": "2024-01-01T08:30:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### 15. Create Business Hours Only Schedule
+### Indexer that only runs during business hours (8 AM - 6 PM)
+PUT {{searchEndpoint}}/indexers/business-hours-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "business-hours-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer that runs every 2 hours during business hours",
+  "schedule": {
+    "interval": "PT2H",
+    "startTime": "2024-01-01T08:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 200,
+    "maxFailedItems": 20
+  }
+}
+
+###
+
+### 16. Reset Indexer (Clear Progress)
+### Reset indexer to start fresh
+POST {{searchEndpoint}}/indexers/hourly-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 17. Check Service Statistics and Limits
+### Monitor service usage and limits
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 18. Monitor All Scheduled Indexers
+### Get status of all indexers to monitor scheduled execution
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}&$select=name,status,lastResult
+api-key: {{apiKey}}
+
+###
+
+### 19. Create Optimized Schedule Based on Data Patterns
+### Example: Adaptive scheduling based on business requirements
+PUT {{searchEndpoint}}/indexers/optimized-schedule-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "optimized-schedule-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Optimized indexer with balanced schedule and error handling",
+  "schedule": {
+    "interval": "PT4H",
+    "startTime": "2024-01-01T02:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 250,
+    "maxFailedItems": 25,
+    "maxFailedItemsPerBatch": 10,
+    "configuration": {
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false
+    }
+  }
+}
+
+###
+
+### 20. Test Schedule Conflict Detection
+### Create indexer with potentially conflicting schedule
+PUT {{searchEndpoint}}/indexers/conflict-test-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "conflict-test-indexer",
+  "dataSourceName": "scheduling-demo-datasource",
+  "targetIndexName": "scheduling-demo-index",
+  "description": "Indexer to test schedule conflicts",
+  "schedule": {
+    "interval": "PT30M",
+    "startTime": "2024-01-01T08:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### 21. Cleanup - Delete Scheduled Indexers (optional)
+### Delete all test indexers
+DELETE {{searchEndpoint}}/indexers/hourly-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/daily-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/high-frequency-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/weekly-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/staggered-indexer-1?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/staggered-indexer-2?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/staggered-indexer-3?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/business-hours-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/optimized-schedule-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/conflict-test-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index and data source
+DELETE {{searchEndpoint}}/indexes/scheduling-demo-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/scheduling-demo-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - Schedule intervals use ISO 8601 duration format (PT1H = 1 hour, P1D = 1 day)
+### - Start times are in UTC format
+### - Stagger indexer start times to avoid resource conflicts
+### - Monitor execution history to optimize schedules
+### - Consider business hours and data update patterns
+### - Use appropriate batch sizes based on schedule frequency
+### - Higher frequency = smaller batches, lower frequency = larger batches
+### - Reset indexers when changing change detection policies
+### - Schedule during off-peak hours when possible (2-4 AM)
+### - Monitor service limits and indexer concurrency

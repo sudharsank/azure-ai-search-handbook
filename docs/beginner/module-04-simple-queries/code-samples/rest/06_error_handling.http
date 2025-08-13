@@ -1,0 +1,479 @@
+###
+# Module 4: Simple Queries and Filters - Error Handling (REST API)
+# ================================================================
+#
+# This file demonstrates comprehensive error handling for Azure AI Search queries using REST API calls.
+# Learn how to handle HTTP errors, validate queries, implement retry logic, and debug issues.
+#
+# Prerequisites:
+# - Azure AI Search service configured
+# - Sample index with data (from previous modules)
+# - VS Code with REST Client extension (recommended)
+# - Or use curl, Postman, or any HTTP client
+#
+# Setup:
+# 1. Replace {{searchEndpoint}}, {{indexName}}, and {{apiKey}} with your values
+# 2. Or create a rest-client.env.json file with these variables
+#
+# Author: Azure AI Search Tutorial
+###
+
+# Variables (replace with your actual values)
+@searchEndpoint = https://your-service.search.windows.net
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2023-11-01
+
+###
+# SUCCESSFUL QUERIES (BASELINE)
+###
+
+### 1. Valid Basic Query (Should Work)
+# Baseline successful query for comparison
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Valid Filter Query (Should Work)
+# Successful query with filter
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology'&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Valid Complex Query (Should Work)
+# Successful complex query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$filter=rating ge 3.0&$orderby=rating desc&$select=id,title,rating&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# AUTHENTICATION AND AUTHORIZATION ERRORS
+###
+
+### 4. Invalid API Key (401 Unauthorized)
+# This should return 401 Unauthorized
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: invalid-api-key-12345
+
+### 5. Missing API Key (401 Unauthorized)
+# This should return 401 Unauthorized
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+
+### 6. Wrong API Key Format (401 Unauthorized)
+# This should return 401 Unauthorized
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: wrong-format
+
+###
+# INDEX AND RESOURCE ERRORS
+###
+
+### 7. Non-Existent Index (404 Not Found)
+# This should return 404 Not Found
+GET {{searchEndpoint}}/indexes/nonexistent-index/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Wrong Service Endpoint (DNS/Connection Error)
+# This should fail with connection error
+GET https://nonexistent-service.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 9. Invalid API Version (400 Bad Request)
+# This should return 400 Bad Request
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version=invalid-version&search=azure&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# QUERY SYNTAX ERRORS
+###
+
+### 10. Invalid Search Syntax (400 Bad Request)
+# Unbalanced quotes should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search="unbalanced quote&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 11. Invalid Lucene Syntax (400 Bad Request)
+# Invalid Lucene syntax should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure AND&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Invalid Regular Expression (400 Bad Request)
+# Invalid regex pattern should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/[invalid/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 13. Unbalanced Parentheses (400 Bad Request)
+# Unbalanced parentheses should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=(azure AND search&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# FILTER SYNTAX ERRORS
+###
+
+### 14. Invalid Filter Operator (400 Bad Request)
+# Using '=' instead of 'eq' should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category = 'Technology'&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. Invalid Filter Field (400 Bad Request)
+# Non-existent field in filter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=nonexistent_field eq 'value'&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 16. Invalid Filter Syntax (400 Bad Request)
+# Malformed filter expression should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 17. Type Mismatch in Filter (400 Bad Request)
+# Wrong data type in filter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating eq 'high'&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Unbalanced Parentheses in Filter (400 Bad Request)
+# Unbalanced parentheses in filter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=(category eq 'Technology' and rating gt 4.0&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# FIELD AND PARAMETER ERRORS
+###
+
+### 19. Invalid Select Field (400 Bad Request)
+# Non-existent field in select should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title,nonexistent_field&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Invalid OrderBy Field (400 Bad Request)
+# Non-existent field in orderby should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=nonexistent_field desc&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 21. Invalid SearchFields (400 Bad Request)
+# Non-existent field in searchFields should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&searchFields=nonexistent_field&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 22. Invalid Highlight Field (400 Bad Request)
+# Non-existent field in highlight should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&highlight=nonexistent_field&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Invalid Top Parameter (400 Bad Request)
+# Negative top parameter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=-1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 24. Invalid Skip Parameter (400 Bad Request)
+# Negative skip parameter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$skip=-1&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 25. Excessive Top Parameter (400 Bad Request)
+# Top parameter too large should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=10000
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# QUERY TYPE AND MODE ERRORS
+###
+
+### 26. Invalid Query Type (400 Bad Request)
+# Invalid queryType parameter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&queryType=invalid&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 27. Invalid Search Mode (400 Bad Request)
+# Invalid searchMode parameter should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&searchMode=invalid&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 28. Lucene Syntax with Simple Query Type (400 Bad Request)
+# Using Lucene syntax with simple queryType should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:azure~&queryType=simple&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# HIGHLIGHTING ERRORS
+###
+
+### 29. Invalid Highlight Pre/Post Tags (400 Bad Request)
+# Malformed highlight tags should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&highlight=title&highlightPreTag=<invalid&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 30. Highlight on Non-Searchable Field (400 Bad Request)
+# Highlighting non-searchable field should return 400
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&highlight=id&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# RATE LIMITING AND THROTTLING
+###
+
+### 31. Rate Limiting Test (429 Too Many Requests)
+# Multiple rapid requests may trigger rate limiting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=test1&$top=1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 32. Rate Limiting Test 2
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=test2&$top=1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 33. Rate Limiting Test 3
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=test3&$top=1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# TIMEOUT AND PERFORMANCE ERRORS
+###
+
+### 34. Complex Query Performance Test
+# Very complex query that might timeout or perform poorly
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=tags/any(t: contains(t, 'a')) and tags/any(t: contains(t, 'b')) and tags/any(t: contains(t, 'c'))&$orderby=rating desc,publishedDate desc,category asc&$top=100
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 35. Large Result Set Request
+# Request for very large result set
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=1000
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# DEBUGGING AND DIAGNOSTIC QUERIES
+###
+
+### 36. Query with Debug Information
+# Include count and detailed scoring information
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 37. Minimal Query for Connection Test
+# Simplest possible query to test connectivity
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 38. Query with All Metadata
+# Query that returns comprehensive metadata
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$select=id,title&highlight=title&$top=2
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ERROR RECOVERY EXAMPLES
+###
+
+### 39. Fallback Query Pattern 1
+# If complex query fails, try simpler version
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:"machine learning" AND content:python&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 40. Fallback Query Pattern 2
+# Simpler fallback for the above query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine learning python&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 41. Fallback Query Pattern 3
+# Final fallback - return all documents
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# CURL EXAMPLES FOR ERROR HANDLING
+###
+
+# Example 1: Testing with invalid API key using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: invalid-key" \
+#   -w "HTTP Status: %{http_code}\n"
+
+# Example 2: Testing with invalid filter using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&\$filter=category%20%3D%20%27Technology%27" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key" \
+#   -w "HTTP Status: %{http_code}\n"
+
+# Example 3: Testing connection with timeout using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key" \
+#   --max-time 5 \
+#   -w "HTTP Status: %{http_code}\nTotal Time: %{time_total}s\n"
+
+###
+# POWERSHELL ERROR HANDLING EXAMPLES
+###
+
+# Example 1: PowerShell with error handling
+# try {
+#     $headers = @{
+#         'Content-Type' = 'application/json'
+#         'api-key' = 'your-api-key'
+#     }
+#     $uri = "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure"
+#     $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method GET -ErrorAction Stop
+#     Write-Host "Success: $($response.value.Count) results found"
+# }
+# catch {
+#     Write-Host "Error: $($_.Exception.Message)"
+#     Write-Host "Status Code: $($_.Exception.Response.StatusCode)"
+# }
+
+###
+# HTTP STATUS CODES REFERENCE
+###
+
+# 200 OK - Request successful
+# 400 Bad Request - Invalid query syntax, parameters, or request format
+# 401 Unauthorized - Invalid or missing API key
+# 403 Forbidden - API key lacks required permissions
+# 404 Not Found - Index, service, or resource doesn't exist
+# 429 Too Many Requests - Rate limiting exceeded
+# 500 Internal Server Error - Service-side error
+# 503 Service Unavailable - Service temporarily unavailable
+
+###
+# COMMON ERROR RESPONSE FORMATS
+###
+
+# 400 Bad Request Example:
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The request parameter '$filter' is invalid.",
+#     "details": [
+#       {
+#         "code": "InvalidSyntax",
+#         "message": "Syntax error in OData filter expression at position 8."
+#       }
+#     ]
+#   }
+# }
+
+# 401 Unauthorized Example:
+# {
+#   "error": {
+#     "code": "InvalidApiKeyOrServiceName",
+#     "message": "Invalid api-key or service name."
+#   }
+# }
+
+# 404 Not Found Example:
+# {
+#   "error": {
+#     "code": "ResourceNotFound",
+#     "message": "The index 'nonexistent-index' was not found."
+#   }
+# }
+
+###
+# ERROR HANDLING BEST PRACTICES
+###
+
+# 1. Always check HTTP status codes
+# 2. Parse error response JSON for detailed information
+# 3. Implement retry logic for 5xx errors and 429
+# 4. Don't retry 4xx errors (except 429)
+# 5. Log errors with sufficient context for debugging
+# 6. Provide fallback queries for better user experience
+# 7. Validate query parameters before sending requests
+# 8. Monitor error rates and patterns in production
+# 9. Set appropriate timeouts for requests
+# 10. Handle network connectivity issues gracefully
+
+###
+# RETRY LOGIC PATTERNS
+###
+
+# Exponential Backoff Pattern:
+# Attempt 1: Immediate
+# Attempt 2: Wait 1 second
+# Attempt 3: Wait 2 seconds
+# Attempt 4: Wait 4 seconds
+# Max attempts: 3-5
+
+# Status Code Retry Rules:
+# 200-299: Success, no retry needed
+# 400-499: Client error, don't retry (except 429)
+# 429: Rate limited, retry with backoff
+# 500-599: Server error, retry with backoff
+
+###
+# DEBUGGING CHECKLIST
+###
+
+# When queries fail, check:
+# 1. ✓ API key is correct and has permissions
+# 2. ✓ Service endpoint URL is correct
+# 3. ✓ Index name exists and is spelled correctly
+# 4. ✓ Query syntax is valid for the query type
+# 5. ✓ Field names in filters/selects exist in index
+# 6. ✓ Data types match in filter expressions
+# 7. ✓ Parentheses and quotes are balanced
+# 8. ✓ URL encoding is correct for special characters
+# 9. ✓ Request headers are properly set
+# 10. ✓ Network connectivity is working
+
+###
+# MONITORING AND ALERTING
+###
+
+# Key metrics to monitor:
+# - Error rate by status code
+# - Average response time
+# - Query timeout rate
+# - Rate limiting occurrences
+# - Failed authentication attempts
+# - Most common error types
+
+# Set up alerts for:
+# - Error rate > 5%
+# - Response time > 2 seconds
+# - Multiple 401/403 errors (security)
+# - High rate of 429 errors (scaling needed)
+# - Service availability issues
+
+###
+# END OF ERROR HANDLING EXAMPLES
+###

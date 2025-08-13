@@ -1,0 +1,312 @@
+###
+# Module 4: Simple Queries and Filters - Basic Queries (REST API)
+# ===============================================================
+#
+# This file demonstrates basic text search operations in Azure AI Search using REST API calls.
+# Learn how to perform simple searches, use query operators, and work with search fields.
+#
+# Prerequisites:
+# - Azure AI Search service configured
+# - Sample index with data (from previous modules)
+# - VS Code with REST Client extension (recommended)
+# - Or use curl, Postman, or any HTTP client
+#
+# Setup:
+# 1. Replace {{searchEndpoint}}, {{indexName}}, and {{apiKey}} with your values
+# 2. Or create a rest-client.env.json file with these variables
+#
+# Author: Azure AI Search Tutorial
+###
+
+# Variables (replace with your actual values)
+@searchEndpoint = https://your-service.search.windows.net
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2023-11-01
+
+###
+# BASIC TEXT SEARCH EXAMPLES
+###
+
+### 1. Simple Text Search
+# Basic search for the term "azure"
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Multi-word Search
+# Search for multiple words - matches documents containing any of the terms
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine learning
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Empty Search (All Documents)
+# Using "*" returns all documents in the index
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 4. Search with Count
+# Include total count of matching documents
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# FIELD-SPECIFIC SEARCH EXAMPLES
+###
+
+### 5. Search in Title Field Only
+# Limit search to specific fields using searchFields parameter
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python&searchFields=title
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 6. Search in Multiple Fields
+# Search in both title and content fields
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&searchFields=title,content
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 7. Search with Field Boosting
+# Boost title field matches (title^3 means title matches are weighted 3x)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&searchFields=title^3,content
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# QUERY OPERATORS EXAMPLES
+###
+
+### 8. Required Term (+)
+# The "+" operator makes a term required
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=%2Bazure search
+Content-Type: application/json
+api-key: {{apiKey}}
+
+# Note: "+" is URL encoded as "%2B"
+
+### 9. Excluded Term (-)
+# The "-" operator excludes documents containing the term
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure -cognitive
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. Exact Phrase Search
+# Use quotes for exact phrase matching
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=%22machine learning%22
+Content-Type: application/json
+api-key: {{apiKey}}
+
+# Note: Quotes are URL encoded as "%22"
+
+### 11. Wildcard Search
+# Use "*" for wildcard matching
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=develop*
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Grouping with Parentheses
+# Use parentheses to group terms with logical operators
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=(azure OR microsoft) search
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# SEARCH MODES AND QUERY TYPES
+###
+
+### 13. Search Mode: Any (Default)
+# Matches documents containing any of the search terms
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning&searchMode=any
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 14. Search Mode: All
+# Matches documents containing all of the search terms
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning&searchMode=all
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. Query Type: Simple (Default)
+# Uses simple query syntax
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure AND search&queryType=simple
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 16. Query Type: Full Lucene
+# Uses full Lucene query syntax for advanced features
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:azure AND content:search&queryType=full
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ADVANCED TEXT SEARCH FEATURES
+###
+
+### 17. Case Insensitive Search (Default Behavior)
+# Demonstrate that searches are case-insensitive by default
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Same Search with Different Case
+# This should return the same results as the previous query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=AZURE&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 19. Limited Results with Top Parameter
+# Limit the number of results returned
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Search with Total Count and Pagination Info
+# Get total count and specific page of results
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$top=5&$skip=0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# RESULT METADATA EXAMPLES
+###
+
+### 21. Basic Search with Score Information
+# All searches return relevance scores by default
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 22. Search with Selected Fields Only
+# Return only specific fields to reduce response size
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title,category&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Search with All Available Metadata
+# Include count and show full document structure
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$top=2
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# CURL EXAMPLES (for command line usage)
+###
+
+# Example 1: Basic search using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 2: Search with field selection using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=python&searchFields=title&$select=id,title" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 3: Phrase search using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=%22machine%20learning%22" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+###
+# POWERSHELL EXAMPLES
+###
+
+# Example 1: Basic search using PowerShell
+# $headers = @{
+#     'Content-Type' = 'application/json'
+#     'api-key' = 'your-api-key'
+# }
+# $response = Invoke-RestMethod -Uri "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure" -Headers $headers -Method GET
+# $response | ConvertTo-Json -Depth 10
+
+###
+# RESPONSE STRUCTURE EXAMPLES
+###
+
+# Typical response structure:
+# {
+#   "@odata.context": "https://your-service.search.windows.net/indexes('your-index')/$metadata#docs(*)",
+#   "@odata.count": 42,
+#   "value": [
+#     {
+#       "@search.score": 1.2345,
+#       "id": "doc_001",
+#       "title": "Azure Machine Learning Tutorial",
+#       "content": "This is a comprehensive guide to Azure ML...",
+#       "category": "Technology",
+#       "rating": 4.5,
+#       "publishedDate": "2023-06-15T10:30:00Z"
+#     }
+#   ]
+# }
+
+###
+# ERROR HANDLING EXAMPLES
+###
+
+### 24. Invalid Query Syntax (will return 400 Bad Request)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure AND
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 25. Invalid Index Name (will return 404 Not Found)
+GET {{searchEndpoint}}/indexes/nonexistent-index/docs?api-version={{apiVersion}}&search=azure
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 26. Invalid API Key (will return 401 Unauthorized)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure
+Content-Type: application/json
+api-key: invalid-key
+
+###
+# PERFORMANCE TESTING
+###
+
+### 27. Simple Query Performance Test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 28. Complex Query Performance Test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=(azure OR microsoft) AND (machine OR learning)&searchFields=title^3,content&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# NOTES AND BEST PRACTICES
+###
+
+# 1. URL Encoding:
+#    - Spaces: %20
+#    - Quotes: %22
+#    - Plus signs: %2B
+#    - Ampersands: %26
+
+# 2. API Version:
+#    - Always specify the api-version parameter
+#    - Use the latest stable version (2023-11-01 as of this writing)
+
+# 3. Authentication:
+#    - Use query keys for read-only operations
+#    - Use admin keys only when necessary
+#    - Store keys securely, never in source code
+
+# 4. Performance:
+#    - Use $select to limit returned fields
+#    - Use $top to limit result count
+#    - Consider using searchFields to limit search scope
+
+# 5. Error Handling:
+#    - Always check HTTP status codes
+#    - Parse error responses for detailed information
+#    - Implement retry logic for transient failures
+
+###
+# END OF BASIC QUERIES EXAMPLES
+###

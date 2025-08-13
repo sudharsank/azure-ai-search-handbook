@@ -1,0 +1,374 @@
+###
+# Module 4: Simple Queries and Filters - Sorting and Pagination (REST API)
+# =========================================================================
+#
+# This file demonstrates sorting and pagination in Azure AI Search using REST API calls.
+# Learn how to order results and efficiently navigate through large result sets.
+#
+# Prerequisites:
+# - Azure AI Search service configured
+# - Sample index with data (from previous modules)
+# - VS Code with REST Client extension (recommended)
+# - Or use curl, Postman, or any HTTP client
+#
+# Setup:
+# 1. Replace {{searchEndpoint}}, {{indexName}}, and {{apiKey}} with your values
+# 2. Or create a rest-client.env.json file with these variables
+#
+# Author: Azure AI Search Tutorial
+###
+
+# Variables (replace with your actual values)
+@searchEndpoint = https://your-service.search.windows.net
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2023-11-01
+
+###
+# BASIC SORTING EXAMPLES
+###
+
+### 1. Default Sorting (Relevance Score)
+# By default, results are sorted by relevance score (descending)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Sort by Date (Newest First)
+# Sort by publishedDate in descending order (newest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=publishedDate desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Sort by Date (Oldest First)
+# Sort by publishedDate in ascending order (oldest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=publishedDate asc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 4. Sort by Rating (Highest First)
+# Sort by rating in descending order (highest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 5. Sort by Rating (Lowest First)
+# Sort by rating in ascending order (lowest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating asc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 6. Sort by Price (Cheapest First)
+# Sort by price in ascending order (cheapest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# MULTI-FIELD SORTING EXAMPLES
+###
+
+### 7. Sort by Category, then Rating
+# Primary sort by category (A-Z), secondary sort by rating (high-low)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=category asc,rating desc&$top=8
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Sort by Rating, then Date
+# Primary sort by rating (high-low), secondary sort by date (newest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc,publishedDate desc&$top=8
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 9. Three-Level Sorting
+# Sort by price (low-high), then rating (high-low), then date (newest first)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc,rating desc,publishedDate desc&$top=8
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. Sort by Category, Rating, and Date
+# Complex multi-field sorting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=category asc,rating desc,publishedDate desc&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# SORTING WITH SEARCH AND FILTERS
+###
+
+### 11. Search + Filter + Sort
+# Search for "azure", filter by rating, sort by rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$filter=rating ge 3.0&$orderby=rating desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Category Filter with Date Sorting
+# Filter by Technology category, sort by newest first
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology'&$orderby=publishedDate desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 13. Complex Filter with Multi-field Sorting
+# Complex business logic with sorting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&$filter=rating ge 4.0 and publishedDate ge 2023-01-01T00:00:00Z&$orderby=rating desc,publishedDate desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 14. Price Range with Price Sorting
+# Filter by price range, sort by price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=price ge 10.0 and price le 100.0&$orderby=price asc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# BASIC PAGINATION EXAMPLES
+###
+
+### 15. First Page (Page 1)
+# Get first 3 results (page 1)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=3&$skip=0&$orderby=publishedDate desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 16. Second Page (Page 2)
+# Get next 3 results (page 2)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=3&$skip=3&$orderby=publishedDate desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 17. Third Page (Page 3)
+# Get next 3 results (page 3)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=3&$skip=6&$orderby=publishedDate desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Large Page Size
+# Get 20 results at once
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=20&$skip=0&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# PAGINATION WITH TOTAL COUNT
+###
+
+### 19. First Page with Total Count
+# Get first page and total count for navigation
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$top=5&$skip=0&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Second Page with Total Count
+# Get second page with total count
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$top=5&$skip=5&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 21. Last Page Calculation Example
+# Example showing how to calculate last page
+# If total count is 47 and page size is 10, last page starts at skip=40
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$count=true&$top=10&$skip=40&$orderby=publishedDate desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ADVANCED PAGINATION PATTERNS
+###
+
+### 22. Search with Pagination Info
+# Complete pagination example with all metadata
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&$count=true&$top=5&$skip=0&$orderby=rating desc&$select=id,title,category,rating,publishedDate
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Filtered Pagination
+# Pagination with filters applied
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology' and rating ge 4.0&$count=true&$top=5&$skip=0&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 24. Deep Pagination (Page 10)
+# Example of deep pagination (may be slower)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=10&$skip=90&$orderby=publishedDate desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# GEOGRAPHIC SORTING EXAMPLES
+###
+
+### 25. Sort by Distance from Point
+# Sort by distance from Seattle (if location field exists)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=geo.distance(location, geography'POINT(-122.131577 47.678581)') asc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 26. Geographic Filter with Distance Sort
+# Filter by area and sort by distance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=restaurants&$filter=geo.distance(location, geography'POINT(-122.131577 47.678581)') le 10&$orderby=geo.distance(location, geography'POINT(-122.131577 47.678581)') asc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# PERFORMANCE OPTIMIZATION EXAMPLES
+###
+
+### 27. Optimized Query (Filter + Sort + Select)
+# Performance-optimized query with all best practices
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$filter=rating ge 4.0 and category eq 'Technology'&$orderby=rating desc&$select=id,title,category,rating&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 28. Simple Sort for Better Performance
+# Use simple single-field sort for better performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$orderby=rating desc&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 29. Limited Fields with Sorting
+# Return only necessary fields for better performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=publishedDate desc&$select=id,title,publishedDate&$top=20
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# SORTING EDGE CASES AND VALIDATION
+###
+
+### 30. Sort by Non-Sortable Field (Will Return Error)
+# This should return an error if the field is not sortable
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=content desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 31. Invalid Sort Direction (Will Return Error)
+# Invalid sort direction should return error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating invalid&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 32. Sort by Non-Existent Field (Will Return Error)
+# Non-existent field should return error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=nonexistent_field desc&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# CURL EXAMPLES (for command line usage)
+###
+
+# Example 1: Basic sorting using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&\$orderby=rating%20desc&\$top=5" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 2: Pagination using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure&\$top=5&\$skip=10&\$orderby=rating%20desc" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 3: Multi-field sorting using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&\$orderby=category%20asc,rating%20desc&\$top=10" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+###
+# POWERSHELL EXAMPLES
+###
+
+# Example 1: Sorting with PowerShell
+# $headers = @{
+#     'Content-Type' = 'application/json'
+#     'api-key' = 'your-api-key'
+# }
+# $orderBy = "rating desc"
+# $encodedOrderBy = [System.Web.HttpUtility]::UrlEncode($orderBy)
+# $uri = "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&`$orderby=$encodedOrderBy&`$top=5"
+# $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method GET
+# $response | ConvertTo-Json -Depth 10
+
+###
+# PAGINATION CALCULATION EXAMPLES
+###
+
+# Pagination Math:
+# - Page Size: 10
+# - Page 1: skip=0, top=10
+# - Page 2: skip=10, top=10  
+# - Page 3: skip=20, top=10
+# - Page N: skip=(N-1)*PageSize, top=PageSize
+#
+# Total Pages = Ceiling(TotalCount / PageSize)
+# Has Next = CurrentPage < TotalPages
+# Has Previous = CurrentPage > 1
+
+###
+# RESPONSE STRUCTURE EXAMPLES
+###
+
+# Typical sorted response structure:
+# {
+#   "@odata.context": "https://your-service.search.windows.net/indexes('your-index')/$metadata#docs(*)",
+#   "@odata.count": 42,
+#   "value": [
+#     {
+#       "@search.score": 1.0,
+#       "id": "doc_001",
+#       "title": "Azure Machine Learning Tutorial",
+#       "category": "Technology",
+#       "rating": 4.8,
+#       "publishedDate": "2023-12-01T10:30:00Z",
+#       "price": 29.99
+#     }
+#   ]
+# }
+
+###
+# SORTING BEST PRACTICES
+###
+
+# 1. Use indexed/sortable fields only
+# 2. Prefer single-field sorts for better performance
+# 3. Combine with filters to reduce dataset size
+# 4. Use reasonable page sizes (10-50 items)
+# 5. Consider caching for frequently accessed pages
+# 6. Use $select to limit returned fields
+# 7. Avoid deep pagination (skip > 1000) when possible
+
+###
+# COMMON SORT PATTERNS
+###
+
+# Most Recent First:        $orderby=publishedDate desc
+# Highest Rated First:      $orderby=rating desc
+# Alphabetical by Title:    $orderby=title asc
+# Price Low to High:        $orderby=price asc
+# Relevance (Default):      No $orderby parameter
+# Category then Rating:     $orderby=category asc,rating desc
+
+###
+# ERROR RESPONSES
+###
+
+# 400 Bad Request - Invalid sort field
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The field 'content' is not sortable."
+#   }
+# }
+
+# 400 Bad Request - Invalid sort syntax
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter", 
+#     "message": "Invalid $orderby expression."
+#   }
+# }
+
+###
+# END OF SORTING AND PAGINATION EXAMPLES
+###

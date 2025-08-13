@@ -1,0 +1,537 @@
+### Change Detection Strategies - REST API Examples
+### This file demonstrates different change detection policies and strategies
+### for efficient incremental indexing in Azure AI Search.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Data sources with appropriate change tracking configured
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY, SQL_CONNECTION_STRING, STORAGE_CONNECTION_STRING, COSMOS_CONNECTION_STRING
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@sqlConnectionString = {{SQL_CONNECTION_STRING}}
+@storageConnectionString = {{STORAGE_CONNECTION_STRING}}
+@cosmosConnectionString = {{COSMOS_CONNECTION_STRING}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. SQL Database with High Water Mark Change Detection
+### Creates a data source using LastModified column for change detection
+PUT {{searchEndpoint}}/datasources/sql-highwatermark-example?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "sql-highwatermark-example",
+  "type": "azuresql",
+  "connectionString": "{{sqlConnectionString}}",
+  "container": {
+    "name": "Hotels"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "LastModified"
+  },
+  "description": "SQL data source with LastModified change detection"
+}
+
+###
+
+### 3. SQL Database with Integrated Change Tracking
+### Creates a data source using SQL Server's built-in change tracking
+PUT {{searchEndpoint}}/datasources/sql-changetracking-example?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "sql-changetracking-example",
+  "type": "azuresql",
+  "connectionString": "{{sqlConnectionString}}",
+  "container": {
+    "name": "Hotels"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.SqlIntegratedChangeTrackingPolicy"
+  },
+  "description": "SQL data source with integrated change tracking"
+}
+
+###
+
+### 4. Blob Storage with LastModified Change Detection
+### Creates a blob data source using file modification timestamps
+PUT {{searchEndpoint}}/datasources/blob-lastmodified-example?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "blob-lastmodified-example",
+  "type": "azureblob",
+  "connectionString": "{{storageConnectionString}}",
+  "container": {
+    "name": "documents"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "metadata_storage_last_modified"
+  },
+  "description": "Blob data source with LastModified change detection"
+}
+
+###
+
+### 5. Cosmos DB with Timestamp Change Detection
+### Creates a Cosmos DB data source using _ts field for change detection
+PUT {{searchEndpoint}}/datasources/cosmos-timestamp-example?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "cosmos-timestamp-example",
+  "type": "cosmosdb",
+  "connectionString": "{{cosmosConnectionString}}",
+  "container": {
+    "name": "hotels",
+    "query": "SELECT * FROM c WHERE c._ts >= @HighWaterMark ORDER BY c._ts"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "_ts"
+  },
+  "description": "Cosmos DB data source with _ts change detection"
+}
+
+###
+
+### 6. Data Source without Change Detection (Full Reprocessing)
+### Creates a data source that reprocesses all data on each run
+PUT {{searchEndpoint}}/datasources/sql-no-change-detection?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "sql-no-change-detection",
+  "type": "azuresql",
+  "connectionString": "{{sqlConnectionString}}",
+  "container": {
+    "name": "Hotels"
+  },
+  "description": "SQL data source without change detection - full reprocessing"
+}
+
+###
+
+### 7. Get All Data Sources to Compare Configurations
+GET {{searchEndpoint}}/datasources?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 8. Get Specific Data Source Details
+### View High Water Mark configuration
+GET {{searchEndpoint}}/datasources/sql-highwatermark-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View Integrated Change Tracking configuration
+GET {{searchEndpoint}}/datasources/sql-changetracking-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View Blob LastModified configuration
+GET {{searchEndpoint}}/datasources/blob-lastmodified-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View Cosmos DB timestamp configuration
+GET {{searchEndpoint}}/datasources/cosmos-timestamp-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 9. Create Index for Change Detection Testing
+PUT {{searchEndpoint}}/indexes/change-detection-test-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "change-detection-test-index",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false
+    },
+    {
+      "name": "name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "description",
+      "type": "Edm.String",
+      "searchable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "lastModified",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "changeTrackingVersion",
+      "type": "Edm.Int64",
+      "filterable": true,
+      "sortable": true
+    }
+  ]
+}
+
+###
+
+### 10. Create Indexer with High Water Mark Change Detection
+PUT {{searchEndpoint}}/indexers/highwatermark-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "highwatermark-indexer",
+  "dataSourceName": "sql-highwatermark-example",
+  "targetIndexName": "change-detection-test-index",
+  "description": "Indexer using high water mark change detection",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 5
+  }
+}
+
+###
+
+### 11. Create Indexer with Integrated Change Tracking
+PUT {{searchEndpoint}}/indexers/changetracking-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "changetracking-indexer",
+  "dataSourceName": "sql-changetracking-example",
+  "targetIndexName": "change-detection-test-index",
+  "description": "Indexer using SQL integrated change tracking",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 5
+  }
+}
+
+###
+
+### 12. Run High Water Mark Indexer (First Run)
+POST {{searchEndpoint}}/indexers/highwatermark-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 13. Monitor High Water Mark Indexer Status
+GET {{searchEndpoint}}/indexers/highwatermark-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 14. Run Change Tracking Indexer (First Run)
+POST {{searchEndpoint}}/indexers/changetracking-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 15. Monitor Change Tracking Indexer Status
+GET {{searchEndpoint}}/indexers/changetracking-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 16. Compare Initial Results
+### Search all documents to see initial indexing results
+GET {{searchEndpoint}}/indexes/change-detection-test-index/docs?api-version={{apiVersion}}&search=*&$top=10
+api-key: {{apiKey}}
+
+###
+
+### 17. Simulate Data Changes and Test Incremental Updates
+### After making changes to your data source, run indexers again
+
+### Run High Water Mark Indexer (Incremental)
+POST {{searchEndpoint}}/indexers/highwatermark-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run Change Tracking Indexer (Incremental)
+POST {{searchEndpoint}}/indexers/changetracking-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 18. Compare Incremental Update Performance
+### Check execution history to compare performance
+
+### High Water Mark Indexer History
+GET {{searchEndpoint}}/indexers/highwatermark-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Change Tracking Indexer History
+GET {{searchEndpoint}}/indexers/changetracking-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 19. Test Change Detection Effectiveness
+### Search for recently modified documents
+GET {{searchEndpoint}}/indexes/change-detection-test-index/docs?api-version={{apiVersion}}&search=*&$orderby=lastModified desc&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 20. Advanced Change Detection: Custom Query for Cosmos DB
+### Update Cosmos DB data source with custom change detection query
+PUT {{searchEndpoint}}/datasources/cosmos-custom-query?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "cosmos-custom-query",
+  "type": "cosmosdb",
+  "connectionString": "{{cosmosConnectionString}}",
+  "container": {
+    "name": "hotels",
+    "query": "SELECT * FROM c WHERE c._ts >= @HighWaterMark AND c.isActive = true ORDER BY c._ts"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "_ts"
+  },
+  "description": "Cosmos DB with custom query for change detection"
+}
+
+###
+
+### 21. Test Blob Storage Change Detection
+### Create indexer for blob storage with LastModified detection
+PUT {{searchEndpoint}}/indexers/blob-change-detection-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "blob-change-detection-indexer",
+  "dataSourceName": "blob-lastmodified-example",
+  "targetIndexName": "change-detection-test-index",
+  "description": "Blob indexer with LastModified change detection",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "metadata_storage_path",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "metadata_storage_name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "content",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "metadata_storage_last_modified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 50,
+    "configuration": {
+      "dataToExtract": "contentAndMetadata"
+    }
+  }
+}
+
+###
+
+### 22. Run Blob Change Detection Test
+POST {{searchEndpoint}}/indexers/blob-change-detection-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 23. Monitor Blob Indexer Change Detection
+GET {{searchEndpoint}}/indexers/blob-change-detection-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 24. Reset Indexer to Test Full Reprocessing
+### Reset high water mark indexer to reprocess all data
+POST {{searchEndpoint}}/indexers/highwatermark-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run after reset to see full reprocessing
+POST {{searchEndpoint}}/indexers/highwatermark-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 25. Compare Change Detection Policies Performance
+### Get execution statistics for all indexers
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 26. Test Data Source Connection
+### Verify data source connectivity
+POST {{searchEndpoint}}/datasources/test-connection?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "connectionString": "{{sqlConnectionString}}",
+  "type": "azuresql"
+}
+
+###
+
+### 27. Update Change Detection Policy
+### Example: Change high water mark column
+PUT {{searchEndpoint}}/datasources/sql-highwatermark-example?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "sql-highwatermark-example",
+  "type": "azuresql",
+  "connectionString": "{{sqlConnectionString}}",
+  "container": {
+    "name": "Hotels"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "ModifiedDate"
+  },
+  "description": "SQL data source with updated change detection column"
+}
+
+###
+
+### 28. Cleanup - Delete Test Resources (optional)
+### Delete indexers
+DELETE {{searchEndpoint}}/indexers/highwatermark-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/changetracking-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/blob-change-detection-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index
+DELETE {{searchEndpoint}}/indexes/change-detection-test-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete data sources
+DELETE {{searchEndpoint}}/datasources/sql-highwatermark-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/sql-changetracking-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/blob-lastmodified-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/cosmos-timestamp-example?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/cosmos-custom-query?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/sql-no-change-detection?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - High Water Mark: Uses timestamp/version columns to track changes
+### - SQL Integrated Change Tracking: Most efficient for SQL Server databases
+### - Blob LastModified: Automatic for file-based data sources
+### - Cosmos DB _ts: Built-in timestamp for change feed detection
+### - No Change Detection: Reprocesses all data each run (least efficient)
+### - Test with actual data changes to see incremental update behavior
+### - Monitor execution history to compare performance between strategies
+### - Choose strategy based on data source capabilities and update patterns

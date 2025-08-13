@@ -1,0 +1,819 @@
+### Performance Monitoring & Optimization - REST API Examples
+### This file demonstrates how to monitor indexer performance and implement
+### optimization strategies for Azure AI Search indexers using the REST API.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Running indexers to monitor
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity and Get Service Statistics
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. Get All Indexers for Performance Monitoring
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 3. Get Detailed Indexer Status with Execution History
+### Monitor a specific indexer's performance
+GET {{searchEndpoint}}/indexers/your-indexer-name/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 4. Create Performance Monitoring Data Source
+PUT {{searchEndpoint}}/datasources/performance-demo-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "performance-demo-datasource",
+  "type": "azuresql",
+  "connectionString": "{{SQL_CONNECTION_STRING}}",
+  "container": {
+    "name": "LargeDataset"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "LastModified"
+  },
+  "description": "Demo data source for performance monitoring"
+}
+
+###
+
+### 5. Create Performance Test Index
+PUT {{searchEndpoint}}/indexes/performance-demo-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "performance-demo-index",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false
+    },
+    {
+      "name": "name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "description",
+      "type": "Edm.String",
+      "searchable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true
+    },
+    {
+      "name": "price",
+      "type": "Edm.Double",
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "facetable": true
+    },
+    {
+      "name": "lastModified",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true
+    }
+  ]
+}
+
+###
+
+### 6. Create Baseline Performance Indexer
+### Standard configuration for performance comparison
+PUT {{searchEndpoint}}/indexers/baseline-performance-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "baseline-performance-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Baseline indexer for performance comparison",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    },
+    {
+      "sourceFieldName": "Tags",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 1000,
+    "maxFailedItems": 10
+  }
+}
+
+###
+
+### 7. Create Optimized Performance Indexer
+### Optimized configuration for better performance
+PUT {{searchEndpoint}}/indexers/optimized-performance-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "optimized-performance-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Optimized indexer for better performance",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    },
+    {
+      "sourceFieldName": "Tags",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 2000,
+    "maxFailedItems": 20,
+    "maxFailedItemsPerBatch": 10,
+    "configuration": {
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false
+    }
+  }
+}
+
+###
+
+### 8. Create Small Batch Indexer for Error-Prone Data
+### Smaller batches for better error isolation
+PUT {{searchEndpoint}}/indexers/small-batch-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "small-batch-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Small batch indexer for error-prone data",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 50,
+    "maxFailedItemsPerBatch": 25
+  }
+}
+
+###
+
+### 9. Run Performance Test - Baseline Indexer
+POST {{searchEndpoint}}/indexers/baseline-performance-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 10. Monitor Baseline Indexer Performance
+GET {{searchEndpoint}}/indexers/baseline-performance-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 11. Run Performance Test - Optimized Indexer
+POST {{searchEndpoint}}/indexers/optimized-performance-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 12. Monitor Optimized Indexer Performance
+GET {{searchEndpoint}}/indexers/optimized-performance-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 13. Run Performance Test - Small Batch Indexer
+POST {{searchEndpoint}}/indexers/small-batch-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 14. Monitor Small Batch Indexer Performance
+GET {{searchEndpoint}}/indexers/small-batch-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 15. Compare All Indexer Performance
+### Get status of all performance test indexers
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}&$filter=contains(name,'performance')
+api-key: {{apiKey}}
+
+###
+
+### 16. Monitor Service Resource Usage
+### Check service statistics for resource consumption
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 17. Create Scheduled Performance Monitoring Indexer
+### Indexer with schedule for ongoing performance monitoring
+PUT {{searchEndpoint}}/indexers/scheduled-monitoring-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "scheduled-monitoring-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Scheduled indexer for ongoing performance monitoring",
+  "schedule": {
+    "interval": "PT1H",
+    "startTime": "2024-01-01T00:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    }
+  ],
+  "parameters": {
+    "batchSize": 1500,
+    "maxFailedItems": 15
+  }
+}
+
+###
+
+### 18. Monitor Scheduled Indexer Performance Over Time
+GET {{searchEndpoint}}/indexers/scheduled-monitoring-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 19. Test Indexer Performance with Different Batch Sizes
+### Create indexers with various batch sizes for comparison
+
+### Large Batch Size Indexer
+PUT {{searchEndpoint}}/indexers/large-batch-test-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "large-batch-test-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Large batch size test indexer",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 5000,
+    "maxFailedItems": 50
+  }
+}
+
+###
+
+### Medium Batch Size Indexer
+PUT {{searchEndpoint}}/indexers/medium-batch-test-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "medium-batch-test-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Medium batch size test indexer",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 1000,
+    "maxFailedItems": 10
+  }
+}
+
+###
+
+### 20. Run Batch Size Performance Tests
+### Run large batch indexer
+POST {{searchEndpoint}}/indexers/large-batch-test-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run medium batch indexer
+POST {{searchEndpoint}}/indexers/medium-batch-test-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 21. Monitor Batch Size Test Results
+### Monitor large batch indexer
+GET {{searchEndpoint}}/indexers/large-batch-test-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Monitor medium batch indexer
+GET {{searchEndpoint}}/indexers/medium-batch-test-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 22. Test Change Detection Performance
+### Create indexer with change detection for incremental updates
+PUT {{searchEndpoint}}/indexers/change-detection-performance-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "change-detection-performance-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Change detection performance test indexer",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 2000,
+    "maxFailedItems": 20
+  }
+}
+
+###
+
+### 23. Run Change Detection Performance Test
+### First run (full indexing)
+POST {{searchEndpoint}}/indexers/change-detection-performance-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Monitor first run
+GET {{searchEndpoint}}/indexers/change-detection-performance-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Second run (incremental update)
+POST {{searchEndpoint}}/indexers/change-detection-performance-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Monitor incremental run
+GET {{searchEndpoint}}/indexers/change-detection-performance-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 24. Test Field Mapping Performance Impact
+### Create indexer with minimal field mappings
+PUT {{searchEndpoint}}/indexers/minimal-mapping-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "minimal-mapping-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Minimal field mapping performance test",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 2000
+  }
+}
+
+###
+
+### Create indexer with complex field mappings
+PUT {{searchEndpoint}}/indexers/complex-mapping-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "complex-mapping-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Complex field mapping performance test",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Tags",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    }
+  ],
+  "parameters": {
+    "batchSize": 2000
+  }
+}
+
+###
+
+### 25. Run Field Mapping Performance Tests
+### Run minimal mapping indexer
+POST {{searchEndpoint}}/indexers/minimal-mapping-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run complex mapping indexer
+POST {{searchEndpoint}}/indexers/complex-mapping-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 26. Monitor Field Mapping Performance Impact
+### Monitor minimal mapping indexer
+GET {{searchEndpoint}}/indexers/minimal-mapping-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Monitor complex mapping indexer
+GET {{searchEndpoint}}/indexers/complex-mapping-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 27. Reset Indexers for Fresh Performance Tests
+### Reset baseline indexer
+POST {{searchEndpoint}}/indexers/baseline-performance-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Reset optimized indexer
+POST {{searchEndpoint}}/indexers/optimized-performance-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 28. Test Concurrent Indexer Performance
+### Run multiple indexers simultaneously to test resource contention
+POST {{searchEndpoint}}/indexers/baseline-performance-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+POST {{searchEndpoint}}/indexers/optimized-performance-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+POST {{searchEndpoint}}/indexers/small-batch-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 29. Monitor Concurrent Execution Performance
+### Check all running indexers
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}&$select=name,status,lastResult
+api-key: {{apiKey}}
+
+###
+
+### 30. Analyze Performance Metrics
+### Get detailed execution history for performance analysis
+GET {{searchEndpoint}}/indexers/baseline-performance-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+GET {{searchEndpoint}}/indexers/optimized-performance-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 31. Test Index Size Impact on Performance
+### Get index statistics
+GET {{searchEndpoint}}/indexes/performance-demo-index/stats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Count documents in index
+GET {{searchEndpoint}}/indexes/performance-demo-index/docs/$count?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 32. Monitor Search Service Health
+### Check service health and resource usage
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 33. Create Performance Optimization Recommendations
+### Based on monitoring results, create optimized indexer configuration
+PUT {{searchEndpoint}}/indexers/recommended-optimized-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "recommended-optimized-indexer",
+  "dataSourceName": "performance-demo-datasource",
+  "targetIndexName": "performance-demo-index",
+  "description": "Indexer with recommended optimization settings",
+  "schedule": {
+    "interval": "PT2H",
+    "startTime": "2024-01-01T02:00:00Z"
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 1500,
+    "maxFailedItems": 15,
+    "maxFailedItemsPerBatch": 5,
+    "configuration": {
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false
+    }
+  }
+}
+
+###
+
+### 34. Test Recommended Configuration
+POST {{searchEndpoint}}/indexers/recommended-optimized-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 35. Monitor Recommended Configuration Performance
+GET {{searchEndpoint}}/indexers/recommended-optimized-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 36. Cleanup - Delete Performance Test Resources (optional)
+### Delete all performance test indexers
+DELETE {{searchEndpoint}}/indexers/baseline-performance-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/optimized-performance-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/small-batch-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/scheduled-monitoring-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/large-batch-test-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/medium-batch-test-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/change-detection-performance-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/minimal-mapping-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/complex-mapping-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/recommended-optimized-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index and data source
+DELETE {{searchEndpoint}}/indexes/performance-demo-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/performance-demo-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - Monitor execution history to track performance trends over time
+### - Batch size optimization: larger batches = better throughput, smaller batches = better error isolation
+### - Change detection significantly improves performance for incremental updates
+### - Field mapping complexity impacts processing time
+### - Schedule indexers during off-peak hours for better performance
+### - Monitor service statistics to understand resource usage and limits
+### - Test different configurations to find optimal settings for your data
+### - Consider concurrent indexer limits and resource contention
+### - Use appropriate error handling thresholds based on data quality
+### - Reset indexers when changing configurations for accurate performance comparison

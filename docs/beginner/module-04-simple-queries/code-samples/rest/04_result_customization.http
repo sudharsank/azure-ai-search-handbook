@@ -1,0 +1,397 @@
+###
+# Module 4: Simple Queries and Filters - Result Customization (REST API)
+# =======================================================================
+#
+# This file demonstrates result customization in Azure AI Search using REST API calls.
+# Learn how to select specific fields, highlight matching terms, and format results.
+#
+# Prerequisites:
+# - Azure AI Search service configured
+# - Sample index with data (from previous modules)
+# - VS Code with REST Client extension (recommended)
+# - Or use curl, Postman, or any HTTP client
+#
+# Setup:
+# 1. Replace {{searchEndpoint}}, {{indexName}}, and {{apiKey}} with your values
+# 2. Or create a rest-client.env.json file with these variables
+#
+# Author: Azure AI Search Tutorial
+###
+
+# Variables (replace with your actual values)
+@searchEndpoint = https://your-service.search.windows.net
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2023-11-01
+
+###
+# FIELD SELECTION EXAMPLES
+###
+
+### 1. All Fields (Default Behavior)
+# By default, all fields are returned
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$top=2
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Select Specific Fields
+# Return only specific fields to reduce response size and improve performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title,category,rating&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Minimal Fields for Performance
+# Return only essential fields for maximum performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 4. Exclude Large Content Fields
+# Exclude large fields like 'content' to improve performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&$select=id,title,category,rating,publishedDate&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 5. Select Fields with Metadata
+# Include search score and other metadata
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title,category&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# SEARCH HIGHLIGHTING EXAMPLES
+###
+
+### 6. Basic Highlighting
+# Highlight matching terms in specified fields
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine learning&highlight=title,content&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 7. Custom Highlight Tags
+# Use custom HTML tags for highlighting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure search&highlight=title,content&highlightPreTag=<mark>&highlightPostTag=</mark>&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Multiple Highlight Tags
+# Use styled HTML tags with CSS classes
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python tutorial&highlight=title,content&highlightPreTag=<strong class="highlight">&highlightPostTag=</strong>&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 9. Highlighting with Field Selection
+# Combine field selection with highlighting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure cognitive&$select=id,title,category&highlight=title&highlightPreTag=**&highlightPostTag=**&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. Title-Only Highlighting
+# Highlight only in title field for performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine learning&highlight=title&highlightPreTag=<em>&highlightPostTag=</em>&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# RESULT METADATA EXAMPLES
+###
+
+### 11. Search Score Analysis
+# Analyze search scores for relevance tuning
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning&$select=id,title,category&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Include Total Count
+# Get total count for pagination
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$select=id,title&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 13. Metadata with Highlighting
+# Combine metadata with highlighting for complete information
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python programming&$count=true&highlight=title,content&$select=id,title,category,rating&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# PERFORMANCE OPTIMIZATION EXAMPLES
+###
+
+### 14. Optimized Query (All Best Practices)
+# Combine all performance optimizations
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$filter=rating ge 4.0 and category eq 'Technology'&$select=id,title,category,rating&highlight=title&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. Minimal Response Size
+# Absolute minimum response for maximum performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title&$top=20
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 16. Balanced Performance and Features
+# Good balance of features and performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&$select=id,title,category,rating&highlight=title&$filter=rating ge 3.0&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ADVANCED CUSTOMIZATION EXAMPLES
+###
+
+### 17. Rich Metadata Response
+# Include comprehensive metadata for analysis
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$count=true&$select=id,title,category,rating,publishedDate,tags&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Highlighting Multiple Fields with Different Tags
+# Different highlight styles for different fields (requires multiple requests)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine learning&highlight=title&highlightPreTag=<h1>&highlightPostTag=</h1>&$select=id,title&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 19. Content Preview with Highlighting
+# Get content preview with highlighting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure tutorial&$select=id,title,content&highlight=content&highlightPreTag=<mark>&highlightPostTag=</mark>&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Category-Specific Field Selection
+# Different fields based on search context
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology'&$select=id,title,category,rating,tags&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# RESULT AGGREGATION EXAMPLES
+###
+
+### 21. Category Distribution Analysis
+# Get results for category analysis (larger sample)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=category,rating&$top=50
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 22. Rating Distribution Analysis
+# Get results for rating analysis
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=rating&$top=50
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Tag Analysis
+# Get results for tag analysis
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=tags&$top=30
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 24. Time-based Analysis
+# Get results for temporal analysis
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=publishedDate,category&$orderby=publishedDate desc&$top=20
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# EXPORT AND INTEGRATION EXAMPLES
+###
+
+### 25. JSON Export Format
+# Clean format for data export
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python&$select=id,title,category,rating&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 26. CSV-Ready Format
+# Fields suitable for CSV export
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$select=id,title,category,rating,publishedDate&$top=25
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 27. API Integration Format
+# Minimal fields for API responses
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title,category&$top=15
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# HIGHLIGHTING EDGE CASES
+###
+
+### 28. No Highlights Available
+# Search that may not produce highlights
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=xyz123&highlight=title,content&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 29. Long Content Highlighting
+# Highlighting in long content fields
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&highlight=content&highlightPreTag=<span class="highlight">&highlightPostTag=</span>&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 30. Multiple Term Highlighting
+# Highlighting multiple search terms
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning tutorial&highlight=title,content&highlightPreTag=<mark>&highlightPostTag=</mark>&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ERROR HANDLING EXAMPLES
+###
+
+### 31. Invalid Field in Select (Will Return Error)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$select=id,title,nonexistent_field&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 32. Invalid Highlight Field (Will Return Error)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&highlight=nonexistent_field&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 33. Invalid Highlight Tags (May Return Error)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&highlight=title&highlightPreTag=<invalid&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# CURL EXAMPLES (for command line usage)
+###
+
+# Example 1: Field selection using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure&\$select=id,title,category" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 2: Highlighting using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=machine%20learning&highlight=title,content&highlightPreTag=%3Cmark%3E&highlightPostTag=%3C/mark%3E" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 3: Combined customization using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure&\$select=id,title,category&highlight=title&\$top=5" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+###
+# POWERSHELL EXAMPLES
+###
+
+# Example 1: Field selection with PowerShell
+# $headers = @{
+#     'Content-Type' = 'application/json'
+#     'api-key' = 'your-api-key'
+# }
+# $select = "id,title,category"
+# $uri = "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure&`$select=$select"
+# $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method GET
+# $response | ConvertTo-Json -Depth 10
+
+###
+# RESPONSE STRUCTURE EXAMPLES
+###
+
+# Typical response with field selection:
+# {
+#   "@odata.context": "https://your-service.search.windows.net/indexes('your-index')/$metadata#docs(id,title,category)",
+#   "value": [
+#     {
+#       "@search.score": 1.2345,
+#       "id": "doc_001",
+#       "title": "Azure Machine Learning Tutorial",
+#       "category": "Technology"
+#     }
+#   ]
+# }
+
+# Response with highlighting:
+# {
+#   "@odata.context": "https://your-service.search.windows.net/indexes('your-index')/$metadata#docs(*)",
+#   "value": [
+#     {
+#       "@search.score": 1.2345,
+#       "@search.highlights": {
+#         "title": ["<mark>Azure</mark> Machine Learning Tutorial"],
+#         "content": ["This is a comprehensive guide to <mark>Azure</mark> ML..."]
+#       },
+#       "id": "doc_001",
+#       "title": "Azure Machine Learning Tutorial",
+#       "content": "This is a comprehensive guide to Azure ML..."
+#     }
+#   ]
+# }
+
+###
+# FIELD SELECTION BEST PRACTICES
+###
+
+# 1. Always select only the fields you need
+# 2. Exclude large text fields when possible
+# 3. Include 'id' field for reference
+# 4. Consider highlighting performance impact
+# 5. Use $count=true for pagination
+# 6. Combine with filters for better performance
+
+###
+# HIGHLIGHTING BEST PRACTICES
+###
+
+# 1. Limit highlighting to essential fields
+# 2. Use semantic HTML tags (<mark>, <em>, <strong>)
+# 3. Consider CSS classes for styling
+# 4. Test with various search terms
+# 5. Handle cases with no highlights
+# 6. Be mindful of content length
+
+###
+# PERFORMANCE CONSIDERATIONS
+###
+
+# Field Selection Impact:
+# - All fields: Largest response, slowest
+# - Selected fields: Smaller response, faster
+# - Minimal fields: Smallest response, fastest
+
+# Highlighting Impact:
+# - No highlighting: Fastest
+# - Title only: Fast
+# - Multiple fields: Slower
+# - Large content: Slowest
+
+###
+# COMMON FIELD COMBINATIONS
+###
+
+# Search Results Page:     $select=id,title,category,rating
+# Auto-complete:           $select=id,title
+# Analytics:               $select=category,rating,publishedDate
+# Export:                  $select=id,title,category,rating,publishedDate
+# Preview:                 $select=id,title,content (with highlighting)
+
+###
+# ERROR RESPONSES
+###
+
+# 400 Bad Request - Invalid field in $select
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The field 'nonexistent_field' is not retrievable."
+#   }
+# }
+
+# 400 Bad Request - Invalid highlight field
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The field 'nonexistent_field' is not searchable and cannot be highlighted."
+#   }
+# }
+
+###
+# END OF RESULT CUSTOMIZATION EXAMPLES
+###

@@ -1,0 +1,445 @@
+###
+# Module 4: Simple Queries and Filters - Advanced Queries (REST API)
+# ===================================================================
+#
+# This file demonstrates advanced query techniques in Azure AI Search using REST API calls.
+# Learn about field boosting, fuzzy search, wildcards, and complex query patterns.
+#
+# Prerequisites:
+# - Azure AI Search service configured
+# - Sample index with data (from previous modules)
+# - VS Code with REST Client extension (recommended)
+# - Or use curl, Postman, or any HTTP client
+#
+# Setup:
+# 1. Replace {{searchEndpoint}}, {{indexName}}, and {{apiKey}} with your values
+# 2. Or create a rest-client.env.json file with these variables
+#
+# Author: Azure AI Search Tutorial
+###
+
+# Variables (replace with your actual values)
+@searchEndpoint = https://your-service.search.windows.net
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2023-11-01
+
+###
+# FIELD BOOSTING EXAMPLES
+###
+
+### 1. No Field Boosting (Baseline)
+# Search without any field boosting for comparison
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python tutorial&searchFields=title,content&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Boost Title Field (3x weight)
+# Give title field 3x more weight than content
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python tutorial&searchFields=title^3,content&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Multiple Field Boosting
+# Title 5x, category 2x, content 1x (default)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning&searchFields=title^5,category^2,content&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 4. Extreme Boosting Comparison
+# Very high title boosting to see the effect
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=tutorial&searchFields=title^10,content&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 5. Category Boosting
+# Boost category field for classification-based searches
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=technology&searchFields=category^5,title^2,content&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# FUZZY SEARCH EXAMPLES
+###
+
+### 6. Exact Match (Baseline)
+# Normal search for comparison with fuzzy search
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine&queryType=simple&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 7. Fuzzy Search with Typo
+# Search with typo using fuzzy matching (requires full Lucene syntax)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machne~&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Fuzzy Search with Edit Distance
+# Allow up to 2 character differences
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=learing~2&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 9. Multiple Fuzzy Terms
+# Multiple terms with fuzzy matching
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machne~ learing~&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. Fuzzy Search in Specific Field
+# Fuzzy search limited to title field
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:tutorail~&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# WILDCARD SEARCH EXAMPLES
+###
+
+### 11. Suffix Wildcard
+# Matches develop, developer, development, etc.
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=develop*&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Prefix Wildcard (Full Lucene)
+# Matches words ending in 'ing' (requires full Lucene syntax)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*ing&queryType=full&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 13. Middle Wildcard
+# Wildcard in the middle of a term
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=mach*ne&queryType=full&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 14. Single Character Wildcard
+# Use ? for single character wildcard
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=te?t&queryType=full&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. Multiple Wildcards
+# Combine multiple wildcard patterns
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=prog* AND dev*&queryType=full&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# PROXIMITY SEARCH EXAMPLES
+###
+
+### 16. Exact Phrase
+# Search for exact phrase
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search="machine learning"&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 17. Proximity Search (Within 5 Words)
+# Terms within 5 words of each other
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search="machine learning"~5&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Looser Proximity (Within 10 Words)
+# Terms within 10 words of each other
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search="azure cognitive"~10&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 19. Proximity with Multiple Terms
+# Complex proximity search
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search="python machine learning"~3&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# REGULAR EXPRESSION EXAMPLES
+###
+
+### 20. Simple Regex Pattern
+# Case-insensitive tutorial matching
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/[Tt]utorial/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 21. Number Pattern
+# Match any number sequence
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/[0-9]+/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 22. Version Pattern
+# Match version numbers like 3.8, 2.1, etc.
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/[0-9]+\.[0-9]+/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Email Pattern (Simple)
+# Basic email pattern matching
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/\w+@\w+\.\w+/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# COMPLEX QUERY COMBINATIONS
+###
+
+### 24. Boosting + Fuzzy + Filter
+# Combine field boosting, fuzzy search, and filtering
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machne~ learing~&searchFields=title^3,content&$filter=rating ge 3.0&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 25. Wildcard + Filter + Sorting
+# Wildcard search with filtering and sorting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=develop* AND tutorial&$filter=category eq 'Technology'&$orderby=rating desc&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 26. Multiple Techniques + Highlighting
+# Complex query with highlighting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python* OR java*&searchFields=title^2,content&$filter=category eq 'Technology'&highlight=title,content&$orderby=@search.score desc&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 27. Proximity + Boosting + Pagination
+# Advanced combination with pagination
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search="machine learning"~3&searchFields=title^3,content&$orderby=rating desc&$top=5&$skip=0&queryType=full
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 28. Fuzzy + Wildcard + Collection Filter
+# Very complex query combining multiple techniques
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=prog* AND tutorail~&$filter=tags/any(t: t eq 'beginner')&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# FIELD-SPECIFIC ADVANCED QUERIES
+###
+
+### 29. Title-Specific Fuzzy Search
+# Fuzzy search only in title field
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:machne~&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 30. Content-Specific Wildcard
+# Wildcard search only in content field
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=content:develop*&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 31. Category-Specific Regex
+# Regex search in category field
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=category:/Tech.*/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 32. Multi-Field Advanced Query
+# Different advanced techniques for different fields
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:python* AND content:"machine learning"~5&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# PERFORMANCE COMPARISON EXAMPLES
+###
+
+### 33. Simple Query (Performance Baseline)
+# Simple query for performance comparison
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure machine learning&queryType=simple&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 34. Wildcard Query Performance
+# Wildcard query performance test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=develop*&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 35. Fuzzy Query Performance
+# Fuzzy query performance test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machne~ learing~&queryType=full&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 36. Regex Query Performance
+# Regex query performance test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/[Tt]utorial/&queryType=full&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 37. Complex Query Performance
+# Complex combination performance test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python* AND "tutorial guide"~3&queryType=full&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ADVANCED SCORING EXAMPLES
+###
+
+### 38. Score Analysis - Simple Query
+# Analyze scores for simple query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure tutorial&queryType=simple&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 39. Score Analysis - Fuzzy Query
+# Analyze scores for fuzzy query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure~ tutorial~&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 40. Score Analysis - Wildcard Query
+# Analyze scores for wildcard query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure* tutorial*&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 41. Boosting Impact on Scores
+# Compare scores with and without boosting
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=python tutorial&searchFields=title^5,content&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ERROR SCENARIOS FOR ADVANCED QUERIES
+###
+
+### 42. Invalid Fuzzy Syntax (Will Return Error)
+# Invalid fuzzy search syntax
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=machine~~&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 43. Invalid Regex Pattern (Will Return Error)
+# Invalid regex pattern
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=/[invalid/&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 44. Complex Query Syntax Error (Will Return Error)
+# Syntax error in complex query
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=title:python* AND content:&queryType=full&$top=3
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# CURL EXAMPLES (for command line usage)
+###
+
+# Example 1: Field boosting using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=python%20tutorial&searchFields=title%5E3,content" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 2: Fuzzy search using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=machne~&queryType=full" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 3: Complex query using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=python*%20OR%20java*&searchFields=title%5E2,content&queryType=full" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+###
+# POWERSHELL EXAMPLES
+###
+
+# Example 1: Field boosting with PowerShell
+# $headers = @{
+#     'Content-Type' = 'application/json'
+#     'api-key' = 'your-api-key'
+# }
+# $searchFields = "title^3,content"
+# $encodedSearchFields = [System.Web.HttpUtility]::UrlEncode($searchFields)
+# $uri = "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=python%20tutorial&searchFields=$encodedSearchFields"
+# $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method GET
+# $response | ConvertTo-Json -Depth 10
+
+###
+# ADVANCED QUERY SYNTAX REFERENCE
+###
+
+# Field Boosting Syntax:
+# fieldname^boost_factor
+# Example: title^3,content^1.5
+
+# Fuzzy Search Syntax:
+# term~ or term~edit_distance
+# Example: machine~ or machine~2
+
+# Wildcard Syntax:
+# * (multiple characters) or ? (single character)
+# Example: develop* or te?t
+
+# Proximity Search Syntax:
+# "term1 term2"~slop
+# Example: "machine learning"~5
+
+# Regular Expression Syntax:
+# /pattern/
+# Example: /[Tt]utorial/ or /[0-9]+/
+
+# Field-Specific Syntax:
+# fieldname:query
+# Example: title:python* or content:"machine learning"
+
+###
+# PERFORMANCE BEST PRACTICES
+###
+
+# 1. Use simple queries when possible (fastest)
+# 2. Limit wildcard usage, especially prefix wildcards
+# 3. Be cautious with fuzzy search on large datasets
+# 4. Regex queries can be slow with complex patterns
+# 5. Combine with filters to reduce search scope
+# 6. Use field boosting strategically
+# 7. Monitor query performance in production
+
+###
+# COMMON ADVANCED QUERY PATTERNS
+###
+
+# Product Search with Typos:        machne~ learing~
+# Flexible Term Matching:           develop* OR program*
+# Version Number Search:            /[0-9]+\.[0-9]+/
+# Phrase with Flexibility:          "machine learning"~3
+# Boosted Title Search:             title^5:python tutorial
+# Multi-Field Advanced:             title:python* AND content:"tutorial"~2
+
+###
+# RESPONSE STRUCTURE WITH ADVANCED QUERIES
+###
+
+# Advanced queries return the same response structure as basic queries:
+# {
+#   "@odata.context": "...",
+#   "value": [
+#     {
+#       "@search.score": 2.1234,
+#       "@search.highlights": { ... },
+#       "id": "doc_001",
+#       "title": "Python Tutorial",
+#       "content": "Learn Python programming..."
+#     }
+#   ]
+# }
+
+# Note: Advanced queries may have different scoring patterns
+# - Fuzzy matches typically have lower scores
+# - Wildcard matches score based on the actual matched term
+# - Boosted fields significantly affect scoring
+# - Proximity searches score based on term distance
+
+###
+# END OF ADVANCED QUERIES EXAMPLES
+###

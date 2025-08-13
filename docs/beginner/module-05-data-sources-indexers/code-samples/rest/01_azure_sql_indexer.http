@@ -1,0 +1,434 @@
+###
+# Azure AI Search - SQL Database Indexer Example (REST API)
+#
+# This file demonstrates how to:
+# 1. Create a data source connection to Azure SQL Database
+# 2. Create an index for SQL data
+# 3. Create and configure an indexer
+# 4. Monitor indexer execution
+# 5. Implement change tracking for incremental updates
+#
+# Prerequisites:
+# - Azure AI Search service
+# - Azure SQL Database with sample data
+# - Admin API key
+# - REST client (VS Code REST Client, Postman, or curl)
+#
+# Setup: Replace the variables below with your actual values
+# or set them as environment variables
+
+@SEARCH_ENDPOINT = https://your-search-service.search.windows.net
+@SEARCH_API_KEY = your-admin-api-key
+@SQL_CONNECTION_STRING = Server=tcp:your-server.database.windows.net,1433;Database=your-db;User ID=your-user;Password=your-password;
+
+# Resource names
+@DATA_SOURCE_NAME = sql-hotels-datasource
+@INDEX_NAME = hotels-sql-index
+@INDEXER_NAME = hotels-sql-indexer
+@TABLE_NAME = Hotels
+
+###
+# Step 1: Test Service Connectivity
+# Verify that your search service is accessible and API key is valid
+
+GET {{SEARCH_ENDPOINT}}/servicestats?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 2: Create Data Source Connection
+# Create a data source connection to Azure SQL Database with integrated change tracking
+
+PUT {{SEARCH_ENDPOINT}}/datasources/{{DATA_SOURCE_NAME}}?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "name": "{{DATA_SOURCE_NAME}}",
+  "type": "azuresql",
+  "connectionString": "{{SQL_CONNECTION_STRING}}",
+  "container": {
+    "name": "{{TABLE_NAME}}"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.SqlIntegratedChangeTrackingPolicy"
+  },
+  "description": "Hotels data from Azure SQL Database with change tracking"
+}
+
+###
+# Step 3: Verify Data Source Creation
+# Get the created data source to verify configuration
+
+GET {{SEARCH_ENDPOINT}}/datasources/{{DATA_SOURCE_NAME}}?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 4: Create Search Index
+# Create a search index that matches the SQL table structure
+
+PUT {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "name": "{{INDEX_NAME}}",
+  "fields": [
+    {
+      "name": "HotelId",
+      "type": "Edm.String",
+      "key": true,
+      "retrievable": true
+    },
+    {
+      "name": "HotelName",
+      "type": "Edm.String",
+      "searchable": true,
+      "retrievable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "Description",
+      "type": "Edm.String",
+      "searchable": true,
+      "retrievable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "Category",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "Rating",
+      "type": "Edm.Double",
+      "filterable": true,
+      "sortable": true,
+      "facetable": true,
+      "retrievable": true
+    },
+    {
+      "name": "Address",
+      "type": "Edm.ComplexType",
+      "fields": [
+        {
+          "name": "StreetAddress",
+          "type": "Edm.String",
+          "retrievable": true
+        },
+        {
+          "name": "City",
+          "type": "Edm.String",
+          "filterable": true,
+          "sortable": true,
+          "facetable": true,
+          "retrievable": true
+        },
+        {
+          "name": "StateProvince",
+          "type": "Edm.String",
+          "filterable": true,
+          "facetable": true,
+          "retrievable": true
+        },
+        {
+          "name": "PostalCode",
+          "type": "Edm.String",
+          "filterable": true,
+          "retrievable": true
+        },
+        {
+          "name": "Country",
+          "type": "Edm.String",
+          "filterable": true,
+          "facetable": true,
+          "retrievable": true
+        }
+      ]
+    },
+    {
+      "name": "LastRenovationDate",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true,
+      "retrievable": true
+    },
+    {
+      "name": "CreatedDate",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true,
+      "retrievable": true
+    },
+    {
+      "name": "ModifiedDate",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true,
+      "retrievable": true
+    }
+  ]
+}
+
+###
+# Step 5: Verify Index Creation
+# Get the created index to verify schema
+
+GET {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 6: Create Indexer
+# Create an indexer with field mappings to populate the index from SQL data
+
+PUT {{SEARCH_ENDPOINT}}/indexers/{{INDEXER_NAME}}?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "name": "{{INDEXER_NAME}}",
+  "dataSourceName": "{{DATA_SOURCE_NAME}}",
+  "targetIndexName": "{{INDEX_NAME}}",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "HotelId",
+      "targetFieldName": "HotelId"
+    },
+    {
+      "sourceFieldName": "HotelName",
+      "targetFieldName": "HotelName"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "Description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "Category"
+    },
+    {
+      "sourceFieldName": "Rating",
+      "targetFieldName": "Rating"
+    },
+    {
+      "sourceFieldName": "Address",
+      "targetFieldName": "Address/StreetAddress"
+    },
+    {
+      "sourceFieldName": "City",
+      "targetFieldName": "Address/City"
+    },
+    {
+      "sourceFieldName": "StateProvince",
+      "targetFieldName": "Address/StateProvince"
+    },
+    {
+      "sourceFieldName": "PostalCode",
+      "targetFieldName": "Address/PostalCode"
+    },
+    {
+      "sourceFieldName": "Country",
+      "targetFieldName": "Address/Country"
+    },
+    {
+      "sourceFieldName": "LastRenovationDate",
+      "targetFieldName": "LastRenovationDate"
+    },
+    {
+      "sourceFieldName": "CreatedDate",
+      "targetFieldName": "CreatedDate"
+    },
+    {
+      "sourceFieldName": "ModifiedDate",
+      "targetFieldName": "ModifiedDate"
+    }
+  ],
+  "description": "Indexer for hotels data from SQL Database",
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10,
+    "maxFailedItemsPerBatch": 5
+  }
+}
+
+###
+# Step 7: Verify Indexer Creation
+# Get the created indexer to verify configuration
+
+GET {{SEARCH_ENDPOINT}}/indexers/{{INDEXER_NAME}}?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 8: Run Indexer
+# Start the indexer execution
+
+POST {{SEARCH_ENDPOINT}}/indexers/{{INDEXER_NAME}}/run?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 9: Monitor Indexer Status
+# Check indexer execution status (run this multiple times to monitor progress)
+
+GET {{SEARCH_ENDPOINT}}/indexers/{{INDEXER_NAME}}/status?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 10: Get Index Statistics
+# Check how many documents were indexed
+
+GET {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}/stats?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 11: Test Search Functionality
+# Perform a simple search to verify indexed data
+
+POST {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}/docs/search?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "search": "*",
+  "top": 5,
+  "select": "HotelId,HotelName,Category,Rating"
+}
+
+###
+# Step 12: Search by Hotel Name
+# Test field-specific search
+
+POST {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}/docs/search?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "search": "hotel",
+  "searchFields": "HotelName",
+  "top": 3,
+  "select": "HotelId,HotelName,Category,Rating"
+}
+
+###
+# Step 13: Filter by Category
+# Test filtering functionality
+
+POST {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}/docs/search?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "search": "*",
+  "filter": "Category eq 'Luxury'",
+  "top": 3,
+  "select": "HotelId,HotelName,Category,Rating"
+}
+
+###
+# Step 14: Sort by Rating
+# Test sorting functionality
+
+POST {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}/docs/search?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+{
+  "search": "*",
+  "orderby": "Rating desc",
+  "top": 3,
+  "select": "HotelId,HotelName,Category,Rating"
+}
+
+###
+# Step 15: Reset Indexer (if needed)
+# Reset indexer state to clear execution history
+
+POST {{SEARCH_ENDPOINT}}/indexers/{{INDEXER_NAME}}/reset?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 16: List All Data Sources
+# View all data sources in the service
+
+GET {{SEARCH_ENDPOINT}}/datasources?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 17: List All Indexes
+# View all indexes in the service
+
+GET {{SEARCH_ENDPOINT}}/indexes?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Step 18: List All Indexers
+# View all indexers in the service
+
+GET {{SEARCH_ENDPOINT}}/indexers?api-version=2024-07-01
+Content-Type: application/json
+api-key: {{SEARCH_API_KEY}}
+
+###
+# Cleanup Section (Optional)
+# Uncomment and run these requests to clean up resources
+
+###
+# Delete Indexer
+# DELETE {{SEARCH_ENDPOINT}}/indexers/{{INDEXER_NAME}}?api-version=2024-07-01
+# Content-Type: application/json
+# api-key: {{SEARCH_API_KEY}}
+
+###
+# Delete Index
+# DELETE {{SEARCH_ENDPOINT}}/indexes/{{INDEX_NAME}}?api-version=2024-07-01
+# Content-Type: application/json
+# api-key: {{SEARCH_API_KEY}}
+
+###
+# Delete Data Source
+# DELETE {{SEARCH_ENDPOINT}}/datasources/{{DATA_SOURCE_NAME}}?api-version=2024-07-01
+# Content-Type: application/json
+# api-key: {{SEARCH_API_KEY}}
+
+###
+# Error Handling Examples
+# These requests demonstrate common error scenarios
+
+###
+# Test Invalid API Key
+# GET {{SEARCH_ENDPOINT}}/servicestats?api-version=2024-07-01
+# Content-Type: application/json
+# api-key: invalid-key
+
+###
+# Test Invalid Data Source Name
+# GET {{SEARCH_ENDPOINT}}/datasources/non-existent-datasource?api-version=2024-07-01
+# Content-Type: application/json
+# api-key: {{SEARCH_API_KEY}}
+
+###
+# Test Invalid Index Schema
+# PUT {{SEARCH_ENDPOINT}}/indexes/test-invalid-index?api-version=2024-07-01
+# Content-Type: application/json
+# api-key: {{SEARCH_API_KEY}}
+# 
+# {
+#   "name": "test-invalid-index",
+#   "fields": [
+#     {
+#       "name": "id",
+#       "type": "InvalidType",
+#       "key": true
+#     }
+#   ]
+# }

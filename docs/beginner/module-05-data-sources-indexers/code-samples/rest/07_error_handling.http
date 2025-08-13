@@ -1,0 +1,699 @@
+### Error Handling & Recovery - REST API Examples
+### This file demonstrates robust error handling patterns and recovery strategies
+### for Azure AI Search indexers using the REST API.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Data sources that may contain problematic data
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY, SQL_CONNECTION_STRING
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@sqlConnectionString = {{SQL_CONNECTION_STRING}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. Create Data Source for Error Handling Examples
+PUT {{searchEndpoint}}/datasources/error-handling-demo-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "error-handling-demo-datasource",
+  "type": "azuresql",
+  "connectionString": "{{sqlConnectionString}}",
+  "container": {
+    "name": "TestData"
+  },
+  "description": "Demo data source for error handling examples"
+}
+
+###
+
+### 3. Create Index for Error Handling Tests
+PUT {{searchEndpoint}}/indexes/error-handling-demo-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "error-handling-demo-index",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false
+    },
+    {
+      "name": "name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "description",
+      "type": "Edm.String",
+      "searchable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true
+    },
+    {
+      "name": "price",
+      "type": "Edm.Double",
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "facetable": true
+    },
+    {
+      "name": "lastModified",
+      "type": "Edm.DateTimeOffset",
+      "filterable": true,
+      "sortable": true
+    }
+  ]
+}
+
+###
+
+### 4. Create Robust Indexer with Error Handling
+### Demonstrates comprehensive error handling configuration
+PUT {{searchEndpoint}}/indexers/robust-error-handling-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "robust-error-handling-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer with robust error handling configuration",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    },
+    {
+      "sourceFieldName": "Tags",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "LastModified",
+      "targetFieldName": "lastModified"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10,
+    "maxFailedItemsPerBatch": 5,
+    "configuration": {
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false,
+      "dataToExtract": "contentAndMetadata",
+      "parsingMode": "default"
+    }
+  }
+}
+
+###
+
+### 5. Create Strict Error Handling Indexer
+### Demonstrates strict error handling (fails fast)
+PUT {{searchEndpoint}}/indexers/strict-error-handling-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "strict-error-handling-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer with strict error handling (fails fast)",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    }
+  ],
+  "parameters": {
+    "batchSize": 50,
+    "maxFailedItems": 0,
+    "maxFailedItemsPerBatch": 0,
+    "configuration": {
+      "failOnUnsupportedContentType": true,
+      "failOnUnprocessableDocument": true
+    }
+  }
+}
+
+###
+
+### 6. Create Lenient Error Handling Indexer
+### Demonstrates lenient error handling (continues processing)
+PUT {{searchEndpoint}}/indexers/lenient-error-handling-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "lenient-error-handling-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer with lenient error handling (continues processing)",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    }
+  ],
+  "parameters": {
+    "batchSize": 200,
+    "maxFailedItems": 100,
+    "maxFailedItemsPerBatch": 50,
+    "configuration": {
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false
+    }
+  }
+}
+
+###
+
+### 7. Create Indexer with Schema Mismatch Errors
+### Intentionally create problematic field mappings to test error handling
+PUT {{searchEndpoint}}/indexers/schema-error-test-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "schema-error-test-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer to test schema mismatch error handling",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "StringField",
+      "targetFieldName": "price"
+    },
+    {
+      "sourceFieldName": "NonExistentField",
+      "targetFieldName": "category"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 20,
+    "maxFailedItemsPerBatch": 10
+  }
+}
+
+###
+
+### 8. Run Robust Error Handling Indexer
+POST {{searchEndpoint}}/indexers/robust-error-handling-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 9. Monitor Robust Indexer Status
+GET {{searchEndpoint}}/indexers/robust-error-handling-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 10. Run Strict Error Handling Indexer
+POST {{searchEndpoint}}/indexers/strict-error-handling-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 11. Monitor Strict Indexer Status (likely to show errors)
+GET {{searchEndpoint}}/indexers/strict-error-handling-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 12. Run Lenient Error Handling Indexer
+POST {{searchEndpoint}}/indexers/lenient-error-handling-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 13. Monitor Lenient Indexer Status
+GET {{searchEndpoint}}/indexers/lenient-error-handling-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 14. Run Schema Error Test Indexer
+POST {{searchEndpoint}}/indexers/schema-error-test-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 15. Monitor Schema Error Test Status (will show mapping errors)
+GET {{searchEndpoint}}/indexers/schema-error-test-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 16. Get Detailed Error Information
+### Get execution history with detailed error information
+GET {{searchEndpoint}}/indexers/schema-error-test-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 17. Test Data Source Connection Issues
+### Create data source with invalid connection string to test connection errors
+PUT {{searchEndpoint}}/datasources/invalid-connection-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "invalid-connection-datasource",
+  "type": "azuresql",
+  "connectionString": "Server=invalid-server;Database=invalid-db;User ID=invalid-user;Password=invalid-password;",
+  "container": {
+    "name": "TestTable"
+  },
+  "description": "Data source with invalid connection for testing connection errors"
+}
+
+###
+
+### 18. Create Indexer with Connection Issues
+PUT {{searchEndpoint}}/indexers/connection-error-test-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "connection-error-test-indexer",
+  "dataSourceName": "invalid-connection-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer to test connection error handling",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10
+  }
+}
+
+###
+
+### 19. Run Connection Error Test (will fail)
+POST {{searchEndpoint}}/indexers/connection-error-test-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 20. Monitor Connection Error Status
+GET {{searchEndpoint}}/indexers/connection-error-test-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 21. Reset Indexer After Fixing Issues
+### Reset indexer to clear error state and start fresh
+POST {{searchEndpoint}}/indexers/robust-error-handling-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run after reset
+POST {{searchEndpoint}}/indexers/robust-error-handling-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 22. Update Indexer to Fix Schema Errors
+### Fix the schema error test indexer with correct field mappings
+PUT {{searchEndpoint}}/indexers/schema-error-test-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "schema-error-test-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Fixed indexer with correct field mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10,
+    "maxFailedItemsPerBatch": 5
+  }
+}
+
+###
+
+### 23. Test Fixed Indexer
+POST {{searchEndpoint}}/indexers/schema-error-test-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 24. Monitor Fixed Indexer Status
+GET {{searchEndpoint}}/indexers/schema-error-test-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 25. Create Indexer with Batch Size Optimization for Error Handling
+### Smaller batches help isolate errors and improve recovery
+PUT {{searchEndpoint}}/indexers/optimized-batch-error-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "optimized-batch-error-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer with optimized batch size for error isolation",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "Price",
+      "targetFieldName": "price"
+    }
+  ],
+  "parameters": {
+    "batchSize": 25,
+    "maxFailedItems": 5,
+    "maxFailedItemsPerBatch": 2,
+    "configuration": {
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false
+    }
+  }
+}
+
+###
+
+### 26. Test Optimized Batch Indexer
+POST {{searchEndpoint}}/indexers/optimized-batch-error-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 27. Monitor Optimized Batch Indexer
+GET {{searchEndpoint}}/indexers/optimized-batch-error-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 28. Compare Error Handling Strategies
+### Get status of all error handling indexers for comparison
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}&$filter=startswith(name,'robust-error-handling') or startswith(name,'strict-error-handling') or startswith(name,'lenient-error-handling')
+api-key: {{apiKey}}
+
+###
+
+### 29. Test Service Health and Limits
+### Check service statistics to understand resource usage
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 30. Create Circuit Breaker Pattern Indexer
+### Indexer that stops processing when error rate is too high
+PUT {{searchEndpoint}}/indexers/circuit-breaker-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "circuit-breaker-indexer",
+  "dataSourceName": "error-handling-demo-datasource",
+  "targetIndexName": "error-handling-demo-index",
+  "description": "Indexer with circuit breaker pattern (low error tolerance)",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Name",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Description",
+      "targetFieldName": "description"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 2,
+    "maxFailedItemsPerBatch": 1,
+    "configuration": {
+      "failOnUnsupportedContentType": true,
+      "failOnUnprocessableDocument": true
+    }
+  }
+}
+
+###
+
+### 31. Test Circuit Breaker Indexer
+POST {{searchEndpoint}}/indexers/circuit-breaker-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 32. Monitor Circuit Breaker Status
+GET {{searchEndpoint}}/indexers/circuit-breaker-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 33. Test Error Recovery with Retry
+### Simulate retry by running indexer multiple times after fixing issues
+POST {{searchEndpoint}}/indexers/robust-error-handling-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Wait and run again (simulating retry logic)
+POST {{searchEndpoint}}/indexers/robust-error-handling-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 34. Validate Error Handling Results
+### Search for successfully indexed documents
+GET {{searchEndpoint}}/indexes/error-handling-demo-index/docs?api-version={{apiVersion}}&search=*&$top=10
+api-key: {{apiKey}}
+
+###
+
+### Count total documents indexed despite errors
+GET {{searchEndpoint}}/indexes/error-handling-demo-index/docs/$count?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 35. Test Data Source Connection Validation
+### Validate data source connection before creating indexer
+POST {{searchEndpoint}}/datasources/test-connection?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "connectionString": "{{sqlConnectionString}}",
+  "type": "azuresql"
+}
+
+###
+
+### 36. Get All Indexer Execution History
+### Review execution history for error patterns
+GET {{searchEndpoint}}/indexers/robust-error-handling-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+GET {{searchEndpoint}}/indexers/strict-error-handling-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+GET {{searchEndpoint}}/indexers/lenient-error-handling-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 37. Cleanup - Delete Error Handling Resources (optional)
+### Delete all test indexers
+DELETE {{searchEndpoint}}/indexers/robust-error-handling-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/strict-error-handling-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/lenient-error-handling-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/schema-error-test-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/connection-error-test-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/optimized-batch-error-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/circuit-breaker-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index and data sources
+DELETE {{searchEndpoint}}/indexes/error-handling-demo-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/error-handling-demo-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/invalid-connection-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - maxFailedItems: Total number of failed items allowed before indexer stops
+### - maxFailedItemsPerBatch: Number of failed items per batch before batch fails
+### - failOnUnsupportedContentType: Whether to fail on unsupported file types
+### - failOnUnprocessableDocument: Whether to fail on documents that can't be processed
+### - Smaller batch sizes help isolate errors and improve recovery
+### - Reset indexers to clear error state and start fresh
+### - Monitor execution history to identify error patterns
+### - Use appropriate error thresholds based on data quality expectations
+### - Test connection before creating indexers to avoid connection errors
+### - Implement retry logic in your application for transient errors
+### - Circuit breaker pattern stops processing when error rate is too high

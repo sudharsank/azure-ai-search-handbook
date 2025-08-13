@@ -1,0 +1,458 @@
+### Azure Cosmos DB Indexer - REST API Examples
+### This file demonstrates how to create and manage indexers for Azure Cosmos DB data sources
+### using the Azure AI Search REST API.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Azure Cosmos DB account with sample data
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY, COSMOS_CONNECTION_STRING
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@cosmosConnectionString = {{COSMOS_CONNECTION_STRING}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. Create Cosmos DB Data Source
+### Creates a data source connection to Azure Cosmos DB with change feed detection
+PUT {{searchEndpoint}}/datasources/cosmos-hotels-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "cosmos-hotels-datasource",
+  "type": "cosmosdb",
+  "connectionString": "{{cosmosConnectionString}}",
+  "container": {
+    "name": "hotels",
+    "query": "SELECT * FROM c WHERE c._ts >= @HighWaterMark ORDER BY c._ts"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "_ts"
+  },
+  "description": "Hotel data from Cosmos DB with change feed detection"
+}
+
+###
+
+### 3. Get Data Source (verify creation)
+GET {{searchEndpoint}}/datasources/cosmos-hotels-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 4. Create Hotels Index
+### Creates a search index optimized for hotel data from Cosmos DB
+PUT {{searchEndpoint}}/indexes/hotels-cosmos-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "hotels-cosmos-index",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false
+    },
+    {
+      "name": "hotelName",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": true,
+      "facetable": false
+    },
+    {
+      "name": "description",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true
+    },
+    {
+      "name": "rating",
+      "type": "Edm.Double",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": true
+    },
+    {
+      "name": "address",
+      "type": "Edm.ComplexType",
+      "fields": [
+        {
+          "name": "street",
+          "type": "Edm.String",
+          "searchable": true,
+          "filterable": false,
+          "sortable": false,
+          "facetable": false
+        },
+        {
+          "name": "city",
+          "type": "Edm.String",
+          "searchable": true,
+          "filterable": true,
+          "sortable": false,
+          "facetable": true
+        },
+        {
+          "name": "state",
+          "type": "Edm.String",
+          "searchable": true,
+          "filterable": true,
+          "sortable": false,
+          "facetable": true
+        },
+        {
+          "name": "zipCode",
+          "type": "Edm.String",
+          "searchable": false,
+          "filterable": true,
+          "sortable": false,
+          "facetable": false
+        },
+        {
+          "name": "country",
+          "type": "Edm.String",
+          "searchable": false,
+          "filterable": true,
+          "sortable": false,
+          "facetable": true
+        }
+      ]
+    },
+    {
+      "name": "amenities",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": true
+    },
+    {
+      "name": "lastRenovated",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false
+    },
+    {
+      "name": "_ts",
+      "type": "Edm.Int64",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false
+    },
+    {
+      "name": "location",
+      "type": "Edm.GeographyPoint",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false
+    }
+  ]
+}
+
+###
+
+### 5. Get Index (verify creation)
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 6. Create Cosmos DB Indexer
+### Creates an indexer to process hotel data from Cosmos DB
+PUT {{searchEndpoint}}/indexers/hotels-cosmos-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "hotels-cosmos-indexer",
+  "dataSourceName": "cosmos-hotels-datasource",
+  "targetIndexName": "hotels-cosmos-index",
+  "description": "Indexer for hotel data from Cosmos DB",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "id",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "hotelName",
+      "targetFieldName": "hotelName"
+    },
+    {
+      "sourceFieldName": "description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "rating",
+      "targetFieldName": "rating"
+    },
+    {
+      "sourceFieldName": "address",
+      "targetFieldName": "address"
+    },
+    {
+      "sourceFieldName": "amenities",
+      "targetFieldName": "amenities"
+    },
+    {
+      "sourceFieldName": "lastRenovated",
+      "targetFieldName": "lastRenovated"
+    },
+    {
+      "sourceFieldName": "_ts",
+      "targetFieldName": "_ts"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10,
+    "maxFailedItemsPerBatch": 5,
+    "configuration": {
+      "parsingMode": "json"
+    }
+  }
+}
+
+###
+
+### 7. Get Indexer (verify creation)
+GET {{searchEndpoint}}/indexers/hotels-cosmos-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 8. Run Indexer
+### Starts the indexer execution
+POST {{searchEndpoint}}/indexers/hotels-cosmos-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 9. Get Indexer Status
+### Monitors indexer execution and shows progress
+GET {{searchEndpoint}}/indexers/hotels-cosmos-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 10. Search All Hotels
+### Search for all hotels to verify indexing worked
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$top=10
+api-key: {{apiKey}}
+
+###
+
+### 11. Search Luxury Hotels
+### Search for luxury hotels
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=luxury&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 12. Filter High-Rated Hotels
+### Find hotels with rating >= 4.0
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.0&$orderby=rating desc&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 13. Search by City
+### Find hotels in a specific city
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$filter=address/city eq 'Seattle'&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 14. Faceted Search by Category
+### Get facets for hotel categories
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&facet=category&$top=0
+api-key: {{apiKey}}
+
+###
+
+### 15. Faceted Search by City
+### Get facets for cities
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&facet=address/city&$top=0
+api-key: {{apiKey}}
+
+###
+
+### 16. Search Hotels with Amenities
+### Find hotels with specific amenities (WiFi)
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$filter=amenities/any(a: a eq 'WiFi')&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 17. Search by Rating Range
+### Find hotels with rating between 3.5 and 4.5
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 3.5 and rating le 4.5&$orderby=rating desc&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 18. Recently Renovated Hotels
+### Find recently renovated hotels
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$filter=lastRenovated ge 2020-01-01T00:00:00Z&$orderby=lastRenovated desc&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 19. Geographic Search (if location data available)
+### Find hotels within a geographic area
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=*&$filter=geo.distance(location, geography'POINT(-122.335114 47.612839)') le 10&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 20. Complex Query with Multiple Filters
+### Find luxury hotels in specific cities with high ratings
+GET {{searchEndpoint}}/indexes/hotels-cosmos-index/docs?api-version={{apiVersion}}&search=luxury&$filter=rating ge 4.0 and (address/city eq 'Seattle' or address/city eq 'San Francisco')&$orderby=rating desc&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 21. Update Indexer for Better Performance
+### Example: Increase batch size for better throughput
+PUT {{searchEndpoint}}/indexers/hotels-cosmos-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "hotels-cosmos-indexer",
+  "dataSourceName": "cosmos-hotels-datasource",
+  "targetIndexName": "hotels-cosmos-index",
+  "description": "Indexer for hotel data from Cosmos DB - optimized",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "id",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "hotelName",
+      "targetFieldName": "hotelName"
+    },
+    {
+      "sourceFieldName": "description",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "category",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "rating",
+      "targetFieldName": "rating"
+    },
+    {
+      "sourceFieldName": "address",
+      "targetFieldName": "address"
+    },
+    {
+      "sourceFieldName": "amenities",
+      "targetFieldName": "amenities"
+    },
+    {
+      "sourceFieldName": "lastRenovated",
+      "targetFieldName": "lastRenovated"
+    },
+    {
+      "sourceFieldName": "_ts",
+      "targetFieldName": "_ts"
+    }
+  ],
+  "parameters": {
+    "batchSize": 200,
+    "maxFailedItems": 20,
+    "maxFailedItemsPerBatch": 10,
+    "configuration": {
+      "parsingMode": "json"
+    }
+  }
+}
+
+###
+
+### 22. Reset Indexer (if needed)
+### Resets the indexer to reprocess all documents
+POST {{searchEndpoint}}/indexers/hotels-cosmos-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 23. Test Change Feed Detection
+### After making changes to Cosmos DB data, run indexer again to see incremental updates
+POST {{searchEndpoint}}/indexers/hotels-cosmos-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 24. Monitor Change Feed Progress
+### Check the high water mark progress
+GET {{searchEndpoint}}/indexers/hotels-cosmos-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 25. Cleanup - Delete Resources (optional)
+### Delete indexer first
+DELETE {{searchEndpoint}}/indexers/hotels-cosmos-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index
+DELETE {{searchEndpoint}}/indexes/hotels-cosmos-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete data source
+DELETE {{searchEndpoint}}/datasources/cosmos-hotels-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - Replace {{SEARCH_ENDPOINT}}, {{SEARCH_API_KEY}}, and {{COSMOS_CONNECTION_STRING}} with your actual values
+### - Ensure your Cosmos DB has a container named "hotels" with sample hotel data
+### - The _ts field is automatically maintained by Cosmos DB for change feed detection
+### - Complex fields (address) allow nested object searching
+### - Collection fields (amenities) support array operations
+### - Geographic search requires location data in GeoJSON format
+### - Change feed detection enables efficient incremental updates

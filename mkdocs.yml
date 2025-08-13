@@ -29,7 +29,6 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.expand
     - navigation.path
     - navigation.top
     - navigation.footer
@@ -79,109 +78,219 @@ nav:
     - Azure AI Search Setup: setup/azure-ai-search-setup.md
     - Quick Reference: setup/quick-reference.md
   - Beginner:
-    - Module 1 - Introduction & Setup: beginner/module-01-introduction-setup/documentation.md
-    - Module 2 - Basic Search: 
-      - Overview: beginner/module-02-basic-search/documentation.md
-      - Prerequisites: beginner/module-02-basic-search/prerequisites.md
-      - Best Practices: beginner/module-02-basic-search/best-practices.md
-      - Practice & Implementation: beginner/module-02-basic-search/practice-implementation.md
-      - Troubleshooting:
-        - Search Operations: beginner/module-02-basic-search/search-troubleshooting.md
-        - Prerequisites Setup: beginner/module-02-basic-search/prerequisites-troubleshooting.md
-      - Code Samples:
-        - Overview: beginner/module-02-basic-search/code-samples/README.md
-        - Interactive Notebooks: beginner/module-02-basic-search/code-samples/notebooks/README.md
-        - Python Examples:
-          - Overview: beginner/module-02-basic-search/code-samples/python/README.md
-          - 01 - Simple Text Search: beginner/module-02-basic-search/code-samples/python/01_simple_text_search.py
-          - 02 - Phrase Search: beginner/module-02-basic-search/code-samples/python/02_phrase_search.py
-          - 03 - Boolean Search: beginner/module-02-basic-search/code-samples/python/03_boolean_search.py
-          - 04 - Wildcard Search: beginner/module-02-basic-search/code-samples/python/04_wildcard_search.py
-          - 05 - Field Search: beginner/module-02-basic-search/code-samples/python/05_field_search.py
-          - 06 - Result Processing: beginner/module-02-basic-search/code-samples/python/06_result_processing.py
-          - 07 - Error Handling: beginner/module-02-basic-search/code-samples/python/07_error_handling.py
-          - 08 - Search Patterns: beginner/module-02-basic-search/code-samples/python/08_search_patterns.py
-        - JavaScript Examples:
-          - Overview: beginner/module-02-basic-search/code-samples/javascript/README.md
-          - 01 - Simple Text Search: beginner/module-02-basic-search/code-samples/javascript/01_simple_text_search.js
-          - 02 - Phrase Search: beginner/module-02-basic-search/code-samples/javascript/02_phrase_search.js
-          - 03 - Boolean Search: beginner/module-02-basic-search/code-samples/javascript/03_boolean_search.js
-          - 04 - Wildcard Search: beginner/module-02-basic-search/code-samples/javascript/04_wildcard_search.js
-          - 05 - Field Search: beginner/module-02-basic-search/code-samples/javascript/05_field_search.js
-          - 06 - Result Processing: beginner/module-02-basic-search/code-samples/javascript/06_result_processing.js
-          - 07 - Error Handling: beginner/module-02-basic-search/code-samples/javascript/07_error_handling.js
-          - 08 - Search Patterns: beginner/module-02-basic-search/code-samples/javascript/08_search_patterns.js
-        - C# Examples:
-          - Overview: beginner/module-02-basic-search/code-samples/csharp/README.md
-          - 01 - Simple Text Search: beginner/module-02-basic-search/code-samples/csharp/01_SimpleTextSearch.cs
-          - 02 - Phrase Search: beginner/module-02-basic-search/code-samples/csharp/02_PhraseSearch.cs
-          - 03 - Boolean Search: beginner/module-02-basic-search/code-samples/csharp/03_BooleanSearch.cs
-          - 04 - Wildcard Search: beginner/module-02-basic-search/code-samples/csharp/04_WildcardSearch.cs
-          - 05 - Field Search: beginner/module-02-basic-search/code-samples/csharp/05_FieldSearch.cs
-          - 06 - Result Processing: beginner/module-02-basic-search/code-samples/csharp/06_ResultProcessing.cs
-          - 07 - Error Handling: beginner/module-02-basic-search/code-samples/csharp/07_ErrorHandling.cs
-          - 08 - Search Patterns: beginner/module-02-basic-search/code-samples/csharp/08_SearchPatterns.cs
-        - REST API Examples:
-          - Overview: beginner/module-02-basic-search/code-samples/rest/README.md
-          - 01 - Simple Text Search: beginner/module-02-basic-search/code-samples/rest/01_simple_text_search.http
-          - 02 - Phrase Search: beginner/module-02-basic-search/code-samples/rest/02_phrase_search.http
-          - 03 - Boolean Search: beginner/module-02-basic-search/code-samples/rest/03_boolean_search.http
-          - 04 - Wildcard Search: beginner/module-02-basic-search/code-samples/rest/04_wildcard_search.http
-          - 05 - Field Search: beginner/module-02-basic-search/code-samples/rest/05_field_search.http
-          - 06 - Result Processing: beginner/module-02-basic-search/code-samples/rest/06_result_processing.http
-          - 07 - Error Handling: beginner/module-02-basic-search/code-samples/rest/07_error_handling.http
-          - 08 - Search Patterns: beginner/module-02-basic-search/code-samples/rest/08_search_patterns.http
-      # - Exercises: beginner/module-02-basic-search/exercises/README.md
-    - Module 3 - Index Management:
-      - Overview: beginner/module-03-index-management/documentation.md
-      - Prerequisites: beginner/module-03-index-management/prerequisites.md
-      - Code Samples:
-        - Overview: beginner/module-03-index-management/code-samples/README.md
-        - Interactive Notebooks: beginner/module-03-index-management/code-samples/notebooks/README.md
-        - Python Examples:
-          - Overview: beginner/module-03-index-management/code-samples/python/README.md
-          - 01 - Create Basic Index: beginner/module-03-index-management/code-samples/python/01_create_basic_index.py
-          - 02 - Schema Design: beginner/module-03-index-management/code-samples/python/02_schema_design.py
-          - 03 - Data Ingestion: beginner/module-03-index-management/code-samples/python/03_data_ingestion.py
-          - 04 - Index Operations: beginner/module-03-index-management/code-samples/python/04_index_operations.py
-          - 05 - Performance Optimization: beginner/module-03-index-management/code-samples/python/05_performance_optimization.py
-          - 06 - Error Handling: beginner/module-03-index-management/code-samples/python/06_error_handling.py
-        - JavaScript Examples:
-          - Overview: beginner/module-03-index-management/code-samples/javascript/README.md
-          - 01 - Create Basic Index: beginner/module-03-index-management/code-samples/javascript/01_create_basic_index.js
-          - 02 - Schema Design: beginner/module-03-index-management/code-samples/javascript/02_schema_design.js
-          - 03 - Data Ingestion: beginner/module-03-index-management/code-samples/javascript/03_data_ingestion.js
-          - 04 - Index Operations: beginner/module-03-index-management/code-samples/javascript/04_index_operations.js
-          - 05 - Performance Optimization: beginner/module-03-index-management/code-samples/javascript/05_performance_optimization.js
-          - 06 - Error Handling: beginner/module-03-index-management/code-samples/javascript/06_error_handling.js
-        - C# Examples:
-          - Overview: beginner/module-03-index-management/code-samples/csharp/README.md
-          - 01 - Create Basic Index: beginner/module-03-index-management/code-samples/csharp/01_CreateBasicIndex.cs
-          - 02 - Schema Design: beginner/module-03-index-management/code-samples/csharp/02_SchemaDesign.cs
-          - 03 - Data Ingestion: beginner/module-03-index-management/code-samples/csharp/03_DataIngestion.cs
-          - 04 - Index Operations: beginner/module-03-index-management/code-samples/csharp/04_IndexOperations.cs
-          - 05 - Performance Optimization: beginner/module-03-index-management/code-samples/csharp/05_PerformanceOptimization.cs
-          - 06 - Error Handling: beginner/module-03-index-management/code-samples/csharp/06_ErrorHandling.cs
-        - REST API Examples:
-          - Overview: beginner/module-03-index-management/code-samples/rest/README.md
-          - 01 - Create Basic Index: beginner/module-03-index-management/code-samples/rest/01_create_basic_index.http
-          - 02 - Schema Design: beginner/module-03-index-management/code-samples/rest/02_schema_design.http
-          - 03 - Data Ingestion: beginner/module-03-index-management/code-samples/rest/03_data_ingestion.http
-          - 04 - Index Operations: beginner/module-03-index-management/code-samples/rest/04_index_operations.http
-          - 05 - Performance Optimization: beginner/module-03-index-management/code-samples/rest/05_performance_optimization.http
-          - 06 - Error Handling: beginner/module-03-index-management/code-samples/rest/06_error_handling.http
-      # - Exercises: beginner/module-03-index-management/exercises/README.md
-    - Module 4 - Simple Queries: beginner/module-04-simple-queries/documentation.md
+    # Simple modules (single page)
+    - "Module 1: Introduction & Setup": beginner/module-01-introduction-setup/documentation.md
+    
+    # Comprehensive modules (with detailed submenus)
+    - "Module 2: Basic Search":
+        - "📖 Overview": beginner/module-02-basic-search/documentation.md
+        - "⚙️ Prerequisites": beginner/module-02-basic-search/prerequisites.md
+        - "✨ Best Practices": beginner/module-02-basic-search/best-practices.md
+        - "🛠️ Practice & Implementation": beginner/module-02-basic-search/practice-implementation.md
+        - "🔧 Troubleshooting":
+            - "Search Operations": beginner/module-02-basic-search/search-troubleshooting.md
+            - "Prerequisites Setup": beginner/module-02-basic-search/prerequisites-troubleshooting.md
+        - "💻 Code Samples":
+            - "📋 Overview": beginner/module-02-basic-search/code-samples/README.md
+            - "📓 Interactive Notebooks": beginner/module-02-basic-search/code-samples/notebooks/README.md
+            - "🐍 Python Examples":
+                - "📖 Overview": beginner/module-02-basic-search/code-samples/python/README.md
+                - "01 - Simple Text Search": beginner/module-02-basic-search/code-samples/python/01_simple_text_search.py
+                - "02 - Phrase Search": beginner/module-02-basic-search/code-samples/python/02_phrase_search.py
+                - "03 - Boolean Search": beginner/module-02-basic-search/code-samples/python/03_boolean_search.py
+                - "04 - Wildcard Search": beginner/module-02-basic-search/code-samples/python/04_wildcard_search.py
+                - "05 - Field Search": beginner/module-02-basic-search/code-samples/python/05_field_search.py
+                - "06 - Result Processing": beginner/module-02-basic-search/code-samples/python/06_result_processing.py
+                - "07 - Error Handling": beginner/module-02-basic-search/code-samples/python/07_error_handling.py
+                - "08 - Search Patterns": beginner/module-02-basic-search/code-samples/python/08_search_patterns.py
+            - "🟨 JavaScript Examples":
+                - "📖 Overview": beginner/module-02-basic-search/code-samples/javascript/README.md
+                - "01 - Simple Text Search": beginner/module-02-basic-search/code-samples/javascript/01_simple_text_search.js
+                - "02 - Phrase Search": beginner/module-02-basic-search/code-samples/javascript/02_phrase_search.js
+                - "03 - Boolean Search": beginner/module-02-basic-search/code-samples/javascript/03_boolean_search.js
+                - "04 - Wildcard Search": beginner/module-02-basic-search/code-samples/javascript/04_wildcard_search.js
+                - "05 - Field Search": beginner/module-02-basic-search/code-samples/javascript/05_field_search.js
+                - "06 - Result Processing": beginner/module-02-basic-search/code-samples/javascript/06_result_processing.js
+                - "07 - Error Handling": beginner/module-02-basic-search/code-samples/javascript/07_error_handling.js
+                - "08 - Search Patterns": beginner/module-02-basic-search/code-samples/javascript/08_search_patterns.js
+            - "🔷 C# Examples":
+                - "📖 Overview": beginner/module-02-basic-search/code-samples/csharp/README.md
+                - "01 - Simple Text Search": beginner/module-02-basic-search/code-samples/csharp/01_SimpleTextSearch.cs
+                - "02 - Phrase Search": beginner/module-02-basic-search/code-samples/csharp/02_PhraseSearch.cs
+                - "03 - Boolean Search": beginner/module-02-basic-search/code-samples/csharp/03_BooleanSearch.cs
+                - "04 - Wildcard Search": beginner/module-02-basic-search/code-samples/csharp/04_WildcardSearch.cs
+                - "05 - Field Search": beginner/module-02-basic-search/code-samples/csharp/05_FieldSearch.cs
+                - "06 - Result Processing": beginner/module-02-basic-search/code-samples/csharp/06_ResultProcessing.cs
+                - "07 - Error Handling": beginner/module-02-basic-search/code-samples/csharp/07_ErrorHandling.cs
+                - "08 - Search Patterns": beginner/module-02-basic-search/code-samples/csharp/08_SearchPatterns.cs
+            - "🌐 REST API Examples":
+                - "📖 Overview": beginner/module-02-basic-search/code-samples/rest/README.md
+                - "01 - Simple Text Search": beginner/module-02-basic-search/code-samples/rest/01_simple_text_search.http
+                - "02 - Phrase Search": beginner/module-02-basic-search/code-samples/rest/02_phrase_search.http
+                - "03 - Boolean Search": beginner/module-02-basic-search/code-samples/rest/03_boolean_search.http
+                - "04 - Wildcard Search": beginner/module-02-basic-search/code-samples/rest/04_wildcard_search.http
+                - "05 - Field Search": beginner/module-02-basic-search/code-samples/rest/05_field_search.http
+                - "06 - Result Processing": beginner/module-02-basic-search/code-samples/rest/06_result_processing.http
+                - "07 - Error Handling": beginner/module-02-basic-search/code-samples/rest/07_error_handling.http
+                - "08 - Search Patterns": beginner/module-02-basic-search/code-samples/rest/08_search_patterns.http
+        # - "🎯 Exercises": beginner/module-02-basic-search/exercises/README.md
+    
+    - "Module 3: Index Management":
+        - "📖 Overview": beginner/module-03-index-management/documentation.md
+        - "⚙️ Prerequisites": beginner/module-03-index-management/prerequisites.md
+        - "✨ Best Practices": beginner/module-03-index-management/best-practices.md
+        - "🛠️ Practice & Implementation": beginner/module-03-index-management/practice-implementation.md
+        - "🔧 Troubleshooting":
+            - "Index Operations": beginner/module-03-index-management/index-troubleshooting.md
+            - "Schema Issues": beginner/module-03-index-management/schema-troubleshooting.md
+        - "💻 Code Samples":
+            - "📋 Overview": beginner/module-03-index-management/code-samples/README.md
+            - "📓 Interactive Notebooks": beginner/module-03-index-management/code-samples/notebooks/README.md
+            - "🐍 Python Examples":
+                - "📖 Overview": beginner/module-03-index-management/code-samples/python/README.md
+                - "01 - Create Basic Index": beginner/module-03-index-management/code-samples/python/01_create_basic_index.py
+                - "02 - Schema Design": beginner/module-03-index-management/code-samples/python/02_schema_design.py
+                - "03 - Data Ingestion": beginner/module-03-index-management/code-samples/python/03_data_ingestion.py
+                - "04 - Index Operations": beginner/module-03-index-management/code-samples/python/04_index_operations.py
+                - "05 - Performance Optimization": beginner/module-03-index-management/code-samples/python/05_performance_optimization.py
+                - "06 - Error Handling": beginner/module-03-index-management/code-samples/python/06_error_handling.py
+            - "🟨 JavaScript Examples":
+                - "📖 Overview": beginner/module-03-index-management/code-samples/javascript/README.md
+                - "01 - Create Basic Index": beginner/module-03-index-management/code-samples/javascript/01_create_basic_index.js
+                - "02 - Schema Design": beginner/module-03-index-management/code-samples/javascript/02_schema_design.js
+                - "03 - Data Ingestion": beginner/module-03-index-management/code-samples/javascript/03_data_ingestion.js
+                - "04 - Index Operations": beginner/module-03-index-management/code-samples/javascript/04_index_operations.js
+                - "05 - Performance Optimization": beginner/module-03-index-management/code-samples/javascript/05_performance_optimization.js
+                - "06 - Error Handling": beginner/module-03-index-management/code-samples/javascript/06_error_handling.js
+            - "🔷 C# Examples":
+                - "📖 Overview": beginner/module-03-index-management/code-samples/csharp/README.md
+                - "01 - Create Basic Index": beginner/module-03-index-management/code-samples/csharp/01_CreateBasicIndex.cs
+                - "02 - Schema Design": beginner/module-03-index-management/code-samples/csharp/02_SchemaDesign.cs
+                - "03 - Data Ingestion": beginner/module-03-index-management/code-samples/csharp/03_DataIngestion.cs
+                - "04 - Index Operations": beginner/module-03-index-management/code-samples/csharp/04_IndexOperations.cs
+                - "05 - Performance Optimization": beginner/module-03-index-management/code-samples/csharp/05_PerformanceOptimization.cs
+                - "06 - Error Handling": beginner/module-03-index-management/code-samples/csharp/06_ErrorHandling.cs
+            - "🌐 REST API Examples":
+                - "📖 Overview": beginner/module-03-index-management/code-samples/rest/README.md
+                - "01 - Create Basic Index": beginner/module-03-index-management/code-samples/rest/01_create_basic_index.http
+                - "02 - Schema Design": beginner/module-03-index-management/code-samples/rest/02_schema_design.http
+                - "03 - Data Ingestion": beginner/module-03-index-management/code-samples/rest/03_data_ingestion.http
+                - "04 - Index Operations": beginner/module-03-index-management/code-samples/rest/04_index_operations.http
+                - "05 - Performance Optimization": beginner/module-03-index-management/code-samples/rest/05_performance_optimization.http
+                - "06 - Error Handling": beginner/module-03-index-management/code-samples/rest/06_error_handling.http
+        # - "🎯 Exercises": beginner/module-03-index-management/exercises/README.md
+    
+    - "Module 4: Simple Queries":
+        - "📖 Overview": beginner/module-04-simple-queries/documentation.md
+        - "⚙️ Prerequisites": beginner/module-04-simple-queries/prerequisites.md
+        - "✨ Best Practices": beginner/module-04-simple-queries/best-practices.md
+        - "🛠️ Practice & Implementation": beginner/module-04-simple-queries/practice-implementation.md
+        - "🔧 Troubleshooting":
+            - "Query Operations": beginner/module-04-simple-queries/query-troubleshooting.md
+            - "Performance Issues": beginner/module-04-simple-queries/performance-troubleshooting.md
+        - "💻 Code Samples":
+            - "📋 Overview": beginner/module-04-simple-queries/code-samples/README.md
+            - "📓 Interactive Notebooks": beginner/module-04-simple-queries/code-samples/notebooks/README.md
+            - "🐍 Python Examples":
+                - "📖 Overview": beginner/module-04-simple-queries/code-samples/python/README.md
+                - "01 - Basic Queries": beginner/module-04-simple-queries/code-samples/python/01_basic_queries.py
+                - "02 - Filtering": beginner/module-04-simple-queries/code-samples/python/02_filtering.py
+                - "03 - Sorting & Pagination": beginner/module-04-simple-queries/code-samples/python/03_sorting_pagination.py
+                - "04 - Result Customization": beginner/module-04-simple-queries/code-samples/python/04_result_customization.py
+                - "05 - Advanced Queries": beginner/module-04-simple-queries/code-samples/python/05_advanced_queries.py
+                - "06 - Error Handling": beginner/module-04-simple-queries/code-samples/python/06_error_handling.py
+            - "🟨 JavaScript Examples":
+                - "📖 Overview": beginner/module-04-simple-queries/code-samples/javascript/README.md
+                - "01 - Basic Queries": beginner/module-04-simple-queries/code-samples/javascript/01_basic_queries.js
+                - "02 - Filtering": beginner/module-04-simple-queries/code-samples/javascript/02_filtering.js
+                - "03 - Sorting & Pagination": beginner/module-04-simple-queries/code-samples/javascript/03_sorting_pagination.js
+                - "04 - Result Customization": beginner/module-04-simple-queries/code-samples/javascript/04_result_customization.js
+                - "05 - Advanced Queries": beginner/module-04-simple-queries/code-samples/javascript/05_advanced_queries.js
+                - "06 - Error Handling": beginner/module-04-simple-queries/code-samples/javascript/06_error_handling.js
+            - "🔷 C# Examples":
+                - "📖 Overview": beginner/module-04-simple-queries/code-samples/csharp/README.md
+                - "01 - Basic Queries": beginner/module-04-simple-queries/code-samples/csharp/01_BasicQueries.cs
+                - "02 - Filtering": beginner/module-04-simple-queries/code-samples/csharp/02_Filtering.cs
+                - "03 - Sorting & Pagination": beginner/module-04-simple-queries/code-samples/csharp/03_SortingPagination.cs
+                - "04 - Result Customization": beginner/module-04-simple-queries/code-samples/csharp/04_ResultCustomization.cs
+                - "05 - Advanced Queries": beginner/module-04-simple-queries/code-samples/csharp/05_AdvancedQueries.cs
+                - "06 - Error Handling": beginner/module-04-simple-queries/code-samples/csharp/06_ErrorHandling.cs
+            - "🌐 REST API Examples":
+                - "📖 Overview": beginner/module-04-simple-queries/code-samples/rest/README.md
+                - "01 - Basic Queries": beginner/module-04-simple-queries/code-samples/rest/01_basic_queries.http
+                - "02 - Filtering": beginner/module-04-simple-queries/code-samples/rest/02_filtering.http
+                - "03 - Sorting & Pagination": beginner/module-04-simple-queries/code-samples/rest/03_sorting_pagination.http
+                - "04 - Result Customization": beginner/module-04-simple-queries/code-samples/rest/04_result_customization.http
+                - "05 - Advanced Queries": beginner/module-04-simple-queries/code-samples/rest/05_advanced_queries.http
+                - "06 - Error Handling": beginner/module-04-simple-queries/code-samples/rest/06_error_handling.http
+        # - "🎯 Exercises": beginner/module-04-simple-queries/exercises/README.md
+    
+    - "Module 5: Data Sources & Indexers":
+        - "📖 Overview": beginner/module-05-data-sources-indexers/documentation.md
+        - "⚙️ Prerequisites": beginner/module-05-data-sources-indexers/prerequisites.md
+        - "✨ Best Practices": beginner/module-05-data-sources-indexers/best-practices.md
+        - "🛠️ Practice & Implementation": beginner/module-05-data-sources-indexers/practice-implementation.md
+        - "🔧 Troubleshooting":
+            - "Indexer Operations": beginner/module-05-data-sources-indexers/indexer-troubleshooting.md
+            - "Data Source Setup": beginner/module-05-data-sources-indexers/datasource-troubleshooting.md
+        - "💻 Code Samples":
+            - "📋 Overview": beginner/module-05-data-sources-indexers/code-samples/README.md
+            - "📓 Interactive Notebooks": beginner/module-05-data-sources-indexers/code-samples/notebooks/README.md
+            - "🐍 Python Examples":
+                - "📖 Overview": beginner/module-05-data-sources-indexers/code-samples/python/README.md
+                - "01 - Azure SQL Indexer": beginner/module-05-data-sources-indexers/code-samples/python/01_azure_sql_indexer.py
+                - "02 - Blob Storage Indexer": beginner/module-05-data-sources-indexers/code-samples/python/02_blob_storage_indexer.py
+                - "03 - Cosmos DB Indexer": beginner/module-05-data-sources-indexers/code-samples/python/03_cosmos_db_indexer.py
+                - "04 - Change Detection": beginner/module-05-data-sources-indexers/code-samples/python/04_change_detection.py
+                - "05 - Indexer Scheduling": beginner/module-05-data-sources-indexers/code-samples/python/05_indexer_scheduling.py
+                - "06 - Field Mappings": beginner/module-05-data-sources-indexers/code-samples/python/06_field_mappings.py
+                - "07 - Error Handling": beginner/module-05-data-sources-indexers/code-samples/python/07_error_handling.py
+                - "08 - Monitoring & Optimization": beginner/module-05-data-sources-indexers/code-samples/python/08_monitoring_optimization.py
+            - "🟨 JavaScript Examples":
+                - "📖 Overview": beginner/module-05-data-sources-indexers/code-samples/javascript/README.md
+                - "01 - Azure SQL Indexer": beginner/module-05-data-sources-indexers/code-samples/javascript/01_azure_sql_indexer.js
+                - "02 - Blob Storage Indexer": beginner/module-05-data-sources-indexers/code-samples/javascript/02_blob_storage_indexer.js
+                - "03 - Cosmos DB Indexer": beginner/module-05-data-sources-indexers/code-samples/javascript/03_cosmos_db_indexer.js
+                - "04 - Change Detection": beginner/module-05-data-sources-indexers/code-samples/javascript/04_change_detection.js
+                - "05 - Indexer Scheduling": beginner/module-05-data-sources-indexers/code-samples/javascript/05_indexer_scheduling.js
+                - "06 - Field Mappings": beginner/module-05-data-sources-indexers/code-samples/javascript/06_field_mappings.js
+                - "07 - Error Handling": beginner/module-05-data-sources-indexers/code-samples/javascript/07_error_handling.js
+                - "08 - Monitoring & Optimization": beginner/module-05-data-sources-indexers/code-samples/javascript/08_monitoring_optimization.js
+            - "🔷 C# Examples":
+                - "📖 Overview": beginner/module-05-data-sources-indexers/code-samples/csharp/README.md
+                - "01 - Azure SQL Indexer": beginner/module-05-data-sources-indexers/code-samples/csharp/01_AzureSqlIndexer.cs
+                - "02 - Blob Storage Indexer": beginner/module-05-data-sources-indexers/code-samples/csharp/02_BlobStorageIndexer.cs
+                - "03 - Cosmos DB Indexer": beginner/module-05-data-sources-indexers/code-samples/csharp/03_CosmosDbIndexer.cs
+                - "04 - Change Detection": beginner/module-05-data-sources-indexers/code-samples/csharp/04_ChangeDetection.cs
+                - "05 - Indexer Scheduling": beginner/module-05-data-sources-indexers/code-samples/csharp/05_IndexerScheduling.cs
+                - "06 - Field Mappings": beginner/module-05-data-sources-indexers/code-samples/csharp/06_FieldMappings.cs
+                - "07 - Error Handling": beginner/module-05-data-sources-indexers/code-samples/csharp/07_ErrorHandling.cs
+                - "08 - Monitoring & Optimization": beginner/module-05-data-sources-indexers/code-samples/csharp/08_MonitoringOptimization.cs
+            - "🌐 REST API Examples":
+                - "📖 Overview": beginner/module-05-data-sources-indexers/code-samples/rest/README.md
+                - "01 - Azure SQL Indexer": beginner/module-05-data-sources-indexers/code-samples/rest/01_azure_sql_indexer.http
+                - "02 - Blob Storage Indexer": beginner/module-05-data-sources-indexers/code-samples/rest/02_blob_storage_indexer.http
+                - "03 - Cosmos DB Indexer": beginner/module-05-data-sources-indexers/code-samples/rest/03_cosmos_db_indexer.http
+                - "04 - Change Detection": beginner/module-05-data-sources-indexers/code-samples/rest/04_change_detection.http
+                - "05 - Indexer Scheduling": beginner/module-05-data-sources-indexers/code-samples/rest/05_indexer_scheduling.http
+                - "06 - Field Mappings": beginner/module-05-data-sources-indexers/code-samples/rest/06_field_mappings.http
+                - "07 - Error Handling": beginner/module-05-data-sources-indexers/code-samples/rest/07_error_handling.http
+                - "08 - Monitoring & Optimization": beginner/module-05-data-sources-indexers/code-samples/rest/08_monitoring_optimization.http
+        # - "🎯 Exercises": beginner/module-05-data-sources-indexers/exercises/README.md
+
   - Intermediate:
-    - Module 5 - Advanced Querying: intermediate/module-05-advanced-querying/documentation.md
-    - Module 6 - Analyzers & Scoring: intermediate/module-06-analyzers-scoring/documentation.md
-    - Module 7 - Facets & Aggregations: intermediate/module-07-facets-aggregations/documentation.md
-    - Module 8 - Security & Access: intermediate/module-08-security-access/documentation.md
+    # Simple modules (single page) - will be expanded with code samples later
+    - "Module 9: Advanced Querying": intermediate/module-09-advanced-querying/documentation.md
+    - "Module 10: Analyzers & Scoring": intermediate/module-10-analyzers-scoring/documentation.md
+    - "Module 11: Facets & Aggregations": intermediate/module-11-facets-aggregations/documentation.md
+    - "Module 12: Security & Access": intermediate/module-12-security-access/documentation.md
+  
   - Advanced:
-    - Module 9 - AI Enrichment: advanced/module-09-ai-enrichment/documentation.md
-    - Module 10 - Vector & Semantic Search: advanced/module-10-vector-semantic-search/documentation.md
-    - Module 11 - Performance Optimization: advanced/module-11-performance-optimization/documentation.md
-    - Module 12 - Production Deployment: advanced/module-12-production-deployment/documentation.md
+    # Simple modules (single page) - will be expanded with code samples later
+    - "Module 13: AI Enrichment": advanced/module-13-ai-enrichment/documentation.md
+    - "Module 14: Vector & Semantic Search": advanced/module-14-vector-semantic-search/documentation.md
+    - "Module 15: Performance Optimization": advanced/module-15-performance-optimization/documentation.md
+    - "Module 16: Production Deployment": advanced/module-16-production-deployment/documentation.md
   - Reference:
     - API Reference: reference/api-reference.md
     - Quick Reference: reference/quick-reference.md

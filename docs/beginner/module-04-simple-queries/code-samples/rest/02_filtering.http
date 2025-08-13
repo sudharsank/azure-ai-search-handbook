@@ -1,0 +1,398 @@
+###
+# Module 4: Simple Queries and Filters - Filtering (REST API)
+# ===========================================================
+#
+# This file demonstrates OData filter expressions in Azure AI Search using REST API calls.
+# Learn how to apply filters to narrow search results based on specific criteria.
+#
+# Prerequisites:
+# - Azure AI Search service configured
+# - Sample index with data (from previous modules)
+# - VS Code with REST Client extension (recommended)
+# - Or use curl, Postman, or any HTTP client
+#
+# Setup:
+# 1. Replace {{searchEndpoint}}, {{indexName}}, and {{apiKey}} with your values
+# 2. Or create a rest-client.env.json file with these variables
+#
+# Author: Azure AI Search Tutorial
+###
+
+# Variables (replace with your actual values)
+@searchEndpoint = https://your-service.search.windows.net
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2023-11-01
+
+###
+# EQUALITY FILTER EXAMPLES
+###
+
+### 1. Exact String Match
+# Filter documents by exact category match
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Not Equal Filter
+# Exclude documents with specific category
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category ne 'Draft'&$top=5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Search Text with Filter
+# Combine text search with category filter
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$filter=category eq 'Technology'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# COMPARISON FILTER EXAMPLES
+###
+
+### 4. Greater Than Filter
+# Find documents with rating greater than 4.0
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating gt 4.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 5. Greater Than or Equal Filter
+# Find highly rated documents (4.5 or higher)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 6. Less Than Filter
+# Find lower rated documents (less than 3.0)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating lt 3.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 7. Less Than or Equal Filter
+# Find documents with rating 3.0 or lower
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating le 3.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Range Filter (Between Values)
+# Find documents with rating between 3.0 and 4.0
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 3.0 and rating le 4.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# LOGICAL OPERATORS IN FILTERS
+###
+
+### 9. AND Operator
+# Documents that are Technology category AND have high rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology' and rating ge 4.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. OR Operator
+# Documents in either Technology or Science category
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology' or category eq 'Science'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 11. NOT Operator
+# Documents that are NOT in Draft category
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=not (category eq 'Draft')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Complex Logical Expression
+# Technology or Science documents with good ratings
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=(category eq 'Technology' or category eq 'Science') and rating gt 3.5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# DATE FILTER EXAMPLES
+###
+
+### 13. Published After Date
+# Documents published after January 1, 2023
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=publishedDate ge 2023-01-01T00:00:00Z
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 14. Published Before Date
+# Documents published before January 1, 2024
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=publishedDate lt 2024-01-01T00:00:00Z
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. Date Range Filter
+# Documents published in 2023
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=publishedDate ge 2023-01-01T00:00:00Z and publishedDate le 2023-12-31T23:59:59Z
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 16. Recent Documents (Last 30 Days)
+# Note: Replace the date with actual date 30 days ago
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=publishedDate ge 2024-12-12T00:00:00Z
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# COLLECTION FILTER EXAMPLES
+###
+
+### 17. Any Element Matches
+# Documents with 'python' tag
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=tags/any(t: t eq 'python')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Multiple Tag Options
+# Documents with either 'python' or 'javascript' tags
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=tags/any(t: t eq 'python' or t eq 'javascript')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 19. All Elements Match
+# Documents where all tags are not 'deprecated'
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=tags/all(t: t ne 'deprecated')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Complex Collection Filter
+# Documents with 'tutorial' tag AND high rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=tags/any(t: t eq 'tutorial') and rating ge 4.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# STRING FUNCTION EXAMPLES
+###
+
+### 21. Starts With Function
+# Categories that start with 'Tech'
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=startswith(category, 'Tech')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 22. Ends With Function
+# Titles that end with 'Guide'
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=endswith(title, 'Guide')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Contains Function
+# Titles containing 'Azure'
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=contains(title, 'Azure')
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 24. Length Function
+# Titles longer than 20 characters
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=length(title) gt 20
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# NUMERIC FILTER EXAMPLES
+###
+
+### 25. Price Range Filter
+# Documents with price between $10 and $100
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=price ge 10.0 and price le 100.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 26. High Rating Filter
+# Highly rated documents (4.5 or higher)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.5
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 27. Multiple Numeric Conditions
+# Good rating and reasonable price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.0 and price le 50.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# ADVANCED FILTER PATTERNS
+###
+
+### 28. Null Value Handling
+# Documents with non-null rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ne null
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 29. Complex Nested Conditions
+# Complex business logic filter
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=((category eq 'Technology' and rating gt 4.0) or (category eq 'Science' and rating gt 3.5)) and publishedDate ge 2023-01-01T00:00:00Z
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 30. Performance-Optimized Filter
+# Combine search with selective filters for better performance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=azure&$filter=rating ge 4.0 and category eq 'Technology'&$top=10
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# FILTER VALIDATION EXAMPLES (Error Cases)
+###
+
+### 31. Valid Filter (Should Work)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Technology'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 32. Invalid Field Name (Will Return 400 Bad Request)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=nonexistent_field eq 'value'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 33. Invalid Filter Syntax (Will Return 400 Bad Request)
+# Using '=' instead of 'eq'
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category = 'Technology'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 34. Type Mismatch (Will Return 400 Bad Request)
+# Trying to compare numeric field with string
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating eq 'high'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 35. Unbalanced Parentheses (Will Return 400 Bad Request)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=(category eq 'Technology' and rating gt 4.0
+Content-Type: application/json
+api-key: {{apiKey}}
+
+###
+# CURL EXAMPLES (for command line usage)
+###
+
+# Example 1: Basic filter using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&\$filter=category%20eq%20%27Technology%27" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 2: Complex filter using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=azure&\$filter=category%20eq%20%27Technology%27%20and%20rating%20ge%204.0" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+# Example 3: Collection filter using curl
+# curl -X GET \
+#   "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&\$filter=tags/any(t:%20t%20eq%20%27python%27)" \
+#   -H "Content-Type: application/json" \
+#   -H "api-key: your-api-key"
+
+###
+# POWERSHELL EXAMPLES
+###
+
+# Example 1: Basic filter using PowerShell
+# $headers = @{
+#     'Content-Type' = 'application/json'
+#     'api-key' = 'your-api-key'
+# }
+# $filter = "category eq 'Technology'"
+# $encodedFilter = [System.Web.HttpUtility]::UrlEncode($filter)
+# $uri = "https://your-service.search.windows.net/indexes/your-index/docs?api-version=2023-11-01&search=*&`$filter=$encodedFilter"
+# $response = Invoke-RestMethod -Uri $uri -Headers $headers -Method GET
+# $response | ConvertTo-Json -Depth 10
+
+###
+# URL ENCODING REFERENCE
+###
+
+# Important characters that need URL encoding in filters:
+# Space: %20
+# Single quote ('): %27
+# Double quote ("): %22
+# Ampersand (&): %26
+# Plus (+): %2B
+# Equals (=): %3D
+# Parentheses: ( = %28, ) = %29
+# Forward slash (/): %2F
+# Colon (:): %3A
+
+# Example of URL encoding:
+# Original: category eq 'Technology' and rating ge 4.0
+# Encoded:  category%20eq%20%27Technology%27%20and%20rating%20ge%204.0
+
+###
+# ODATA FILTER OPERATORS REFERENCE
+###
+
+# Comparison Operators:
+# eq - Equal to
+# ne - Not equal to
+# gt - Greater than
+# ge - Greater than or equal to
+# lt - Less than
+# le - Less than or equal to
+
+# Logical Operators:
+# and - Logical AND
+# or - Logical OR
+# not - Logical NOT
+
+# String Functions:
+# startswith(field, 'value') - Field starts with value
+# endswith(field, 'value') - Field ends with value
+# contains(field, 'value') - Field contains value
+# length(field) - Length of field value
+
+# Collection Functions:
+# any(variable: condition) - Any element matches condition
+# all(variable: condition) - All elements match condition
+
+# Math Functions:
+# add(field, value) - Addition
+# sub(field, value) - Subtraction
+# mul(field, value) - Multiplication
+# div(field, value) - Division
+# mod(field, value) - Modulo
+
+###
+# PERFORMANCE TIPS
+###
+
+# 1. Put most selective filters first
+# 2. Use indexed fields for filtering
+# 3. Combine filters with search text when possible
+# 4. Avoid complex nested conditions when simple ones suffice
+# 5. Use appropriate data types (don't compare numbers as strings)
+
+###
+# COMMON ERROR RESPONSES
+###
+
+# 400 Bad Request - Invalid filter syntax
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The request parameter '$filter' is invalid.",
+#     "details": [
+#       {
+#         "code": "InvalidSyntax",
+#         "message": "Syntax error in OData filter expression."
+#       }
+#     ]
+#   }
+# }
+
+# 400 Bad Request - Unknown field
+# {
+#   "error": {
+#     "code": "InvalidRequestParameter",
+#     "message": "The field 'nonexistent_field' is not filterable."
+#   }
+# }
+
+###
+# END OF FILTERING EXAMPLES
+###

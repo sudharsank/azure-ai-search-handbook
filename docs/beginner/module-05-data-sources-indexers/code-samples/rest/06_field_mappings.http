@@ -1,0 +1,811 @@
+### Advanced Field Mappings - REST API Examples
+### This file demonstrates advanced field mapping techniques for Azure AI Search indexers,
+### including complex transformations, built-in functions, and output field mappings.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Data sources with complex data structures
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY, SQL_CONNECTION_STRING
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@sqlConnectionString = {{SQL_CONNECTION_STRING}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. Create Data Source for Field Mapping Examples
+PUT {{searchEndpoint}}/datasources/field-mapping-demo-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "field-mapping-demo-datasource",
+  "type": "azuresql",
+  "connectionString": "{{sqlConnectionString}}",
+  "container": {
+    "name": "Products"
+  },
+  "description": "Demo data source for field mapping examples"
+}
+
+###
+
+### 3. Create Index for Field Mapping Demonstrations
+PUT {{searchEndpoint}}/indexes/field-mapping-demo-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "field-mapping-demo-index",
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false
+    },
+    {
+      "name": "name",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": true
+    },
+    {
+      "name": "description",
+      "type": "Edm.String",
+      "searchable": true,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "category",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true
+    },
+    {
+      "name": "price",
+      "type": "Edm.Double",
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "facetable": true
+    },
+    {
+      "name": "brand",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true
+    },
+    {
+      "name": "specifications",
+      "type": "Collection(Edm.String)",
+      "searchable": true
+    },
+    {
+      "name": "title",
+      "type": "Edm.String",
+      "searchable": true
+    },
+    {
+      "name": "fileExtension",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true
+    },
+    {
+      "name": "authorList",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "facetable": true
+    },
+    {
+      "name": "encodedPath",
+      "type": "Edm.String",
+      "searchable": false
+    },
+    {
+      "name": "keyphrases",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "facetable": true
+    },
+    {
+      "name": "entityNames",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "facetable": true
+    },
+    {
+      "name": "sentimentScore",
+      "type": "Edm.Double",
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "detectedLanguage",
+      "type": "Edm.String",
+      "filterable": true,
+      "facetable": true
+    }
+  ]
+}
+
+###
+
+### 4. Basic Field Mappings Indexer
+### Demonstrates simple field name transformations
+PUT {{searchEndpoint}}/indexers/basic-field-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "basic-field-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with basic field mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "ProductDescription",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "CategoryName",
+      "targetFieldName": "category"
+    },
+    {
+      "sourceFieldName": "UnitPrice",
+      "targetFieldName": "price"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### 5. Field Mappings with Built-in Functions
+### Demonstrates string manipulation and transformation functions
+PUT {{searchEndpoint}}/indexers/function-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "function-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with built-in mapping functions",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "Tags",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "brand",
+      "mappingFunction": {
+        "name": "extractTokenAtPosition",
+        "parameters": {
+          "delimiter": " ",
+          "position": 0
+        }
+      }
+    },
+    {
+      "sourceFieldName": "SpecificationsJson",
+      "targetFieldName": "specifications",
+      "mappingFunction": {
+        "name": "jsonArrayToStringCollection"
+      }
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### 6. Document Processing Field Mappings
+### Demonstrates field mappings for document processing scenarios
+PUT {{searchEndpoint}}/indexers/document-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "document-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with document processing field mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "DocumentPath",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "Title",
+      "targetFieldName": "title"
+    },
+    {
+      "sourceFieldName": "DocumentPath",
+      "targetFieldName": "fileExtension",
+      "mappingFunction": {
+        "name": "extractTokenAtPosition",
+        "parameters": {
+          "delimiter": ".",
+          "position": -1
+        }
+      }
+    },
+    {
+      "sourceFieldName": "Authors",
+      "targetFieldName": "authorList",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ";",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "DocumentPath",
+      "targetFieldName": "encodedPath",
+      "mappingFunction": {
+        "name": "urlEncode"
+      }
+    }
+  ],
+  "parameters": {
+    "batchSize": 50
+  }
+}
+
+###
+
+### 7. Complex E-commerce Field Mappings
+### Demonstrates complex transformations for e-commerce data
+PUT {{searchEndpoint}}/indexers/ecommerce-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "ecommerce-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with complex e-commerce field mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "ProductDescription",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Categories",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "brand",
+      "mappingFunction": {
+        "name": "extractTokenAtPosition",
+        "parameters": {
+          "delimiter": " ",
+          "position": 0
+        }
+      }
+    },
+    {
+      "sourceFieldName": "CategoryPath",
+      "targetFieldName": "category",
+      "mappingFunction": {
+        "name": "extractTokenAtPosition",
+        "parameters": {
+          "delimiter": "/",
+          "position": -1
+        }
+      }
+    },
+    {
+      "sourceFieldName": "UnitPrice",
+      "targetFieldName": "price"
+    }
+  ],
+  "parameters": {
+    "batchSize": 150,
+    "maxFailedItems": 15
+  }
+}
+
+###
+
+### 8. Base64 Encoding/Decoding Field Mappings
+### Demonstrates Base64 encoding and decoding functions
+PUT {{searchEndpoint}}/indexers/base64-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "base64-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with Base64 encoding/decoding mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "BinaryData",
+      "targetFieldName": "encodedPath",
+      "mappingFunction": {
+        "name": "base64Encode"
+      }
+    },
+    {
+      "sourceFieldName": "EncodedDescription",
+      "targetFieldName": "description",
+      "mappingFunction": {
+        "name": "base64Decode"
+      }
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### 9. URL Encoding/Decoding Field Mappings
+### Demonstrates URL encoding and decoding functions
+PUT {{searchEndpoint}}/indexers/url-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "url-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with URL encoding/decoding mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "FilePath",
+      "targetFieldName": "encodedPath",
+      "mappingFunction": {
+        "name": "urlEncode"
+      }
+    },
+    {
+      "sourceFieldName": "EncodedUrl",
+      "targetFieldName": "description",
+      "mappingFunction": {
+        "name": "urlDecode"
+      }
+    }
+  ],
+  "parameters": {
+    "batchSize": 100
+  }
+}
+
+###
+
+### 10. Output Field Mappings for AI Enrichment
+### Demonstrates output field mappings for cognitive skills (conceptual example)
+PUT {{searchEndpoint}}/indexers/ai-enrichment-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "ai-enrichment-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer with AI enrichment output field mappings",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "ProductDescription",
+      "targetFieldName": "description"
+    }
+  ],
+  "outputFieldMappings": [
+    {
+      "sourceFieldName": "/document/content/keyphrases/*",
+      "targetFieldName": "keyphrases"
+    },
+    {
+      "sourceFieldName": "/document/content/entities/*/name",
+      "targetFieldName": "entityNames"
+    },
+    {
+      "sourceFieldName": "/document/content/sentiment/score",
+      "targetFieldName": "sentimentScore"
+    },
+    {
+      "sourceFieldName": "/document/content/language",
+      "targetFieldName": "detectedLanguage"
+    }
+  ],
+  "parameters": {
+    "batchSize": 50
+  }
+}
+
+###
+
+### 11. Get All Indexers to View Field Mappings
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 12. Get Specific Indexer Field Mapping Details
+### View basic field mappings
+GET {{searchEndpoint}}/indexers/basic-field-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View function mappings
+GET {{searchEndpoint}}/indexers/function-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View document mappings
+GET {{searchEndpoint}}/indexers/document-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### View e-commerce mappings
+GET {{searchEndpoint}}/indexers/ecommerce-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 13. Test Field Mapping Indexers
+### Run basic field mappings indexer
+POST {{searchEndpoint}}/indexers/basic-field-mappings-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run function mappings indexer
+POST {{searchEndpoint}}/indexers/function-mappings-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run document mappings indexer
+POST {{searchEndpoint}}/indexers/document-mappings-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 14. Monitor Field Mapping Indexer Status
+### Check basic mappings status
+GET {{searchEndpoint}}/indexers/basic-field-mappings-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Check function mappings status
+GET {{searchEndpoint}}/indexers/function-mappings-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Check document mappings status
+GET {{searchEndpoint}}/indexers/document-mappings-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 15. Test Search Results with Field Mappings
+### Search all documents to verify field mappings worked
+GET {{searchEndpoint}}/indexes/field-mapping-demo-index/docs?api-version={{apiVersion}}&search=*&$top=10
+api-key: {{apiKey}}
+
+###
+
+### Search by mapped brand field
+GET {{searchEndpoint}}/indexes/field-mapping-demo-index/docs?api-version={{apiVersion}}&search=*&$filter=brand ne null&$top=5
+api-key: {{apiKey}}
+
+###
+
+### Search by mapped tags collection
+GET {{searchEndpoint}}/indexes/field-mapping-demo-index/docs?api-version={{apiVersion}}&search=*&facet=tags&$top=0
+api-key: {{apiKey}}
+
+###
+
+### Search by file extension (from document mappings)
+GET {{searchEndpoint}}/indexes/field-mapping-demo-index/docs?api-version={{apiVersion}}&search=*&facet=fileExtension&$top=0
+api-key: {{apiKey}}
+
+###
+
+### 16. Update Field Mappings
+### Update function mappings indexer with additional transformations
+PUT {{searchEndpoint}}/indexers/function-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "function-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Updated indexer with enhanced mapping functions",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "ProductDescription",
+      "targetFieldName": "description"
+    },
+    {
+      "sourceFieldName": "Tags",
+      "targetFieldName": "tags",
+      "mappingFunction": {
+        "name": "splitAndTrim",
+        "parameters": {
+          "delimiter": ",",
+          "trimWhitespace": true
+        }
+      }
+    },
+    {
+      "sourceFieldName": "ProductName",
+      "targetFieldName": "brand",
+      "mappingFunction": {
+        "name": "extractTokenAtPosition",
+        "parameters": {
+          "delimiter": " ",
+          "position": 0
+        }
+      }
+    },
+    {
+      "sourceFieldName": "SpecificationsJson",
+      "targetFieldName": "specifications",
+      "mappingFunction": {
+        "name": "jsonArrayToStringCollection"
+      }
+    },
+    {
+      "sourceFieldName": "CategoryPath",
+      "targetFieldName": "category",
+      "mappingFunction": {
+        "name": "extractTokenAtPosition",
+        "parameters": {
+          "delimiter": "/",
+          "position": -1
+        }
+      }
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10
+  }
+}
+
+###
+
+### 17. Test Field Mapping Error Handling
+### Create indexer with intentionally problematic field mappings
+PUT {{searchEndpoint}}/indexers/error-test-mappings-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "error-test-mappings-indexer",
+  "dataSourceName": "field-mapping-demo-datasource",
+  "targetIndexName": "field-mapping-demo-index",
+  "description": "Indexer to test field mapping error handling",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "ProductID",
+      "targetFieldName": "id"
+    },
+    {
+      "sourceFieldName": "NonExistentField",
+      "targetFieldName": "name"
+    },
+    {
+      "sourceFieldName": "InvalidJsonField",
+      "targetFieldName": "specifications",
+      "mappingFunction": {
+        "name": "jsonArrayToStringCollection"
+      }
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 50,
+    "maxFailedItemsPerBatch": 25
+  }
+}
+
+###
+
+### Run error test indexer
+POST {{searchEndpoint}}/indexers/error-test-mappings-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Check error test indexer status
+GET {{searchEndpoint}}/indexers/error-test-mappings-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 18. Reset Indexer with Field Mappings
+### Reset indexer to reprocess all data with new mappings
+POST {{searchEndpoint}}/indexers/function-mappings-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Run after reset
+POST {{searchEndpoint}}/indexers/function-mappings-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 19. Validate Field Mapping Results
+### Test specific field mapping transformations
+GET {{searchEndpoint}}/indexes/field-mapping-demo-index/docs?api-version={{apiVersion}}&search=*&$select=id,name,brand,tags,specifications&$top=5
+api-key: {{apiKey}}
+
+###
+
+### Test document processing mappings
+GET {{searchEndpoint}}/indexes/field-mapping-demo-index/docs?api-version={{apiVersion}}&search=*&$select=id,title,fileExtension,authorList,encodedPath&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 20. Cleanup - Delete Field Mapping Resources (optional)
+### Delete all test indexers
+DELETE {{searchEndpoint}}/indexers/basic-field-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/function-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/document-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/ecommerce-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/base64-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/url-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/ai-enrichment-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/indexers/error-test-mappings-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index and data source
+DELETE {{searchEndpoint}}/indexes/field-mapping-demo-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+DELETE {{searchEndpoint}}/datasources/field-mapping-demo-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - Field mappings connect source fields to target index fields
+### - Built-in functions provide powerful data transformation capabilities
+### - splitAndTrim: Splits delimited strings into collections
+### - extractTokenAtPosition: Extracts specific tokens from strings
+### - jsonArrayToStringCollection: Converts JSON arrays to searchable collections
+### - base64Encode/Decode: Handles binary data encoding
+### - urlEncode/Decode: Handles URL-safe string encoding
+### - Output field mappings are used with cognitive skills for AI enrichment
+### - Test field mappings with sample data before production use
+### - Monitor indexer execution for field mapping errors
+### - Use appropriate error handling thresholds for problematic data

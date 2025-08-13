@@ -1,0 +1,365 @@
+### Azure Blob Storage Indexer - REST API Examples
+### This file demonstrates how to create and manage indexers for Azure Blob Storage data sources
+### using the Azure AI Search REST API.
+
+### Prerequisites:
+### - Azure AI Search service
+### - Azure Storage Account with sample documents
+### - Admin API key
+### - Set environment variables: SEARCH_ENDPOINT, SEARCH_API_KEY, STORAGE_CONNECTION_STRING
+
+### Variables (replace with your actual values)
+@searchEndpoint = {{SEARCH_ENDPOINT}}
+@apiKey = {{SEARCH_API_KEY}}
+@storageConnectionString = {{STORAGE_CONNECTION_STRING}}
+@apiVersion = 2024-07-01
+
+### 1. Test Service Connectivity
+GET {{searchEndpoint}}/servicestats?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 2. Create Blob Storage Data Source
+### Creates a data source connection to Azure Blob Storage with LastModified change detection
+PUT {{searchEndpoint}}/datasources/blob-documents-datasource?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "blob-documents-datasource",
+  "type": "azureblob",
+  "connectionString": "{{storageConnectionString}}",
+  "container": {
+    "name": "sample-documents"
+  },
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "metadata_storage_last_modified"
+  },
+  "description": "Document data from Azure Blob Storage with LastModified detection"
+}
+
+###
+
+### 3. Get Data Source (verify creation)
+GET {{searchEndpoint}}/datasources/blob-documents-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 4. Create Document Index
+### Creates a search index optimized for document content and metadata
+PUT {{searchEndpoint}}/indexes/documents-blob-index?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "documents-blob-index",
+  "fields": [
+    {
+      "name": "metadata_storage_path",
+      "type": "Edm.String",
+      "key": true,
+      "searchable": false,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false,
+      "analyzer": "en.lucene"
+    },
+    {
+      "name": "metadata_storage_name",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false
+    },
+    {
+      "name": "metadata_storage_size",
+      "type": "Edm.Int64",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false
+    },
+    {
+      "name": "metadata_storage_last_modified",
+      "type": "Edm.DateTimeOffset",
+      "searchable": false,
+      "filterable": true,
+      "sortable": true,
+      "facetable": false
+    },
+    {
+      "name": "metadata_storage_content_type",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true
+    },
+    {
+      "name": "metadata_language",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true
+    },
+    {
+      "name": "metadata_title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": false
+    },
+    {
+      "name": "metadata_author",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "sortable": false,
+      "facetable": true
+    },
+    {
+      "name": "keyphrases",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": false,
+      "sortable": false,
+      "facetable": true
+    }
+  ]
+}
+
+###
+
+### 5. Get Index (verify creation)
+GET {{searchEndpoint}}/indexes/documents-blob-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 6. Create Blob Storage Indexer
+### Creates an indexer to process documents from blob storage
+PUT {{searchEndpoint}}/indexers/documents-blob-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "documents-blob-indexer",
+  "dataSourceName": "blob-documents-datasource",
+  "targetIndexName": "documents-blob-index",
+  "description": "Indexer for documents from blob storage",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "metadata_storage_path",
+      "targetFieldName": "metadata_storage_path"
+    },
+    {
+      "sourceFieldName": "content",
+      "targetFieldName": "content"
+    },
+    {
+      "sourceFieldName": "metadata_storage_name",
+      "targetFieldName": "metadata_storage_name"
+    },
+    {
+      "sourceFieldName": "metadata_storage_size",
+      "targetFieldName": "metadata_storage_size"
+    },
+    {
+      "sourceFieldName": "metadata_storage_last_modified",
+      "targetFieldName": "metadata_storage_last_modified"
+    },
+    {
+      "sourceFieldName": "metadata_storage_content_type",
+      "targetFieldName": "metadata_storage_content_type"
+    }
+  ],
+  "parameters": {
+    "batchSize": 50,
+    "maxFailedItems": 5,
+    "maxFailedItemsPerBatch": 2,
+    "configuration": {
+      "dataToExtract": "contentAndMetadata",
+      "parsingMode": "default",
+      "excludedFileNameExtensions": ".png,.jpg,.jpeg,.gif,.bmp"
+    }
+  }
+}
+
+###
+
+### 7. Get Indexer (verify creation)
+GET {{searchEndpoint}}/indexers/documents-blob-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 8. Run Indexer
+### Starts the indexer execution
+POST {{searchEndpoint}}/indexers/documents-blob-indexer/run?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 9. Get Indexer Status
+### Monitors indexer execution and shows progress
+GET {{searchEndpoint}}/indexers/documents-blob-indexer/status?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 10. Search Documents (test results)
+### Search for all documents to verify indexing worked
+GET {{searchEndpoint}}/indexes/documents-blob-index/docs?api-version={{apiVersion}}&search=*&$top=10
+api-key: {{apiKey}}
+
+###
+
+### 11. Search by Content Type
+### Filter documents by content type
+GET {{searchEndpoint}}/indexes/documents-blob-index/docs?api-version={{apiVersion}}&search=*&$filter=metadata_storage_content_type eq 'application/pdf'&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 12. Search by File Size
+### Find large documents (over 100KB)
+GET {{searchEndpoint}}/indexes/documents-blob-index/docs?api-version={{apiVersion}}&search=*&$filter=metadata_storage_size gt 100000&$orderby=metadata_storage_size desc&$top=5
+api-key: {{apiKey}}
+
+###
+
+### 13. Content Search
+### Search within document content
+GET {{searchEndpoint}}/indexes/documents-blob-index/docs?api-version={{apiVersion}}&search=hotel&$top=5&$select=metadata_storage_name,content
+api-key: {{apiKey}}
+
+###
+
+### 14. Faceted Search by Content Type
+### Get facets for content types
+GET {{searchEndpoint}}/indexes/documents-blob-index/docs?api-version={{apiVersion}}&search=*&facet=metadata_storage_content_type&$top=0
+api-key: {{apiKey}}
+
+###
+
+### 15. Recent Documents
+### Find recently modified documents
+GET {{searchEndpoint}}/indexes/documents-blob-index/docs?api-version={{apiVersion}}&search=*&$orderby=metadata_storage_last_modified desc&$top=5&$select=metadata_storage_name,metadata_storage_last_modified
+api-key: {{apiKey}}
+
+###
+
+### 16. Reset Indexer (if needed)
+### Resets the indexer to reprocess all documents
+POST {{searchEndpoint}}/indexers/documents-blob-indexer/reset?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 17. Update Indexer Configuration
+### Example: Update batch size for better performance
+PUT {{searchEndpoint}}/indexers/documents-blob-indexer?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+  "name": "documents-blob-indexer",
+  "dataSourceName": "blob-documents-datasource",
+  "targetIndexName": "documents-blob-index",
+  "description": "Indexer for documents from blob storage - optimized",
+  "fieldMappings": [
+    {
+      "sourceFieldName": "metadata_storage_path",
+      "targetFieldName": "metadata_storage_path"
+    },
+    {
+      "sourceFieldName": "content",
+      "targetFieldName": "content"
+    },
+    {
+      "sourceFieldName": "metadata_storage_name",
+      "targetFieldName": "metadata_storage_name"
+    },
+    {
+      "sourceFieldName": "metadata_storage_size",
+      "targetFieldName": "metadata_storage_size"
+    },
+    {
+      "sourceFieldName": "metadata_storage_last_modified",
+      "targetFieldName": "metadata_storage_last_modified"
+    },
+    {
+      "sourceFieldName": "metadata_storage_content_type",
+      "targetFieldName": "metadata_storage_content_type"
+    }
+  ],
+  "parameters": {
+    "batchSize": 100,
+    "maxFailedItems": 10,
+    "maxFailedItemsPerBatch": 5,
+    "configuration": {
+      "dataToExtract": "contentAndMetadata",
+      "parsingMode": "default",
+      "excludedFileNameExtensions": ".png,.jpg,.jpeg,.gif,.bmp,.zip,.exe",
+      "failOnUnsupportedContentType": false,
+      "failOnUnprocessableDocument": false
+    }
+  }
+}
+
+###
+
+### 18. List All Data Sources
+### View all data sources in the service
+GET {{searchEndpoint}}/datasources?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 19. List All Indexers
+### View all indexers in the service
+GET {{searchEndpoint}}/indexers?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### 20. Cleanup - Delete Resources (optional)
+### Delete indexer first
+DELETE {{searchEndpoint}}/indexers/documents-blob-indexer?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete index
+DELETE {{searchEndpoint}}/indexes/documents-blob-index?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Delete data source
+DELETE {{searchEndpoint}}/datasources/blob-documents-datasource?api-version={{apiVersion}}
+api-key: {{apiKey}}
+
+###
+
+### Notes:
+### - Replace {{SEARCH_ENDPOINT}}, {{SEARCH_API_KEY}}, and {{STORAGE_CONNECTION_STRING}} with your actual values
+### - Ensure your storage account has a container named "sample-documents" with documents
+### - The indexer will process various document formats (PDF, Word, JSON, etc.)
+### - LastModified change detection enables incremental updates
+### - Monitor the indexer status to track processing progress
+### - Use the search examples to verify documents were indexed correctly
