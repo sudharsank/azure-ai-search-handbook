@@ -1,0 +1,31 @@
+{
+  "name": "azure-search-filters-sorting-examples",
+  "version": "1.0.0",
+  "description": "JavaScript examples for Azure AI Search filters and sorting",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:performance": "jest --testPathPattern=performance",
+    "start": "node run_all_examples.js"
+  },
+  "dependencies": {
+    "@azure/search-documents": "^11.3.0",
+    "@azure/identity": "^3.1.0",
+    "@azure/core-auth": "^1.4.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "keywords": [
+    "azure",
+    "search",
+    "filters",
+    "sorting",
+    "javascript",
+    "nodejs"
+  ],
+  "author": "Azure AI Search Handbook",
+  "license": "MIT"
+}

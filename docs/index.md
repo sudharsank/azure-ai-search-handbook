@@ -11,22 +11,26 @@ Perfect for developers new to Azure AI Search or search technologies in general.
 - **Module 2: Basic Search Operations** - Learn core search functionality
 - **Module 3: Index Management** - Master index creation and data ingestion
 - **Module 4: Simple Queries and Filters** - Build effective search queries
+- **Module 5: Data Sources and Indexers** - Automated data ingestion and indexing
+- **Module 6: Filters and Sorting** - Advanced filtering and result ordering
+- **Module 7: Pagination and Result Shaping** - Managing large result sets and response formatting
+- **Module 8: Search Explorer and Portal Tools** - Using Azure portal tools for search development
 
 ### 🟡 Intermediate Level
 For developers ready to implement more sophisticated search solutions.
 
-- **Module 5: Advanced Querying** - Complex queries and relevance tuning
-- **Module 6: Analyzers and Custom Scoring** - Text analysis and custom relevance
-- **Module 7: Facets and Aggregations** - Build rich search experiences
-- **Module 8: Security and Access Control** - Secure your search implementation
+- **Module 9: Advanced Querying** - Complex queries and relevance tuning
+- **Module 10: Analyzers and Custom Scoring** - Text analysis and custom relevance
+- **Module 11: Facets and Aggregations** - Build rich search experiences
+- **Module 12: Security and Access Control** - Secure your search implementation
 
 ### 🔴 Advanced Level
 Expert-level topics for production-ready implementations.
 
-- **Module 9: AI Enrichment and Cognitive Skills** - AI-powered content enhancement
-- **Module 10: Vector Search and Semantic Search** - Modern search capabilities
-- **Module 11: Performance Optimization** - Scale and optimize for production
-- **Module 12: Production Deployment and Monitoring** - Enterprise deployment strategies
+- **Module 13: AI Enrichment and Cognitive Skills** - AI-powered content enhancement
+- **Module 14: Vector Search and Semantic Search** - Modern search capabilities
+- **Module 15: Performance Optimization** - Scale and optimize for production
+- **Module 16: Production Deployment and Monitoring** - Enterprise deployment strategies
 
 ## How to Use This Handbook
 

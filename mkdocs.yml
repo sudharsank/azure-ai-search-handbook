@@ -278,19 +278,33 @@ nav:
                 - "08 - Monitoring & Optimization": beginner/module-05-data-sources-indexers/code-samples/rest/08_monitoring_optimization.http
         # - "🎯 Exercises": beginner/module-05-data-sources-indexers/exercises/README.md
 
+    - "Module 6: Filters & Sorting":
+        - "📖 Overview": beginner/module-06-filters-sorting/documentation.md
+        - "⚙️ Prerequisites": beginner/module-06-filters-sorting/prerequisites.md
+        - "✨ Best Practices": beginner/module-06-filters-sorting/best-practices.md
+        - "🛠️ Practice & Implementation": beginner/module-06-filters-sorting/practice-implementation.md
+        - "💻 Code Samples":
+            - "📋 Overview": beginner/module-06-filters-sorting/code-samples/README.md
+            - "📓 Interactive Notebooks": beginner/module-06-filters-sorting/code-samples/notebooks/README.md
+            - "🐍 Python Examples":
+                - "📖 Overview": beginner/module-06-filters-sorting/code-samples/python/README.md
+    
+    - "Module 7: Pagination & Result Shaping": beginner/module-07-pagination-result-shaping/documentation.md
+    - "Module 8: Search Explorer & Portal Tools": beginner/module-08-search-explorer-portal-tools/documentation.md
+
   - Intermediate:
     # Simple modules (single page) - will be expanded with code samples later
-    - "Module 9: Advanced Querying": intermediate/module-09-advanced-querying/documentation.md
-    - "Module 10: Analyzers & Scoring": intermediate/module-10-analyzers-scoring/documentation.md
-    - "Module 11: Facets & Aggregations": intermediate/module-11-facets-aggregations/documentation.md
-    - "Module 12: Security & Access": intermediate/module-12-security-access/documentation.md
+    - "Module 9: Advanced Querying": intermediate/module-05-advanced-querying/documentation.md
+    - "Module 10: Analyzers & Scoring": intermediate/module-06-analyzers-scoring/documentation.md
+    - "Module 11: Facets & Aggregations": intermediate/module-07-facets-aggregations/documentation.md
+    - "Module 12: Security & Access": intermediate/module-08-security-access/documentation.md
   
   - Advanced:
     # Simple modules (single page) - will be expanded with code samples later
-    - "Module 13: AI Enrichment": advanced/module-13-ai-enrichment/documentation.md
-    - "Module 14: Vector & Semantic Search": advanced/module-14-vector-semantic-search/documentation.md
-    - "Module 15: Performance Optimization": advanced/module-15-performance-optimization/documentation.md
-    - "Module 16: Production Deployment": advanced/module-16-production-deployment/documentation.md
+    - "Module 13: AI Enrichment": advanced/module-09-ai-enrichment/documentation.md
+    - "Module 14: Vector & Semantic Search": advanced/module-10-vector-semantic-search/documentation.md
+    - "Module 15: Performance Optimization": advanced/module-11-performance-optimization/documentation.md
+    - "Module 16: Production Deployment": advanced/module-12-production-deployment/documentation.md
   - Reference:
     - API Reference: reference/api-reference.md
     - Quick Reference: reference/quick-reference.md

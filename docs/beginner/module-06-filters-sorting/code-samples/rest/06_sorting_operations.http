@@ -1,0 +1,264 @@
+### Azure AI Search - Sorting Operations Examples
+### This file demonstrates various sorting strategies including single-field, multi-field, and geographic sorting
+
+### Variables (Update these with your values)
+@searchEndpoint = https://your-search-service.search.windows.net
+@apiKey = your-admin-api-key
+@indexName = your-index-name
+@apiVersion = 2023-11-01
+
+### Test Connection
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== BASIC SINGLE-FIELD SORTING =====
+
+### 1. Sort by Price: Low to High
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=5&$select=id,name,price,category,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Sort by Price: High to Low
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price desc&$top=5&$select=id,name,price,category,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. Sort by Rating: Highest First
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc&$top=5&$select=id,name,rating,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 4. Sort by Name: Alphabetical
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=name asc&$top=5&$select=id,name,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 5. Sort by Date: Newest First
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=createdDate desc&$top=5&$select=id,name,createdDate,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== MULTI-FIELD SORTING =====
+
+### 6. Sort by Category, then Rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=category asc, rating desc&$top=8&$select=id,name,category,rating,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 7. Sort by Rating, then Price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc, price asc&$top=8&$select=id,name,rating,price,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Sort by Brand, Category, then Price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=brand asc, category asc, price asc&$top=8&$select=id,name,brand,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 9. Sort by Stock Status, then Rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=inStock desc, rating desc&$top=8&$select=id,name,inStock,rating,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. Sort by Price Range, then Name
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price desc, name asc&$top=8&$select=id,name,price,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== GEOGRAPHIC SORTING =====
+
+### 11. Sort by Distance from Seattle (Nearest First)
+# Seattle coordinates: -122.3321, 47.6062
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=geo.distance(location, geography'POINT(-122.3321 47.6062)')&$top=5&$select=id,name,location,address
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Sort by Distance, then Rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=geo.distance(location, geography'POINT(-122.3321 47.6062)'), rating desc&$top=5&$select=id,name,location,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 13. Sort by Rating, then Distance
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc, geo.distance(location, geography'POINT(-122.3321 47.6062)')&$top=5&$select=id,name,rating,location
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== SORTING WITH FILTERS =====
+
+### 14. Electronics by Price (Low to High)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$orderby=price asc&$top=5&$select=id,name,category,price,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. High-rated Items by Price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.0&$orderby=price asc&$top=5&$select=id,name,rating,price,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 16. In-stock Premium Items by Rating and Price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=inStock eq true and price ge 500&$orderby=rating desc, price desc&$top=5&$select=id,name,inStock,price,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 17. Recent Items by Rating and Date
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=createdDate ge 2024-01-01T00:00:00Z&$orderby=rating desc, createdDate desc&$top=5&$select=id,name,rating,createdDate
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== SEARCH WITH SORTING =====
+
+### 18. Search "phone" sorted by Relevance (default)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=phone&$top=5&$select=id,name,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 19. Search "phone" sorted by Price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=phone&$orderby=price asc&$top=5&$select=id,name,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Search "laptop" sorted by Rating, then Price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=laptop&$orderby=rating desc, price asc&$top=5&$select=id,name,rating,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== ADVANCED SORTING SCENARIOS =====
+
+### 21. E-commerce: Best Value (High Rating, Low Price)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc, price asc&$top=8&$select=id,name,rating,price,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 22. Catalog Browse: Organized by Category and Name
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=category asc, name asc&$top=8&$select=id,name,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Premium First: High Price, High Rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price desc, rating desc&$top=8&$select=id,name,price,rating,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 24. Latest and Greatest: New + Highly Rated
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=createdDate desc, rating desc&$top=8&$select=id,name,createdDate,rating,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== PAGINATION WITH SORTING =====
+
+### 25. Sorted Results - Page 1
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=5&$skip=0&$count=true&$select=id,name,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 26. Sorted Results - Page 2
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=5&$skip=5&$count=true&$select=id,name,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 27. Sorted Results - Page 3
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=5&$skip=10&$count=true&$select=id,name,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== PERFORMANCE TESTING =====
+
+### 28. Single Field Sort Performance Test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=100&$select=id,name,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 29. Multi-Field Sort Performance Test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=category asc, rating desc, price asc&$top=100&$select=id,name,category,rating,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 30. String Sort Performance Test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=name asc&$top=100&$select=id,name,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== ERROR TESTING =====
+
+### 31. Invalid sort field - Should return 400 error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=nonexistentfield asc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 32. Invalid sort direction - Should return 400 error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price up
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 33. Non-sortable field - Should return 400 error (if field not marked sortable)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=description asc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== COMPLEX SCENARIOS =====
+
+### 34. Location-based Product Search
+# Find electronics near Seattle, sorted by distance and rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$orderby=geo.distance(location, geography'POINT(-122.3321 47.6062)'), rating desc&$top=5&$select=id,name,location,rating,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 35. Inventory Management View
+# In-stock items sorted by category and stock level
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=inStock eq true&$orderby=category asc, quantityInStock desc&$top=10&$select=id,name,category,quantityInStock,inStock
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 36. Customer Recommendation View
+# High-rated, reasonably priced items
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.0 and price le 300&$orderby=rating desc, price asc&$top=8&$select=id,name,rating,price,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== FACETED SEARCH WITH SORTING =====
+
+### 37. Get facets with sorted results
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=price asc&$top=5&$facet=category&$facet=brand&$select=id,name,price,category,brand
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 38. Category facets with rating sort
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$orderby=rating desc&$top=5&$facet=category,count:10&$select=id,name,rating,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== NOTES =====
+#
+# Sorting Syntax Rules:
+# - Field names must be marked as 'sortable' in the index schema
+# - Sort directions: asc (ascending), desc (descending)
+# - Multiple fields separated by commas: field1 asc, field2 desc
+# - Geographic sorting: geo.distance(fieldname, geography'POINT(lon lat)')
+#
+# Sort Field Types:
+# - Numeric fields (Edm.Double, Edm.Int32): Fastest sorting
+# - Date fields (Edm.DateTimeOffset): Fast sorting
+# - String fields (Edm.String): Slower, especially for large text
+# - Boolean fields (Edm.Boolean): Fast sorting
+# - Geographic fields (Edm.GeographyPoint): Moderate speed
+#
+# Performance Tips:
+# - Numeric sorts are faster than string sorts
+# - Single-field sorts are faster than multi-field sorts
+# - Limit the number of sort fields (2-3 maximum recommended)
+# - Use $select to limit returned fields
+# - Consider caching for frequently used sort orders
+#
+# Best Practices:
+# - Provide clear sort option labels to users
+# - Use sensible default sort orders
+# - Remember user sort preferences
+# - Show current sort order in UI
+# - Combine filters with sorting for better user experience
+#
+# Common Sort Patterns:
+# - E-commerce: price asc, rating desc, name asc
+# - Content: createdDate desc, rating desc
+# - Location-based: geo.distance(), rating desc
+# - Catalog: category asc, name asc

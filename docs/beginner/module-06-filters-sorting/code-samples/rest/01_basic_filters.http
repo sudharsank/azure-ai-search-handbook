@@ -1,0 +1,203 @@
+### Azure AI Search - Basic Filters Examples
+### This file demonstrates basic filtering operations including equality, comparison, and logical combinations
+
+### Variables (Update these with your values)
+@searchEndpoint = https://your-search-service.search.windows.net
+@apiKey = your-admin-api-key
+@indexName = your-index-name
+@apiVersion = 2023-11-01
+
+### Test Connection
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$top=1
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== EQUALITY FILTERS =====
+
+### 1. Category equals Electronics
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$top=5&$select=id,name,category,price,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 2. Status not discontinued
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=status ne 'Discontinued'&$top=5&$select=id,name,status,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 3. In stock items only
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=inStock eq true&$top=5&$select=id,name,inStock,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 4. Out of stock items
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=inStock eq false&$top=5&$select=id,name,inStock,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== COMPARISON FILTERS =====
+
+### 5. Price greater than $100
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=price gt 100&$top=5&$select=id,name,price,category&$orderby=price asc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 6. Rating 4.0 or higher
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.0&$top=5&$select=id,name,rating,category&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 7. Price less than $50
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=price lt 50&$top=5&$select=id,name,price,category&$orderby=price asc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 8. Rating 3.0 or lower
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating le 3.0&$top=5&$select=id,name,rating,category&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== LOGICAL COMBINATIONS =====
+
+### 9. Electronics AND high rating
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics' and rating ge 4.0&$top=5&$select=id,name,category,rating,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 10. Budget OR Premium categories
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Budget' or category eq 'Premium'&$top=5&$select=id,name,category,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 11. NOT discontinued items
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=not (status eq 'Discontinued')&$top=5&$select=id,name,status,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 12. Complex combination - Expensive electronics OR highly-rated books
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=(category eq 'Electronics' and price gt 100) or (category eq 'Books' and rating ge 4.5)&$top=5&$select=id,name,category,price,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== NULL VALUE HANDLING =====
+
+### 13. Items with rating (not null)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ne null&$top=5&$select=id,name,rating,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 14. Items without description
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=description eq null&$top=5&$select=id,name,description,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 15. Items with non-zero price
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=price ne null and price gt 0&$top=5&$select=id,name,price,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== ADVANCED COMBINATIONS =====
+
+### 16. High-quality electronics in stock
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics' and rating ge 4.0 and inStock eq true and price gt 50&$top=5&$select=id,name,category,rating,price,inStock&$orderby=rating desc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 17. Multiple categories with price range
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=(category eq 'Electronics' or category eq 'Computers') and price ge 100 and price le 500&$top=5&$select=id,name,category,price&$orderby=price asc
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 18. Exclude low-rated and out-of-stock items
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=not (rating lt 3.0 or inStock eq false)&$top=5&$select=id,name,rating,inStock,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== ERROR TESTING =====
+
+### 19. Invalid filter syntax (missing quotes) - Should return 400 error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq Electronics
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 20. Invalid field name - Should return 400 error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=nonexistentfield eq 'test'
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 21. Invalid operator - Should return 400 error
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=price equals 100
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== PERFORMANCE TESTING =====
+
+### 22. Simple filter performance test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$top=50&$select=id,name,category
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 23. Complex filter performance test
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=(category eq 'Electronics' and price gt 100 and rating ge 4.0) or (category eq 'Books' and rating ge 4.5)&$top=50&$select=id,name,category,price,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== PAGINATION EXAMPLES =====
+
+### 24. First page of results
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$top=10&$skip=0&$select=id,name,price&$count=true
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 25. Second page of results
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$top=10&$skip=10&$select=id,name,price&$count=true
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== FIELD SELECTION EXAMPLES =====
+
+### 26. Select specific fields only
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=rating ge 4.0&$top=5&$select=name,rating,price
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 27. Include search score
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=electronics&$filter=price gt 100&$top=5&$select=name,price,rating
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== COUNT EXAMPLES =====
+
+### 28. Get total count with results
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=category eq 'Electronics'&$top=5&$count=true&$select=id,name
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### 29. Get count only (no results)
+GET {{searchEndpoint}}/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=*&$filter=inStock eq true&$top=0&$count=true
+Content-Type: application/json
+api-key: {{apiKey}}
+
+### ===== NOTES =====
+# 
+# Filter Syntax Rules:
+# - String values must be enclosed in single quotes: 'Electronics'
+# - Boolean values: true, false (lowercase, no quotes)
+# - Numeric values: 100, 4.5 (no quotes)
+# - Null values: null (no quotes)
+# - Date values: 2024-01-01T00:00:00Z (in quotes)
+#
+# Operators:
+# - Equality: eq, ne
+# - Comparison: gt, ge, lt, le
+# - Logical: and, or, not
+#
+# Performance Tips:
+# - Use specific filters first (most selective)
+# - Combine filters with 'and' when possible
+# - Use $select to limit returned fields
+# - Use $top to limit result set size
+#
+# Error Handling:
+# - 400 Bad Request: Invalid filter syntax
+# - 404 Not Found: Invalid index name
+# - 403 Forbidden: Invalid API key or permissions

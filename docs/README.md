@@ -16,18 +16,22 @@ Welcome to the comprehensive Azure AI Search learning resource!
 - [Module 2: Basic Search Operations](beginner/module-02-basic-search/)
 - [Module 3: Index Management](beginner/module-03-index-management/)
 - [Module 4: Simple Queries and Filters](beginner/module-04-simple-queries/)
+- [Module 5: Data Sources and Indexers](beginner/module-05-data-sources-indexers/)
+- [Module 6: Filters and Sorting](beginner/module-06-filters-sorting/)
+- [Module 7: Pagination and Result Shaping](beginner/module-07-pagination-result-shaping/)
+- [Module 8: Search Explorer and Portal Tools](beginner/module-08-search-explorer-portal-tools/)
 
 #### 🟡 **Intermediate Level** (Ready for advanced features)
-- [Module 5: Advanced Querying](intermediate/module-05-advanced-querying/)
-- [Module 6: Analyzers and Custom Scoring](intermediate/module-06-analyzers-scoring/)
-- [Module 7: Facets and Aggregations](intermediate/module-07-facets-aggregations/)
-- [Module 8: Security and Access Control](intermediate/module-08-security-access/)
+- [Module 9: Advanced Querying](intermediate/module-05-advanced-querying/)
+- [Module 10: Analyzers and Custom Scoring](intermediate/module-06-analyzers-scoring/)
+- [Module 11: Facets and Aggregations](intermediate/module-07-facets-aggregations/)
+- [Module 12: Security and Access Control](intermediate/module-08-security-access/)
 
 #### 🔴 **Advanced Level** (Production-ready implementations)
-- [Module 9: AI Enrichment and Cognitive Skills](advanced/module-09-ai-enrichment/)
-- [Module 10: Vector Search and Semantic Search](advanced/module-10-vector-semantic-search/)
-- [Module 11: Performance Optimization](advanced/module-11-performance-optimization/)
-- [Module 12: Production Deployment and Monitoring](advanced/module-12-production-deployment/)
+- [Module 13: AI Enrichment and Cognitive Skills](advanced/module-09-ai-enrichment/)
+- [Module 14: Vector Search and Semantic Search](advanced/module-10-vector-semantic-search/)
+- [Module 15: Performance Optimization](advanced/module-11-performance-optimization/)
+- [Module 16: Production Deployment and Monitoring](advanced/module-12-production-deployment/)
 
 ## 📁 Content Structure
 
