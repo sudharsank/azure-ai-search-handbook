@@ -283,11 +283,50 @@ nav:
         - "⚙️ Prerequisites": beginner/module-06-filters-sorting/prerequisites.md
         - "✨ Best Practices": beginner/module-06-filters-sorting/best-practices.md
         - "🛠️ Practice & Implementation": beginner/module-06-filters-sorting/practice-implementation.md
+        - "🔧 Troubleshooting": beginner/module-06-filters-sorting/troubleshooting.md
         - "💻 Code Samples":
             - "📋 Overview": beginner/module-06-filters-sorting/code-samples/README.md
             - "📓 Interactive Notebooks": beginner/module-06-filters-sorting/code-samples/notebooks/README.md
             - "🐍 Python Examples":
                 - "📖 Overview": beginner/module-06-filters-sorting/code-samples/python/README.md
+                - "01 - Basic Filters": beginner/module-06-filters-sorting/code-samples/python/01_basic_filters.py
+                - "02 - Range Filters": beginner/module-06-filters-sorting/code-samples/python/02_range_filters.py
+                - "03 - String Filters": beginner/module-06-filters-sorting/code-samples/python/03_string_filters.py
+                - "04 - Date Filters": beginner/module-06-filters-sorting/code-samples/python/04_date_filters.py
+                - "05 - Geographic Filters": beginner/module-06-filters-sorting/code-samples/python/05_geographic_filters.py
+                - "06 - Sorting Operations": beginner/module-06-filters-sorting/code-samples/python/06_sorting_operations.py
+                - "07 - Complex Filters": beginner/module-06-filters-sorting/code-samples/python/07_complex_filters.py
+                - "08 - Performance Analysis": beginner/module-06-filters-sorting/code-samples/python/08_performance_analysis.py
+            - "🔷 C# Examples":
+                - "📖 Overview": beginner/module-06-filters-sorting/code-samples/csharp/README.md
+                - "01 - Basic Filters": beginner/module-06-filters-sorting/code-samples/csharp/01_BasicFilters.cs
+                - "02 - Range Filters": beginner/module-06-filters-sorting/code-samples/csharp/02_RangeFilters.cs
+                - "03 - String Filters": beginner/module-06-filters-sorting/code-samples/csharp/03_StringFilters.cs
+                - "04 - Date Filters": beginner/module-06-filters-sorting/code-samples/csharp/04_DateFilters.cs
+                - "05 - Geographic Filters": beginner/module-06-filters-sorting/code-samples/csharp/05_GeographicFilters.cs
+                - "06 - Sorting Operations": beginner/module-06-filters-sorting/code-samples/csharp/06_SortingOperations.cs
+                - "07 - Complex Filters": beginner/module-06-filters-sorting/code-samples/csharp/07_ComplexFilters.cs
+                - "08 - Performance Analysis": beginner/module-06-filters-sorting/code-samples/csharp/08_PerformanceAnalysis.cs
+            - "🟨 JavaScript Examples":
+                - "📖 Overview": beginner/module-06-filters-sorting/code-samples/javascript/README.md
+                - "01 - Basic Filters": beginner/module-06-filters-sorting/code-samples/javascript/01_basic_filters.js
+                - "02 - Range Filters": beginner/module-06-filters-sorting/code-samples/javascript/02_range_filters.js
+                - "03 - String Filters": beginner/module-06-filters-sorting/code-samples/javascript/03_string_filters.js
+                - "04 - Date Filters": beginner/module-06-filters-sorting/code-samples/javascript/04_date_filters.js
+                - "05 - Geographic Filters": beginner/module-06-filters-sorting/code-samples/javascript/05_geographic_filters.js
+                - "06 - Sorting Operations": beginner/module-06-filters-sorting/code-samples/javascript/06_sorting_operations.js
+                - "07 - Complex Filters": beginner/module-06-filters-sorting/code-samples/javascript/07_complex_filters.js
+                - "08 - Performance Analysis": beginner/module-06-filters-sorting/code-samples/javascript/08_performance_analysis.js
+            - "🌐 REST API Examples":
+                - "📖 Overview": beginner/module-06-filters-sorting/code-samples/rest/README.md
+                - "01 - Basic Filters": beginner/module-06-filters-sorting/code-samples/rest/01_basic_filters.http
+                - "02 - Range Filters": beginner/module-06-filters-sorting/code-samples/rest/02_range_filters.http
+                - "03 - String Filters": beginner/module-06-filters-sorting/code-samples/rest/03_string_filters.http
+                - "04 - Date Filters": beginner/module-06-filters-sorting/code-samples/rest/04_date_filters.http
+                - "05 - Geographic Filters": beginner/module-06-filters-sorting/code-samples/rest/05_geographic_filters.http
+                - "06 - Sorting Operations": beginner/module-06-filters-sorting/code-samples/rest/06_sorting_operations.http
+                - "07 - Complex Filters": beginner/module-06-filters-sorting/code-samples/rest/07_complex_filters.http
+                - "08 - Performance Analysis": beginner/module-06-filters-sorting/code-samples/rest/08_performance_analysis.http
     
     - "Module 7: Pagination & Result Shaping": beginner/module-07-pagination-result-shaping/documentation.md
     - "Module 8: Search Explorer & Portal Tools": beginner/module-08-search-explorer-portal-tools/documentation.md

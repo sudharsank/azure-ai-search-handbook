@@ -1,0 +1,279 @@
+### Date Filters Examples
+### This file demonstrates date and time filtering operations in Azure AI Search using REST API
+
+### Prerequisites
+# Set these variables in your REST client or replace with actual values
+@searchService = your-search-service
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+### 1. Items modified today
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-12-25T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 2. Items modified in the last 7 days
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-12-18T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 3. Items modified in the last 30 days
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-11-25T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 4. Items from specific year (2024)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-01-01T00:00:00Z and lastModified lt 2025-01-01T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 5. Items from specific month (June 2024)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-06-01T00:00:00Z and lastModified lt 2024-07-01T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 6. Items from Q1 2024
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-01-01T00:00:00Z and lastModified lt 2024-04-01T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 7. Items modified before this year
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified lt 2024-01-01T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 8. Items created vs modified date comparison
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "createdDate ge 2024-01-01T00:00:00Z and lastModified gt createdDate",
+    "select": "id,name,createdDate,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 9. Items with specific date range (between two dates)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-06-01T00:00:00Z and lastModified le 2024-08-31T23:59:59Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 10. Recent Electronics (date + category filter)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and lastModified ge 2024-12-01T00:00:00Z",
+    "select": "id,name,category,lastModified,price",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 11. Recent high-priced items (date + price filter)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price gt 500 and lastModified ge 2024-11-01T00:00:00Z",
+    "select": "id,name,price,lastModified,category",
+    "orderby": "lastModified desc, price desc",
+    "top": 5
+}
+
+### 12. Items with null modification date
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified eq null",
+    "select": "id,name,lastModified,category",
+    "top": 5
+}
+
+### 13. Items with non-null modification date
+POST https://{{searchService}}.search.windows.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ne null",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 14. Items modified on specific date (exact day)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-12-25T00:00:00Z and lastModified lt 2024-12-26T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 15. Items modified in business hours (9 AM to 5 PM UTC)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-12-25T09:00:00Z and lastModified le 2024-12-25T17:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 16. Items older than 1 year
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified lt 2023-12-25T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 17. Items modified this week (Monday to Sunday)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-12-23T00:00:00Z and lastModified lt 2024-12-30T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 18. Items with future modification dates (data quality check)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified gt 2024-12-25T23:59:59Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 19. Items modified in different time zones (with timezone offset)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-12-25T08:00:00-08:00",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 20. Complex date and search combination
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "laptop computer",
+    "filter": "lastModified ge 2024-11-01T00:00:00Z and category eq 'Electronics'",
+    "select": "id,name,lastModified,category,price,description",
+    "orderby": "search.score() desc, lastModified desc",
+    "top": 5
+}
+
+### Notes:
+# - Always use ISO 8601 format: YYYY-MM-DDTHH:mm:ssZ
+# - Use 'Z' suffix for UTC timezone or specify offset like '-08:00'
+# - Use 'ge' (>=) for inclusive start dates
+# - Use 'lt' (<) for exclusive end dates to avoid overlap
+# - Combine date filters with other criteria for better performance
+# - Consider timezone implications when filtering dates
+# - Use null checks when date fields might be empty
+# - Test with various date ranges and edge cases
+# - Date fields must be marked as 'filterable' in the index schema

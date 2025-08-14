@@ -1,0 +1,270 @@
+### String Filters Examples
+### This file demonstrates string filtering operations in Azure AI Search using REST API
+
+### Prerequisites
+# Set these variables in your REST client or replace with actual values
+@searchService = your-search-service
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+### 1. Exact String Match - Category equals 'Electronics'
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,category,price,rating",
+    "top": 5
+}
+
+### 2. String Inequality - Items NOT in 'Discontinued' status
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "status ne 'Discontinued'",
+    "select": "id,name,status,category,price",
+    "top": 5
+}
+
+### 3. StartsWith Function - Names starting with 'iPhone'
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "startswith(name, 'iPhone')",
+    "select": "id,name,category,price,rating",
+    "orderby": "name asc",
+    "top": 5
+}
+
+### 4. EndsWith Function - Names ending with 'Pro'
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "endswith(name, 'Pro')",
+    "select": "id,name,category,price,rating",
+    "orderby": "name asc",
+    "top": 5
+}
+
+### 5. Contains Function - Description contains 'wireless'
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "contains(description, 'wireless')",
+    "select": "id,name,description,category,price",
+    "top": 5
+}
+
+### 6. Multiple String Conditions - Electronics OR Books category
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' or category eq 'Books'",
+    "select": "id,name,category,price,rating",
+    "orderby": "category asc, name asc",
+    "top": 10
+}
+
+### 7. String with AND Logic - Electronics AND Active status
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and status eq 'Active'",
+    "select": "id,name,category,status,price",
+    "top": 5
+}
+
+### 8. Complex String Pattern - Names starting with 'Samsung' and containing 'Galaxy'
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "startswith(name, 'Samsung') and contains(name, 'Galaxy')",
+    "select": "id,name,category,price,rating",
+    "orderby": "name asc",
+    "top": 5
+}
+
+### 9. String with Null Check - Items with non-null description
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "description ne null",
+    "select": "id,name,description,category",
+    "top": 5
+}
+
+### 10. String with Empty Check - Items with empty or null brand
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "brand eq null or brand eq ''",
+    "select": "id,name,brand,category",
+    "top": 5
+}
+
+### 11. Case Sensitivity - Exact case match for brand
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "brand eq 'Apple'",
+    "select": "id,name,brand,category,price",
+    "top": 5
+}
+
+### 12. Multiple String Functions - Complex name pattern matching
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(startswith(name, 'iPhone') or startswith(name, 'iPad')) and endswith(name, 'Pro')",
+    "select": "id,name,category,price,rating",
+    "orderby": "name asc",
+    "top": 5
+}
+
+### 13. String with Numeric Combination - Electronics over $500
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and price gt 500",
+    "select": "id,name,category,price,rating",
+    "orderby": "price desc",
+    "top": 5
+}
+
+### 14. String Collection Filter - Tags containing specific value
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'featured')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 15. Multiple String Collection Filters - Items with 'wireless' OR 'bluetooth' tags
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'wireless' or t eq 'bluetooth')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 16. String with Date Combination - Recent Electronics
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and lastModified ge 2024-01-01T00:00:00Z",
+    "select": "id,name,category,lastModified,price",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 17. Complex String Logic - Premium brands or budget category
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(brand eq 'Apple' or brand eq 'Samsung') or category eq 'Budget'",
+    "select": "id,name,brand,category,price",
+    "orderby": "brand asc, price asc",
+    "top": 10
+}
+
+### 18. String Pattern with Search Query - Search for laptops in specific category
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "laptop computer",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,category,price,rating,description",
+    "orderby": "search.score() desc",
+    "top": 5
+}
+
+### 19. String Functions with Negation - NOT starting with specific prefix
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "not startswith(name, 'Generic')",
+    "select": "id,name,category,price",
+    "top": 5
+}
+
+### 20. Advanced String Pattern - Multi-condition brand and model filtering
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(brand eq 'Apple' and contains(name, 'iPhone')) or (brand eq 'Samsung' and contains(name, 'Galaxy'))",
+    "select": "id,name,brand,category,price,rating",
+    "orderby": "brand asc, name asc",
+    "top": 10
+}
+
+### Notes:
+# - String comparisons are case-sensitive by default
+# - Use single quotes around string literals
+# - String functions: startswith(), endswith(), contains()
+# - Handle null values explicitly with 'ne null' or 'eq null'
+# - Use collection filters with any() for string arrays
+# - Combine string filters with other filter types using logical operators
+# - Consider using search.in() function for multiple exact matches
+# - Escape single quotes in strings by doubling them ('Alice''s car')
+# - String fields must be marked as 'filterable' in the index schema

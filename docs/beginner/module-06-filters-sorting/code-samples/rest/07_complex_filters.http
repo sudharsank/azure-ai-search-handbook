@@ -1,0 +1,335 @@
+### Complex Filters Examples
+### This file demonstrates advanced filtering operations in Azure AI Search using REST API
+
+### Prerequisites
+# Set these variables in your REST client or replace with actual values
+@searchService = your-search-service
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+### 1. Collection Filter - Items with any featured tag
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'featured')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 2. Collection Filter - Items with wireless OR bluetooth tags
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'wireless' or t eq 'bluetooth')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 3. Collection Filter - Items where all tags are non-empty
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/all(t: t ne null and t ne '')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 4. Complex Logical Filter - Expensive electronics OR highly-rated books
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(category eq 'Electronics' and price gt 100) or (category eq 'Books' and rating ge 4.5)",
+    "select": "id,name,category,price,rating",
+    "top": 5
+}
+
+### 5. Multi-criteria Premium Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(brand eq 'Apple' or brand eq 'Samsung') and (price gt 500 and rating gt 4.0) and tags/any(t: t eq 'premium')",
+    "select": "id,name,brand,price,rating,tags,category",
+    "top": 5
+}
+
+### 6. Availability and Quality Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "inStock eq true and ((rating ge 4.0 and price le 200) or (rating ge 4.5 and price le 500))",
+    "select": "id,name,price,rating,inStock,category",
+    "top": 5
+}
+
+### 7. Geographic and Category Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(category eq 'Restaurant' or category eq 'Hotel') and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 25",
+    "select": "id,name,category,location,rating",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 8. Multiple Tag Requirements (AND logic between collections)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'wireless') and tags/any(t: t eq 'premium')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 9. Negated Collection Filter - Items without promotional tags
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "not tags/any(t: t eq 'featured' or t eq 'bestseller' or t eq 'premium')",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 10. Complex Tag Pattern Matching
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: startswith(t, 'color-') or startswith(t, 'size-') or startswith(t, 'material-'))",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 11. Search with Complex Filter - Laptop search with multiple criteria
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "laptop computer",
+    "filter": "(category eq 'Electronics' and price ge 500 and price le 2000) and (rating ge 4.0 or tags/any(t: t eq 'bestseller'))",
+    "select": "id,name,category,price,rating,tags,description",
+    "orderby": "search.score() desc, rating desc",
+    "top": 5
+}
+
+### 12. Wireless Products Search with Availability
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "wireless bluetooth",
+    "filter": "inStock eq true and (tags/any(t: t eq 'wireless' or t eq 'bluetooth')) and price le 300",
+    "select": "id,name,tags,price,inStock,category,description",
+    "orderby": "search.score() desc, price asc",
+    "top": 5
+}
+
+### 13. Premium Brand Search
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "premium quality",
+    "filter": "(brand eq 'Apple' or brand eq 'Samsung' or brand eq 'Sony') and rating ge 4.5",
+    "select": "id,name,brand,rating,price,category,description",
+    "orderby": "search.score() desc, rating desc",
+    "top": 5
+}
+
+### 14. Complex Date and Category Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(category eq 'Electronics' or category eq 'Computers') and lastModified ge 2024-11-01T00:00:00Z and (price gt 500 or rating ge 4.5)",
+    "select": "id,name,category,price,rating,lastModified",
+    "orderby": "lastModified desc, rating desc",
+    "top": 5
+}
+
+### 15. Multi-level Collection and String Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: contains(t, 'premium') or contains(t, 'luxury')) and (startswith(name, 'iPhone') or startswith(name, 'Samsung'))",
+    "select": "id,name,tags,category,price,brand",
+    "top": 5
+}
+
+### 16. Geographic Ring with Category Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Restaurant' and geo.distance(location, geography'POINT(-122.335167 47.608013)') gt 5 and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 20",
+    "select": "id,name,category,location,rating",
+    "orderby": "rating desc, geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 17. Complex Inventory and Pricing Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "inStock eq true and ((category eq 'Electronics' and price le 1000) or (category eq 'Books' and price le 50)) and rating ge 3.5",
+    "select": "id,name,category,price,rating,inStock",
+    "orderby": "rating desc, price asc",
+    "top": 5
+}
+
+### 18. Multi-brand and Feature Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(brand eq 'Apple' and tags/any(t: t eq 'pro')) or (brand eq 'Samsung' and tags/any(t: t eq 'galaxy')) or (brand eq 'Sony' and tags/any(t: t eq 'premium'))",
+    "select": "id,name,brand,tags,category,price",
+    "orderby": "brand asc, price desc",
+    "top": 5
+}
+
+### 19. Time-sensitive Promotional Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'sale' or t eq 'discount') and lastModified ge 2024-12-01T00:00:00Z and inStock eq true and price gt 0",
+    "select": "id,name,tags,price,lastModified,inStock,category",
+    "orderby": "lastModified desc, price asc",
+    "top": 5
+}
+
+### 20. Comprehensive Business Logic Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "((category eq 'Electronics' and price ge 100 and price le 1000) or (category eq 'Books' and rating ge 4.0)) and inStock eq true and (tags/any(t: t ne null and t ne '') or description ne null) and lastModified ge 2024-01-01T00:00:00Z",
+    "select": "id,name,category,price,rating,inStock,tags,description,lastModified",
+    "orderby": "rating desc, lastModified desc",
+    "top": 5
+}
+
+### 21. Using search.in function for multiple values
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "search.in(category, 'Electronics,Computers,Phones,Tablets', ',') and price gt 200",
+    "select": "id,name,category,price,rating",
+    "orderby": "price desc",
+    "top": 5
+}
+
+### 22. Complex search.ismatch with filters
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "",
+    "filter": "search.ismatchscoring('wireless bluetooth', 'name,description') and category eq 'Electronics' and price le 500",
+    "select": "id,name,description,category,price",
+    "orderby": "search.score() desc",
+    "top": 5
+}
+
+### 23. Nested collection with complex conditions
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: (startswith(t, 'feature-') and endswith(t, '-enabled')) or (startswith(t, 'spec-') and contains(t, 'high')))",
+    "select": "id,name,tags,category,price",
+    "top": 5
+}
+
+### 24. Multi-dimensional filtering (price, rating, location, category)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(category eq 'Restaurant' and rating ge 4.0 and price le 100) and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 15 and tags/any(t: t eq 'delivery' or t eq 'takeout')",
+    "select": "id,name,category,rating,price,location,tags",
+    "orderby": "rating desc, geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 25. Advanced null handling and data quality filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "name ne null and name ne '' and price ne null and price gt 0 and (description ne null and description ne '') and (tags/any() and not tags/any(t: t eq null or t eq ''))",
+    "select": "id,name,price,description,tags,category",
+    "orderby": "price desc",
+    "top": 5
+}
+
+### Notes:
+# - Use parentheses to group complex logical conditions clearly
+# - Collection filters: any() for "at least one", all() for "every item"
+# - Combine multiple any() calls for AND logic between different collection conditions
+# - Use search.in() instead of multiple OR conditions for better performance
+# - search.ismatch() and search.ismatchscoring() allow full-text search within filters
+# - Consider operator precedence: NOT > Comparison > AND > OR
+# - Test complex filters with smaller components first
+# - Validate all input values and handle null cases appropriately
+# - Complex filters may impact performance - optimize by putting selective filters first
+# - Use meaningful field names and consistent data types across your index

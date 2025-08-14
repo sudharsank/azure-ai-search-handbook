@@ -1,0 +1,355 @@
+### Performance Analysis Examples
+### This file demonstrates performance testing and optimization techniques for Azure AI Search filters and sorting
+
+### Prerequisites
+# Set these variables in your REST client or replace with actual values
+@searchService = your-search-service
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+### Performance Test 1: Simple Equality Filter (Baseline)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Performance Test 2: Range Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price ge 100 and price le 500",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Performance Test 3: String Function Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "startswith(name, 'iPhone')",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Performance Test 4: Complex Logical Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(category eq 'Electronics' and price gt 200) or (category eq 'Books' and rating ge 4.0)",
+    "select": "id,name,category,price,rating",
+    "top": 50
+}
+
+### Performance Test 5: Collection Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'featured' or t eq 'bestseller')",
+    "select": "id,name,tags,category,price",
+    "top": 50
+}
+
+### Sorting Performance Test 1: No Sorting (Relevance)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "electronics",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Sorting Performance Test 2: Single Field Sort
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "electronics",
+    "orderby": "price asc",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Sorting Performance Test 3: Multi-field Sort
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "electronics",
+    "orderby": "category asc, price desc",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Sorting Performance Test 4: Geographic Sort
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "store",
+    "filter": "location ne null",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "select": "id,name,location,category",
+    "top": 50
+}
+
+### Result Set Size Test 1: Small Result Set (10 items)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,price",
+    "top": 10
+}
+
+### Result Set Size Test 2: Medium Result Set (50 items)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,price",
+    "top": 50
+}
+
+### Result Set Size Test 3: Large Result Set (100 items)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,price",
+    "top": 100
+}
+
+### Result Set Size Test 4: All Fields vs Selected Fields
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "top": 50
+}
+
+### Filter Optimization Test 1: Unoptimized (Complex filter first)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "contains(description, 'wireless') and category eq 'Electronics' and price gt 100",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Filter Optimization Test 2: Optimized (Selective filter first)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and price gt 100 and contains(description, 'wireless')",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Filter Optimization Test 3: Multiple OR Conditions (Unoptimized)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' or category eq 'Computers' or category eq 'Phones' or category eq 'Tablets'",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Filter Optimization Test 4: Using search.in Function (Optimized)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "search.in(category, 'Electronics,Computers,Phones,Tablets', ',')",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Caching Test: Repeated Query (Run multiple times to test caching)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and price gt 100",
+    "select": "id,name,category,price",
+    "top": 50
+}
+
+### Geographic Performance Test 1: Simple Distance Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.335167 47.608013)') le 25",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 50
+}
+
+### Geographic Performance Test 2: Complex Geographic + Business Logic
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Restaurant' and rating ge 4.0 and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 15",
+    "select": "id,name,category,rating,location",
+    "orderby": "rating desc, geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 50
+}
+
+### Collection Performance Test 1: Simple Collection Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: t eq 'featured')",
+    "select": "id,name,tags,category",
+    "top": 50
+}
+
+### Collection Performance Test 2: Complex Collection Filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "tags/any(t: startswith(t, 'feature-') or contains(t, 'premium')) and tags/any(t: t eq 'available')",
+    "select": "id,name,tags,category",
+    "top": 50
+}
+
+### Search + Filter Performance Test
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "laptop computer wireless",
+    "filter": "category eq 'Electronics' and price ge 500 and price le 2000 and rating ge 4.0",
+    "select": "id,name,category,price,rating,description",
+    "orderby": "search.score() desc, rating desc",
+    "top": 50
+}
+
+### Faceted Search Performance Test
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "facets": ["brand", "price,values:100|300|500|1000", "rating,values:3|4|5"],
+    "select": "id,name,category,brand,price,rating",
+    "top": 50
+}
+
+### Pagination Performance Test (Skip + Top)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics'",
+    "select": "id,name,category,price",
+    "skip": 100,
+    "top": 50,
+    "orderby": "price asc"
+}
+
+### Performance Monitoring Query (with count)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and price gt 100",
+    "select": "id,name,category,price",
+    "count": true,
+    "top": 50
+}
+
+### Notes for Performance Testing:
+# 1. Run each query multiple times to get average response times
+# 2. Test with realistic data volumes and query patterns
+# 3. Monitor response times, especially for:
+#    - Complex filters with multiple conditions
+#    - Geographic distance calculations
+#    - Collection filters with complex logic
+#    - Large result sets
+#    - Sorting operations
+# 4. Performance optimization tips:
+#    - Use most selective filters first
+#    - Use search.in() instead of multiple OR conditions
+#    - Limit result set size with appropriate "top" values
+#    - Use "select" to return only needed fields
+#    - Consider index design (filterable/sortable field attributes)
+#    - Monitor query patterns and cache frequently used queries
+# 5. Baseline measurements:
+#    - Simple equality filters: < 50ms
+#    - Range filters: < 100ms
+#    - Complex logical filters: < 200ms
+#    - Geographic filters: < 300ms
+#    - Collection filters: < 500ms
+# 6. Performance alerts:
+#    - Set up monitoring for queries > 1000ms
+#    - Track query frequency and patterns
+#    - Monitor index size and growth
+#    - Watch for performance degradation over time

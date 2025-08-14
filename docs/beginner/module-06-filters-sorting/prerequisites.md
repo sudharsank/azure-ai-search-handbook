@@ -202,10 +202,16 @@ GET https://[service-name].search.windows.net/indexes/[index-name]/docs?api-vers
 
 If you encounter issues during setup:
 
-1. Check the troubleshooting section in this module
-2. Review Azure AI Search documentation
-3. Verify all prerequisites are met
-4. Test with simple queries before complex ones
+1. **[Troubleshooting Guide](troubleshooting.md)** - Common issues and solutions
+2. **[Azure AI Search Documentation](https://docs.microsoft.com/azure/search/)** - Official Microsoft documentation
+3. **[Best Practices](best-practices.md)** - Guidelines for effective implementation
+4. **[Code Samples](code-samples/README.md)** - Working examples in multiple languages
+
+### Quick Diagnostic Steps
+- Verify all prerequisites are met
+- Test with simple queries before complex ones
+- Check field attributes in index schema
+- Validate authentication and permissions
 
 ## Next Steps
 

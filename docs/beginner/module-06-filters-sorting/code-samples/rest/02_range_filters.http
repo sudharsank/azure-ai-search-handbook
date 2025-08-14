@@ -1,0 +1,213 @@
+### Range Filters Examples
+### This file demonstrates range filtering operations in Azure AI Search using REST API
+
+### Prerequisites
+# Set these variables in your REST client or replace with actual values
+@searchService = your-search-service
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+### 1. Basic Numeric Range - Price between $50 and $200
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price ge 50 and price le 200",
+    "select": "id,name,price,category,rating",
+    "orderby": "price asc",
+    "top": 5
+}
+
+### 2. Price Range - Items over $500 (Premium products)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price gt 500",
+    "select": "id,name,price,category,rating",
+    "orderby": "price desc",
+    "top": 5
+}
+
+### 3. Rating Range - Items with rating between 3.0 and 4.0
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "rating ge 3.0 and rating le 4.0",
+    "select": "id,name,rating,category,price",
+    "orderby": "rating desc",
+    "top": 5
+}
+
+### 4. Date Range - Items modified in the last 30 days
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-01-01T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 5. Date Range - Items from specific year (2024)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-01-01T00:00:00Z and lastModified lt 2025-01-01T00:00:00Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 6. Combined Range Filters - High-value items (price > $100 AND rating > 4.0)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price gt 100 and rating gt 4.0",
+    "select": "id,name,price,rating,category",
+    "orderby": "rating desc, price asc",
+    "top": 5
+}
+
+### 7. Budget Range - Items between $10 and $50
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price ge 10 and price le 50",
+    "select": "id,name,price,rating,category",
+    "orderby": "rating desc",
+    "top": 5
+}
+
+### 8. Exclusive Range - Items with price greater than $100 but less than $500 (exclusive)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price gt 100 and price lt 500",
+    "select": "id,name,price,category,rating",
+    "orderby": "price asc",
+    "top": 5
+}
+
+### 9. Complex Range Combination - Sweet spot products (good price and rating)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(price ge 50 and price le 200) and (rating ge 4.0 and rating le 5.0)",
+    "select": "id,name,price,rating,category",
+    "orderby": "rating desc, price asc",
+    "top": 5
+}
+
+### 10. Range with Category Filter - Electronics in specific price range
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and price ge 100 and price le 1000",
+    "select": "id,name,price,rating,category",
+    "orderby": "price asc",
+    "top": 5
+}
+
+### 11. Date Range with Status Filter - Recent active items
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-06-01T00:00:00Z and status eq 'Active'",
+    "select": "id,name,lastModified,status,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 12. Multiple Range Conditions - Clearance candidates (expensive but low-rated)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price gt 200 and rating lt 3.0",
+    "select": "id,name,price,rating,category",
+    "orderby": "price desc",
+    "top": 5
+}
+
+### 13. Range with OR Logic - Budget OR Premium items
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(price le 50) or (price ge 500)",
+    "select": "id,name,price,category,rating",
+    "orderby": "price asc",
+    "top": 10
+}
+
+### 14. Time-based Range - Items modified in specific time window
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastModified ge 2024-01-01T00:00:00Z and lastModified le 2024-06-30T23:59:59Z",
+    "select": "id,name,lastModified,category",
+    "orderby": "lastModified desc",
+    "top": 5
+}
+
+### 15. Range with Search Query - Search within price range
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "laptop computer",
+    "filter": "price ge 500 and price le 1500",
+    "select": "id,name,price,rating,category,description",
+    "orderby": "search.score() desc, price asc",
+    "top": 5
+}
+
+### Notes:
+# - Use 'ge' (greater than or equal) and 'le' (less than or equal) for inclusive ranges
+# - Use 'gt' (greater than) and 'lt' (less than) for exclusive ranges
+# - Date values should be in ISO 8601 format with 'Z' suffix for UTC
+# - Combine multiple range conditions with 'and' or 'or' operators
+# - Use parentheses to group complex range expressions
+# - Consider performance implications of complex range queries
+# - Ensure fields used in ranges are marked as 'filterable' in the index schema

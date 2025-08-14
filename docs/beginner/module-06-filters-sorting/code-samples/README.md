@@ -322,11 +322,24 @@ The [notebooks](./notebooks/README.md) directory contains Jupyter notebooks with
 
 ## Additional Resources
 
-- [OData Filter Syntax Reference](https://docs.microsoft.com/azure/search/search-query-odata-filter)
-- [OData OrderBy Syntax Reference](https://docs.microsoft.com/azure/search/search-query-odata-orderby)
-- [Geographic Functions](https://docs.microsoft.com/azure/search/search-query-odata-geo-spatial-functions)
-- [Best Practices Guide](../best-practices.md)
-- [Troubleshooting Guide](../filter-troubleshooting.md)
+### Module Documentation
+- **[Main Documentation](../documentation.md)** - Complete module overview
+- **[Prerequisites](../prerequisites.md)** - Required setup and knowledge
+- **[Best Practices](../best-practices.md)** - Guidelines for effective implementation
+- **[Practice & Implementation](../practice-implementation.md)** - Hands-on exercises
+- **[Troubleshooting](../troubleshooting.md)** - Common issues and solutions
+
+### External Resources
+- **[OData Filter Syntax Reference](https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter)**
+- **[OData OrderBy Syntax Reference](https://learn.microsoft.com/en-us/azure/search/search-query-odata-orderby)**
+- **[Geographic Functions](https://learn.microsoft.com/en-us/azure/search/search-query-odata-geo-spatial-functions)**
+- **[Collection Operators](https://learn.microsoft.com/en-us/azure/search/search-query-odata-collection-operators)**
+- **[Search Functions](https://learn.microsoft.com/en-us/azure/search/search-query-odata-full-text-search-functions)**
+
+### When You Need Help
+- **Syntax Issues**: Check the [Troubleshooting Guide](../troubleshooting.md)
+- **Performance Problems**: Review [Performance Analysis Examples](python/08_performance_analysis.py)
+- **Complex Scenarios**: Explore [Complex Filter Examples](python/07_complex_filters.py)
 
 ## Next Steps
 

@@ -93,6 +93,11 @@ Throughout this module, you'll create:
 - `any()`: `Amenities/any(a: a eq 'WiFi')`
 - `all()`: `Amenities/all(a: a ne null)`
 
+### Search Functions
+- `search.in()`: `search.in(HotelName, 'Sea View motel,Budget hotel', ',')`
+- `search.ismatch()`: `search.ismatch('waterfront')`
+- `search.ismatchscoring()`: `search.ismatchscoring('luxury')`
+
 ## Sorting Syntax
 
 ### Basic Sorting
@@ -121,6 +126,21 @@ Throughout this module, you'll create:
 - Consider using facets for common filter values
 - Cache frequently used filter combinations
 
+## Module Resources
+
+### 📚 Additional Documentation
+- **[Prerequisites](prerequisites.md)** - Required setup and knowledge
+- **[Best Practices](best-practices.md)** - Guidelines for effective filtering and sorting
+- **[Practice & Implementation](practice-implementation.md)** - Hands-on exercises and examples
+- **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
+- **[Code Samples](code-samples/README.md)** - Comprehensive examples in multiple languages
+
+### 🔧 When You Need Help
+- **Common Issues**: Check the [Troubleshooting Guide](troubleshooting.md)
+- **Performance Problems**: Review [Performance Analysis Examples](code-samples/python/08_performance_analysis.py)
+- **Syntax Errors**: Validate against [OData Filter Reference](https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter)
+- **Complex Scenarios**: Explore [Complex Filter Examples](code-samples/python/07_complex_filters.py)
+
 ## Next Steps
 
 After completing this module, you'll be ready to:
@@ -129,8 +149,61 @@ After completing this module, you'll be ready to:
 - Move on to Module 7: Pagination & Result Shaping
 - Explore advanced query features in intermediate modules
 
+### Recommended Learning Path
+1. **Complete Prerequisites**: Ensure you have the required setup
+2. **Study Documentation**: Read through the concepts and examples
+3. **Run Code Samples**: Try the examples in your preferred language
+4. **Practice Implementation**: Work through the hands-on exercises
+5. **Apply Best Practices**: Implement optimized filtering in your projects
+6. **Troubleshoot Issues**: Use the troubleshooting guide when needed
+
+## Advanced Examples
+
+### Using search.in() Function
+The `search.in()` function is useful for matching against multiple values:
+
+```odata
+# Find hotels with specific names
+search.in(HotelName, 'Sea View motel,Budget hotel', ',')
+
+# Find hotels with multiple categories
+search.in(Category, 'Luxury|Budget|Economy', '|')
+```
+
+### Complex Collection Filtering
+```odata
+# Hotels with WiFi amenity
+Rooms/any(room: room/Tags/any(tag: tag eq 'wifi'))
+
+# Hotels where all rooms are non-smoking
+Rooms/all(room: not room/SmokingAllowed)
+
+# Hotels with any rooms under $200
+Rooms/any(room: room/BaseRate lt 200.0)
+```
+
+### Geographic Filtering Examples
+```odata
+# Hotels within 10km of a point
+geo.distance(Location, geography'POINT(-122.131577 47.678581)') le 10
+
+# Hotels within a polygon area
+geo.intersects(Location, geography'POLYGON((-122.031577 47.578581, -122.031577 47.678581, -122.131577 47.678581, -122.031577 47.578581))')
+```
+
+### Combining Filters with Full-Text Search
+```odata
+# Search for "luxury" and filter by rating
+search.ismatchscoring('luxury') and Rating ge 4
+
+# Search in specific fields with filters
+search.ismatchscoring('"ocean view"', 'Description,HotelName') or Rating eq 5
+```
+
 ## Additional Resources
 
-- [OData Filter Syntax Reference](https://docs.microsoft.com/azure/search/search-query-odata-filter)
-- [OData OrderBy Syntax Reference](https://docs.microsoft.com/azure/search/search-query-odata-orderby)
-- [Geographic Search Functions](https://docs.microsoft.com/azure/search/search-query-odata-geo-spatial-functions)
+- [OData Filter Syntax Reference](https://learn.microsoft.com/en-us/azure/search/search-query-odata-filter)
+- [OData OrderBy Syntax Reference](https://learn.microsoft.com/en-us/azure/search/search-query-odata-orderby)
+- [Geographic Search Functions](https://learn.microsoft.com/en-us/azure/search/search-query-odata-geo-spatial-functions)
+- [Collection Operators](https://learn.microsoft.com/en-us/azure/search/search-query-odata-collection-operators)
+- [Search Functions](https://learn.microsoft.com/en-us/azure/search/search-query-odata-full-text-search-functions)

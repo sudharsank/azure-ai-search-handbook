@@ -817,8 +817,21 @@ After completing these exercises, you should be able to:
 
 ## Additional Resources
 
-- [OData Filter Syntax Reference](https://docs.microsoft.com/azure/search/search-query-odata-filter)
-- [Azure AI Search Best Practices](../best-practices.md)
-- [Performance Optimization Guide](../../intermediate/module-15-performance-optimization/documentation.md)
+### Module Documentation
+- **[Prerequisites](prerequisites.md)** - Required setup and knowledge
+- **[Main Documentation](documentation.md)** - Complete module overview
+- **[Best Practices](best-practices.md)** - Guidelines for effective implementation
+- **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
+- **[Code Samples](code-samples/README.md)** - Working examples in multiple languages
+
+### External Resources
+- **[OData Filter Syntax Reference](https://docs.microsoft.com/azure/search/search-query-odata-filter)**
+- **[Azure AI Search Documentation](https://docs.microsoft.com/azure/search/)**
+- **[Performance Optimization Guide](https://docs.microsoft.com/azure/search/search-performance-optimization)**
+
+### When You Need Help
+- **Syntax Issues**: Check the [Troubleshooting Guide](troubleshooting.md)
+- **Performance Problems**: Review [Performance Analysis Examples](code-samples/python/08_performance_analysis.py)
+- **Complex Scenarios**: Explore [Complex Filter Examples](code-samples/python/07_complex_filters.py)
 
 Remember: Practice makes perfect! Work through these exercises multiple times with different data sets to build confidence and expertise.

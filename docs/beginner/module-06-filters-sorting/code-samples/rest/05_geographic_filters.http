@@ -1,0 +1,281 @@
+### Geographic Filters Examples
+### This file demonstrates geographic filtering operations in Azure AI Search using REST API
+
+### Prerequisites
+# Set these variables in your REST client or replace with actual values
+@searchService = your-search-service
+@indexName = your-index-name
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+### Reference Points
+# Seattle, WA: 47.608013, -122.335167
+# San Francisco, CA: 37.774929, -122.419416
+# New York, NY: 40.712776, -74.005974
+# London, UK: 51.507351, -0.127758
+# Tokyo, Japan: 35.676676, 139.650344
+
+### 1. Items within 10km of Seattle
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.335167 47.608013)') le 10",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 2. Items within 50km of San Francisco
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.419416 37.774929)') le 50",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.419416 37.774929)')",
+    "top": 5
+}
+
+### 3. Items more than 100km from New York
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-74.005974 40.712776)') gt 100",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-74.005974 40.712776)')",
+    "top": 5
+}
+
+### 4. Items between 20-50km from Seattle (ring search)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.335167 47.608013)') gt 20 and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 50",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 5. Items near Seattle OR San Francisco (within 25km of either)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.335167 47.608013)') le 25 or geo.distance(location, geography'POINT(-122.419416 37.774929)') le 25",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 6. Items closer to Seattle than to San Francisco
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.335167 47.608013)') lt geo.distance(location, geography'POINT(-122.419416 37.774929)')",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 7. Items within Seattle metropolitan area (polygon)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.intersects(location, geography'POLYGON((-122.5 47.4, -122.5 47.8, -122.1 47.8, -122.1 47.4, -122.5 47.4))')",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 8. Items within San Francisco Bay Area (polygon)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.intersects(location, geography'POLYGON((-122.6 37.3, -122.6 38.0, -121.8 38.0, -121.8 37.3, -122.6 37.3))')",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 9. Electronics stores within 25km of Seattle
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Electronics' and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 25",
+    "select": "id,name,location,category,price",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 10. High-priced items within 50km of San Francisco
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "price gt 500 and geo.distance(location, geography'POINT(-122.419416 37.774929)') le 50",
+    "select": "id,name,location,price,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.419416 37.774929)')",
+    "top": 5
+}
+
+### 11. Apple stores within 100km of Seattle
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "brand eq 'Apple' and category eq 'Store' and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 100",
+    "select": "id,name,brand,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 12. Restaurants within 5km of downtown Seattle
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category eq 'Restaurant' and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 5",
+    "select": "id,name,location,category,rating",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 10
+}
+
+### 13. Items with location data (non-null check)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "location ne null",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 14. Items without location data
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "location eq null",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 15. Items within Pacific Northwest region (large polygon)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.intersects(location, geography'POLYGON((-125.0 45.0, -125.0 49.0, -116.0 49.0, -116.0 45.0, -125.0 45.0))')",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 16. Items within California (state-level polygon)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.intersects(location, geography'POLYGON((-124.5 32.5, -124.5 42.0, -114.0 42.0, -114.0 32.5, -124.5 32.5))')",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 17. Search "coffee" near Seattle (text search + geographic filter)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "coffee shop cafe",
+    "filter": "geo.distance(location, geography'POINT(-122.335167 47.608013)') le 15",
+    "select": "id,name,location,category,description",
+    "orderby": "search.score() desc, geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 18. Items within multiple metropolitan areas (OR condition)
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.intersects(location, geography'POLYGON((-122.5 47.4, -122.5 47.8, -122.1 47.8, -122.1 47.4, -122.5 47.4))') or geo.intersects(location, geography'POLYGON((-122.6 37.3, -122.6 38.0, -121.8 38.0, -121.8 37.3, -122.6 37.3))')",
+    "select": "id,name,location,category",
+    "top": 5
+}
+
+### 19. Items sorted by distance from multiple reference points
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "location ne null",
+    "select": "id,name,location,category",
+    "orderby": "geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### 20. Complex geographic and business logic filter
+POST https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "(category eq 'Restaurant' or category eq 'Hotel') and rating ge 4.0 and geo.distance(location, geography'POINT(-122.335167 47.608013)') le 20",
+    "select": "id,name,location,category,rating,price",
+    "orderby": "rating desc, geo.distance(location, geography'POINT(-122.335167 47.608013)')",
+    "top": 5
+}
+
+### Notes:
+# - Use geography'POINT(longitude latitude)' format (longitude first!)
+# - Distances are calculated in kilometers by default
+# - Use 'le' (<=) for "within distance" and 'gt' (>) for "beyond distance"
+# - Polygons must be closed (first point = last point)
+# - Define polygon points in counterclockwise order
+# - Use geo.intersects() for polygon-based filtering
+# - Use geo.distance() for radius-based filtering
+# - Combine geographic filters with other criteria for better results
+# - Always validate coordinate ranges: lat (-90 to 90), lon (-180 to 180)
+# - Consider performance implications of complex geographic queries
+# - Location fields must be of type Edm.GeographyPoint and marked as 'filterable'

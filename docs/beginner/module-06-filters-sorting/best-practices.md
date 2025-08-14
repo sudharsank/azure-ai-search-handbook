@@ -527,4 +527,23 @@ function trackSortUsage(sortOption) {
 }
 ```
 
+## Related Resources
+
+### Module Documentation
+- **[Prerequisites](prerequisites.md)** - Required setup and knowledge
+- **[Main Documentation](documentation.md)** - Complete module overview
+- **[Practice & Implementation](practice-implementation.md)** - Hands-on exercises
+- **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
+- **[Code Samples](code-samples/README.md)** - Working examples in multiple languages
+
+### External Resources
+- **[Azure AI Search Documentation](https://docs.microsoft.com/azure/search/)**
+- **[OData Filter Reference](https://docs.microsoft.com/azure/search/search-query-odata-filter)**
+- **[Performance Tuning Guide](https://docs.microsoft.com/azure/search/search-performance-optimization)**
+
+### When You Need Help
+- **Syntax Issues**: Check the [Troubleshooting Guide](troubleshooting.md)
+- **Performance Problems**: Review [Performance Analysis Examples](code-samples/python/08_performance_analysis.py)
+- **Complex Scenarios**: Explore [Complex Filter Examples](code-samples/python/07_complex_filters.py)
+
 By following these best practices, you'll create efficient, user-friendly, and maintainable filter and sorting implementations in Azure AI Search.
