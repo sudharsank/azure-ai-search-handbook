@@ -1,0 +1,494 @@
+###
+# Module 7: Result Counting and Totals Management
+# 
+# This file demonstrates how to manage result counts effectively,
+# including performance considerations and different counting strategies.
+
+# Set variables for your Azure AI Search service
+@searchService = your-search-service
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+###
+# 1. Basic Result Counting
+# Get total count of all results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 2. Search with Result Count
+# Count results for a specific search query
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 3. Filtered Results Count
+# Count results with filters applied
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "rating ge 4.0",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 4. Complex Query Count
+# Count results for complex queries
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "$filter": "rating ge 4.0 and category eq 'Resort'",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 5. Count Without Results
+# Get only the count, no actual results (top=0)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$count": true,
+    "$top": 0
+}
+
+###
+# 6. Performance Comparison - With Count
+# Request with count (slower for large result sets)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$count": true,
+    "$top": 20,
+    "$skip": 100
+}
+
+###
+# 7. Performance Comparison - Without Count
+# Same request without count (faster)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$count": false,
+    "$top": 20,
+    "$skip": 100
+}
+
+###
+# 8. Pagination Strategy - First Page with Count
+# Get count only on first page for pagination UI
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$count": true,
+    "$top": 10,
+    "$skip": 0
+}
+
+###
+# 9. Pagination Strategy - Subsequent Pages without Count
+# Skip count on subsequent pages for better performance
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$count": false,
+    "$top": 10,
+    "$skip": 10
+}
+
+###
+# 10. Count with Faceted Search
+# Combine counting with faceted search
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "facets": ["category", "rating"],
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 11. Geographic Search Count
+# Count results within geographic bounds
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "geo.distance(location, geography'POINT(-122.12 47.67)') le 50",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 12. Date Range Count
+# Count results within date ranges
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "lastRenovationDate ge 2020-01-01T00:00:00Z",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 13. Category-Based Counting
+# Count results by category
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "category eq 'Resort'",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 14. Rating-Based Counting
+# Count high-rated results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "rating ge 4.5",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 15. Boolean Filter Counting
+# Count results with boolean conditions
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "parkingIncluded eq true and smokingAllowed eq false",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 16. Search Field Specific Count
+# Count results searching specific fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "searchFields": "hotelName,description",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 17. Wildcard Search Count
+# Count results for wildcard searches
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "lux*",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 18. Phrase Search Count
+# Count results for exact phrase searches
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "\"ocean view\"",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 19. Multiple Condition Count
+# Count with multiple filter conditions
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa",
+    "$filter": "rating ge 4.0 and category eq 'Resort' and parkingIncluded eq true",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 20. Count for Analytics
+# Get counts for different segments
+
+# All hotels
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$count": true,
+    "$top": 0
+}
+
+###
+# Luxury hotels
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "rating ge 4.5",
+    "$count": true,
+    "$top": 0
+}
+
+###
+# Budget hotels
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "rating lt 3.5",
+    "$count": true,
+    "$top": 0
+}
+
+###
+# 21. Count with Sorting (No Impact on Count)
+# Sorting doesn't affect the total count
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$orderby": "rating desc",
+    "$count": true,
+    "$top": 10
+}
+
+###
+# 22. URL Parameter Style Counting
+# Using URL parameters for counting
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=luxury&$count=true&$top=10
+api-key: {{apiKey}}
+
+###
+# 23. Count Validation Test
+# Verify count accuracy by retrieving all results
+
+# Get count
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa",
+    "$count": true,
+    "$top": 0
+}
+
+###
+# Get all results to verify count (use appropriate top value)
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa",
+    "$count": false,
+    "$top": 1000
+}
+
+###
+# 24. Large Dataset Count Performance
+# Test counting performance on large result sets
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$count": true,
+    "$top": 1
+}
+
+###
+# 25. Conditional Counting Strategy
+# Different counting strategies based on context
+
+# First page - include count for pagination UI
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$count": true,
+    "$top": 20,
+    "$skip": 0
+}
+
+###
+# Subsequent pages - skip count for performance
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$count": false,
+    "$top": 20,
+    "$skip": 20
+}
+
+###
+# Deep pagination - definitely skip count
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$count": false,
+    "$top": 20,
+    "$skip": 1000
+}
+
+###
+# Expected Response Format with Count:
+# {
+#   "@odata.context": "...",
+#   "@odata.count": 42,          // Total count when $count=true
+#   "value": [
+#     {
+#       "@search.score": 1.0,
+#       "hotelId": "1",
+#       // ... document fields
+#     }
+#   ]
+# }
+
+###
+# Expected Response Format without Count:
+# {
+#   "@odata.context": "...",
+#   // No @odata.count property
+#   "value": [
+#     {
+#       "@search.score": 1.0,
+#       "hotelId": "1",
+#       // ... document fields
+#     }
+#   ]
+# }
+
+###
+# Result Counting Best Practices:
+# 1. Use $count=true only when you need the total count
+# 2. Skip count on subsequent pagination pages for performance
+# 3. Use $top=0 when you only need the count, not results
+# 4. Cache counts when possible to avoid repeated calculations
+# 5. Consider approximate counts for very large result sets
+# 6. Monitor performance impact of counting on complex queries
+# 7. Use conditional counting based on user context
+# 8. Implement client-side estimation for better UX
+
+###
+# Common Counting Patterns:
+
+# Pattern 1: First page with count
+# $count=true&$top=20&$skip=0
+
+# Pattern 2: Subsequent pages without count
+# $count=false&$top=20&$skip=20
+
+# Pattern 3: Count only (no results)
+# $count=true&$top=0
+
+# Pattern 4: Analytics counting
+# $count=true&$top=0&$filter=condition
+
+# Pattern 5: Performance-optimized pagination
+# First page: $count=true, Others: $count=false

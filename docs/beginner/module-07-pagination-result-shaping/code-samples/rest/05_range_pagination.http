@@ -1,0 +1,334 @@
+###
+# Module 7: Range-Based Pagination for Large Datasets
+# 
+# This file demonstrates range-based pagination using filters and sorting,
+# which provides better performance for large datasets and deep pagination scenarios.
+###
+
+# Set variables for your Azure AI Search service
+@searchEndpoint = https://your-search-service.search.windows.net
+@indexName = hotels-sample
+@apiKey = your-api-key
+@apiVersion = 2024-07-01
+
+###
+# 1. Basic Range Pagination - First Page
+# Get the first page using sort order without any filter
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,rating,category"
+}
+
+###
+# 2. Range Pagination - Second Page
+# Use the last hotelId from the previous page to get the next page
+# Replace 'hotel_005' with the actual last hotelId from the previous response
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId gt 'hotel_005'",
+    "orderby": "hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,rating,category"
+}
+
+###
+# 3. Range Pagination with Search Query
+# Combine search query with range-based pagination
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "filter": "hotelId gt 'hotel_010'",
+    "orderby": "hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,description,rating"
+}
+
+###
+# 4. Range Pagination with Additional Filters
+# Combine range pagination with business logic filters
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "rating ge 4.0 and hotelId gt 'hotel_015'",
+    "orderby": "hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,rating,category"
+}
+
+###
+# 5. Range Pagination with Numeric Field
+# Use rating field for range-based pagination (descending order)
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "rating desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,rating,category"
+}
+
+###
+# 6. Range Pagination - Next Page with Numeric Field
+# Continue pagination using rating and hotelId for tie-breaking
+# Replace values with actual last rating and hotelId from previous response
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "rating lt 4.5 or (rating eq 4.5 and hotelId gt 'hotel_020')",
+    "orderby": "rating desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,rating,category"
+}
+
+###
+# 7. Range Pagination with Date Field
+# Use lastRenovationDate for pagination (most recent first)
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "lastRenovationDate desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,lastRenovationDate,rating"
+}
+
+###
+# 8. Range Pagination - Next Page with Date Field
+# Continue pagination using date field
+# Replace date with actual lastRenovationDate from previous response
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastRenovationDate lt 2020-01-01T00:00:00Z or (lastRenovationDate eq 2020-01-01T00:00:00Z and hotelId gt 'hotel_025')",
+    "orderby": "lastRenovationDate desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,lastRenovationDate,rating"
+}
+
+###
+# 9. Deep Pagination Performance Test
+# Compare skip/top vs range-based pagination for deep pages
+# Traditional skip/top approach (slower for large skip values)
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "hotelId asc",
+    "skip": 1000,
+    "top": 10,
+    "select": "hotelId,hotelName,rating"
+}
+
+###
+# 10. Deep Pagination with Range Filter (Better Performance)
+# Range-based approach for the same deep page
+# First, get the boundary value at position 1000
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "hotelId asc",
+    "skip": 999,
+    "top": 1,
+    "select": "hotelId"
+}
+
+###
+# 11. Use the boundary value for range pagination
+# Replace 'boundary_hotel_id' with the hotelId from the previous response
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId gt 'boundary_hotel_id'",
+    "orderby": "hotelId asc",
+    "top": 10,
+    "select": "hotelId,hotelName,rating"
+}
+
+###
+# 12. Range Pagination with Complex Sorting
+# Multiple sort fields with range filtering
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "category asc, rating desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,category,rating"
+}
+
+###
+# 13. Continue Complex Sorting Pagination
+# Next page with multiple sort fields
+# Replace values with actual last category, rating, and hotelId from previous response
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "category gt 'Budget' or (category eq 'Budget' and rating lt 4.0) or (category eq 'Budget' and rating eq 4.0 and hotelId gt 'hotel_030')",
+    "orderby": "category asc, rating desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,category,rating"
+}
+
+###
+# 14. Range Pagination with Geographic Sorting
+# Sort by distance from a point (requires geo.distance function)
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "geo.distance(location, geography'POINT(-122.131577 47.678581)') asc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,location"
+}
+
+###
+# 15. Infinite Scroll Pattern
+# Simulate infinite scroll by continuously loading more results
+# This would be called repeatedly with updated filter values
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "beach",
+    "filter": "hotelId gt 'last_loaded_hotel_id'",
+    "orderby": "hotelId asc",
+    "top": 20,
+    "select": "hotelId,hotelName,description,rating",
+    "highlight": "description"
+}
+
+###
+# 16. Range Pagination with Facets
+# Combine range pagination with faceted navigation
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId gt 'hotel_040'",
+    "orderby": "hotelId asc",
+    "top": 10,
+    "facets": ["category", "rating,interval:1"],
+    "select": "hotelId,hotelName,category,rating"
+}
+
+###
+# 17. Range Pagination Error Handling
+# Test pagination at the end of results
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId gt 'zzz_nonexistent_id'",
+    "orderby": "hotelId asc",
+    "top": 10,
+    "select": "hotelId,hotelName,rating"
+}
+
+###
+# 18. Range Pagination with Search Score
+# Combine relevance scoring with range pagination
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "orderby": "@search.score desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,description",
+    "highlight": "description"
+}
+
+###
+# 19. Continue Score-Based Pagination
+# Next page maintaining score-based ordering
+# Replace values with actual last score and hotelId from previous response
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "filter": "@search.score lt 1.5 or (@search.score eq 1.5 and hotelId gt 'hotel_045')",
+    "orderby": "@search.score desc, hotelId asc",
+    "top": 5,
+    "select": "hotelId,hotelName,description",
+    "highlight": "description"
+}
+
+###
+# 20. Performance Comparison Query
+# Get timing information for performance analysis
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId gt 'performance_test_boundary'",
+    "orderby": "hotelId asc",
+    "top": 50,
+    "select": "hotelId,hotelName",
+    "count": false
+}
+
+###
+# Notes for Range Pagination Implementation:
+#
+# 1. Always include a unique, sortable field (like ID) in your sort order
+# 2. Use compound sorting for tie-breaking when primary sort field has duplicates
+# 3. Range filters provide consistent performance regardless of page depth
+# 4. Avoid using skip/top for deep pagination (skip > 1000)
+# 5. Consider the data type when building range filters (strings need quotes)
+# 6. Test performance with your actual data size and query patterns
+# 7. Monitor query execution time using the elapsed-time header
+# 8. Use appropriate page sizes (10-50 typically) for optimal performance
+# 9. Handle edge cases like end-of-results gracefully
+# 10. Consider caching strategies for frequently accessed ranges
+###

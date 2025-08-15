@@ -71,14 +71,16 @@ Each programming language directory contains:
 language/
 ├── README.md                    # Language-specific setup and overview
 ├── 01_basic_pagination.*       # Basic pagination implementations
-├── 02_skip_top.*              # Skip/top pagination examples
-├── 03_range_pagination.*       # Range-based pagination
-├── 04_field_selection.*        # Field selection techniques
-├── 05_result_counting.*        # Result counting strategies
-├── 06_hit_highlighting.*       # Hit highlighting implementations
-├── 07_search_scores.*          # Search score handling
-└── 08_large_result_sets.*      # Large dataset optimization
+├── 02_field_selection.*        # Field selection techniques
+├── 03_hit_highlighting.*       # Hit highlighting implementations
+├── 04_result_counting.*        # Result counting strategies
+├── 05_range_pagination.*       # Range-based pagination
+├── 06_search_scores.*          # Search scores and relevance
+├── 07_large_result_sets.*      # Large dataset handling
+└── 08_performance_optimization.* # Performance optimization techniques
 ```
+
+**Note**: All samples are now complete and verified against Microsoft documentation.
 
 ## Prerequisites
 

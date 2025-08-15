@@ -1,0 +1,343 @@
+###
+# Module 7: Pagination & Result Shaping - Search Scores Analysis
+# Azure AI Search REST API Examples
+#
+# This file demonstrates how to work with search scores and relevance in Azure AI Search
+# using direct REST API calls, including score analysis and custom scoring techniques.
+#
+# Prerequisites:
+# - Azure AI Search service
+# - Sample data index (hotels-sample recommended)
+# - Valid API keys and service endpoint
+# - REST client (VS Code REST Client extension, Postman, etc.)
+
+### Variables (Update these with your actual values)
+@searchEndpoint = https://your-search-service.search.windows.net
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+### 1. Basic Search with Scores
+# Simple search that returns relevance scores for analysis
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury hotel",
+    "top": 10,
+    "searchMode": "all",
+    "scoringStatistics": "global"
+}
+
+### 2. Search with Score Explanation (if supported)
+# Request detailed score explanations for debugging relevance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "ocean view",
+    "top": 5,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "queryType": "simple"
+}
+
+### 3. Compare Different Search Modes - ANY Mode
+# Test search with "any" mode for broader matching
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury beach resort",
+    "top": 10,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 4. Compare Different Search Modes - ALL Mode
+# Test search with "all" mode for stricter matching
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury beach resort",
+    "top": 10,
+    "searchMode": "all",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 5. Exact Phrase Search for Score Comparison
+# Search for exact phrases to analyze precision vs recall
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "\"ocean view\"",
+    "top": 10,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 6. Search with Field Boosting for Score Analysis
+# Boost specific fields to analyze impact on relevance scores
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotelName:luxury^3 OR description:luxury",
+    "top": 10,
+    "queryType": "full",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 7. Search with Custom Scoring Profile (if configured)
+# Use custom scoring profile to modify relevance calculation
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 10,
+    "scoringProfile": "geo-boost",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,address"
+}
+
+### 8. Multi-Field Search for Score Distribution Analysis
+# Search across multiple fields to analyze score distribution
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa wellness",
+    "searchFields": "hotelName,description,tags",
+    "top": 15,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description,tags"
+}
+
+### 9. Search with Minimum Score Threshold
+# Filter results by minimum relevance score
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "top": 20,
+    "minimumCoverage": 80,
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 10. Complex Query for Advanced Score Analysis
+# Complex query combining multiple techniques for comprehensive analysis
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "(hotelName:luxury OR description:luxury) AND (tags:spa OR tags:pool)",
+    "top": 10,
+    "queryType": "full",
+    "searchMode": "all",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description,tags",
+    "highlight": "description",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>"
+}
+
+### 11. Search for Score Variance Analysis - High Frequency Terms
+# Search with common terms to analyze score variance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 50,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating"
+}
+
+### 12. Search for Score Variance Analysis - Low Frequency Terms
+# Search with specific terms to analyze score variance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "oceanfront penthouse",
+    "top": 20,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 13. Wildcard Search for Score Pattern Analysis
+# Use wildcard searches to analyze scoring patterns
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "lux*",
+    "top": 15,
+    "queryType": "full",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 14. Fuzzy Search for Score Tolerance Analysis
+# Use fuzzy matching to analyze score tolerance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxery~1",
+    "top": 10,
+    "queryType": "full",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 15. Search with Facets and Scores
+# Combine faceting with score analysis
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "resort",
+    "top": 20,
+    "facets": ["rating", "tags"],
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,tags,description"
+}
+
+### 16. Geographic Search with Score Analysis
+# Analyze scores in geographic searches
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.12 47.67)') le 50",
+    "orderby": "geo.distance(location, geography'POINT(-122.12 47.67)')",
+    "top": 15,
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,address"
+}
+
+### 17. Search with Synonyms for Score Impact Analysis
+# Analyze how synonyms affect relevance scores
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "accommodation lodging",
+    "top": 15,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 18. Multi-Language Search Score Analysis
+# Analyze scores across different languages (if applicable)
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel hôtel",
+    "top": 10,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 19. Search with Stop Words for Score Analysis
+# Analyze how stop words affect relevance scoring
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "the best luxury hotel in the city",
+    "top": 10,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+### 20. Comparative Score Analysis - Short vs Long Queries
+# Compare scores between short and long queries
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury beachfront resort with spa facilities and ocean view rooms perfect for romantic getaway",
+    "top": 10,
+    "searchMode": "any",
+    "scoringStatistics": "global",
+    "select": "hotelId,hotelName,rating,description"
+}
+
+###
+# Score Analysis Tips:
+#
+# 1. Score Interpretation:
+#    - Higher scores indicate better relevance
+#    - Scores are relative within a result set
+#    - Compare scores across similar queries for patterns
+#
+# 2. Factors Affecting Scores:
+#    - Term frequency (TF)
+#    - Inverse document frequency (IDF)
+#    - Field length normalization
+#    - Field boosting
+#    - Custom scoring profiles
+#
+# 3. Score Optimization Strategies:
+#    - Use field boosting for important fields
+#    - Implement custom scoring profiles
+#    - Optimize query construction
+#    - Consider search mode (any vs all)
+#    - Use phrase queries for exact matches
+#
+# 4. Performance Considerations:
+#    - Scoring statistics add overhead
+#    - Complex scoring profiles impact performance
+#    - Balance relevance vs performance needs
+#
+# 5. Debugging Relevance:
+#    - Compare different query formulations
+#    - Analyze score distributions
+#    - Test with known relevant documents
+#    - Use highlighting to understand matches
+#
+# 6. Best Practices:
+#    - Establish baseline scores for comparison
+#    - Monitor score patterns over time
+#    - Test with representative queries
+#    - Consider user feedback for validation
+#    - Document scoring decisions and changes

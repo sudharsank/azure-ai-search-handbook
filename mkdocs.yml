@@ -328,7 +328,62 @@ nav:
                 - "07 - Complex Filters": beginner/module-06-filters-sorting/code-samples/rest/07_complex_filters.http
                 - "08 - Performance Analysis": beginner/module-06-filters-sorting/code-samples/rest/08_performance_analysis.http
     
-    - "Module 7: Pagination & Result Shaping": beginner/module-07-pagination-result-shaping/documentation.md
+    - "Module 7: Pagination & Result Shaping":
+        - "📖 Overview": beginner/module-07-pagination-result-shaping/documentation.md
+        - "⚙️ Prerequisites": beginner/module-07-pagination-result-shaping/prerequisites.md
+        - "✨ Best Practices": beginner/module-07-pagination-result-shaping/best-practices.md
+        - "🛠️ Practice & Implementation": beginner/module-07-pagination-result-shaping/practice-implementation.md
+        - "🔧 Troubleshooting": beginner/module-07-pagination-result-shaping/troubleshooting.md
+        - "💻 Code Samples":
+            - "📋 Overview": beginner/module-07-pagination-result-shaping/code-samples/README.md
+            - "📓 Interactive Notebooks":
+                - "📖 Overview": beginner/module-07-pagination-result-shaping/code-samples/notebooks/README.md
+                - "01 - Pagination Fundamentals": beginner/module-07-pagination-result-shaping/code-samples/notebooks/01_pagination_fundamentals.ipynb
+                - "02 - Result Shaping Techniques": beginner/module-07-pagination-result-shaping/code-samples/notebooks/02_result_shaping_techniques.ipynb
+                - "03 - Advanced Pagination Patterns": beginner/module-07-pagination-result-shaping/code-samples/notebooks/03_advanced_pagination_patterns.ipynb
+                - "04 - Performance Analysis Workshop": beginner/module-07-pagination-result-shaping/code-samples/notebooks/04_performance_analysis_workshop.ipynb
+                - "05 - Comprehensive Pagination Workshop": beginner/module-07-pagination-result-shaping/code-samples/notebooks/05_comprehensive_pagination_workshop.ipynb
+                - "06 - Pagination Troubleshooting Guide": beginner/module-07-pagination-result-shaping/code-samples/notebooks/06_pagination_troubleshooting_guide.ipynb
+            - "🐍 Python Examples":
+                - "📖 Overview": beginner/module-07-pagination-result-shaping/code-samples/python/README.md
+                - "01 - Basic Pagination": beginner/module-07-pagination-result-shaping/code-samples/python/01_basic_pagination.py
+                - "02 - Field Selection": beginner/module-07-pagination-result-shaping/code-samples/python/02_field_selection.py
+                - "03 - Hit Highlighting": beginner/module-07-pagination-result-shaping/code-samples/python/03_hit_highlighting.py
+                - "04 - Result Counting": beginner/module-07-pagination-result-shaping/code-samples/python/04_result_counting.py
+                - "05 - Range Pagination": beginner/module-07-pagination-result-shaping/code-samples/python/05_range_pagination.py
+                - "06 - Search Scores": beginner/module-07-pagination-result-shaping/code-samples/python/06_search_scores.py
+                - "07 - Large Result Sets": beginner/module-07-pagination-result-shaping/code-samples/python/07_large_result_sets.py
+                - "08 - Performance Optimization": beginner/module-07-pagination-result-shaping/code-samples/python/08_performance_optimization.py
+            - "🟨 JavaScript Examples":
+                - "📖 Overview": beginner/module-07-pagination-result-shaping/code-samples/javascript/README.md
+                - "01 - Basic Pagination": beginner/module-07-pagination-result-shaping/code-samples/javascript/01_basic_pagination.js
+                - "02 - Field Selection": beginner/module-07-pagination-result-shaping/code-samples/javascript/02_field_selection.js
+                - "03 - Hit Highlighting": beginner/module-07-pagination-result-shaping/code-samples/javascript/03_hit_highlighting.js
+                - "04 - Result Counting": beginner/module-07-pagination-result-shaping/code-samples/javascript/04_result_counting.js
+                - "05 - Range Pagination": beginner/module-07-pagination-result-shaping/code-samples/javascript/05_range_pagination.js
+                - "06 - Advanced Range Pagination": beginner/module-07-pagination-result-shaping/code-samples/javascript/06_advanced_range_pagination.js
+                - "07 - Search Scores": beginner/module-07-pagination-result-shaping/code-samples/javascript/07_search_scores.js
+                - "08 - Large Result Sets": beginner/module-07-pagination-result-shaping/code-samples/javascript/08_large_result_sets.js
+            - "🔷 C# Examples":
+                - "📖 Overview": beginner/module-07-pagination-result-shaping/code-samples/csharp/README.md
+                - "01 - Basic Pagination": beginner/module-07-pagination-result-shaping/code-samples/csharp/01_BasicPagination.cs
+                - "02 - Field Selection": beginner/module-07-pagination-result-shaping/code-samples/csharp/02_FieldSelection.cs
+                - "03 - Hit Highlighting": beginner/module-07-pagination-result-shaping/code-samples/csharp/03_HitHighlighting.cs
+                - "04 - Result Counting": beginner/module-07-pagination-result-shaping/code-samples/csharp/04_ResultCounting.cs
+                - "05 - Range Pagination": beginner/module-07-pagination-result-shaping/code-samples/csharp/05_RangePagination.cs
+                - "06 - Search Scores": beginner/module-07-pagination-result-shaping/code-samples/csharp/06_SearchScores.cs
+                - "07 - Large Result Sets": beginner/module-07-pagination-result-shaping/code-samples/csharp/07_LargeResultSets.cs
+                - "08 - Performance Optimization": beginner/module-07-pagination-result-shaping/code-samples/csharp/08_PerformanceOptimization.cs
+            - "🌐 REST API Examples":
+                - "📖 Overview": beginner/module-07-pagination-result-shaping/code-samples/rest/README.md
+                - "01 - Basic Pagination": beginner/module-07-pagination-result-shaping/code-samples/rest/01_basic_pagination.http
+                - "02 - Field Selection": beginner/module-07-pagination-result-shaping/code-samples/rest/02_field_selection.http
+                - "03 - Hit Highlighting": beginner/module-07-pagination-result-shaping/code-samples/rest/03_hit_highlighting.http
+                - "04 - Result Counting": beginner/module-07-pagination-result-shaping/code-samples/rest/04_result_counting.http
+                - "05 - Range Pagination": beginner/module-07-pagination-result-shaping/code-samples/rest/05_range_pagination.http
+                - "06 - Search Scores": beginner/module-07-pagination-result-shaping/code-samples/rest/06_search_scores.http
+                - "07 - Large Result Sets": beginner/module-07-pagination-result-shaping/code-samples/rest/07_large_result_sets.http
+                - "08 - Performance Optimization": beginner/module-07-pagination-result-shaping/code-samples/rest/08_performance_optimization.http
     - "Module 8: Search Explorer & Portal Tools": beginner/module-08-search-explorer-portal-tools/documentation.md
 
   - Intermediate:

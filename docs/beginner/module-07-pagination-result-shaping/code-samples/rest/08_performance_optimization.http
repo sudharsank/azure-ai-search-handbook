@@ -1,0 +1,533 @@
+###
+# Module 7: Pagination & Result Shaping - Performance Optimization
+# Azure AI Search REST API Examples
+#
+# This file demonstrates comprehensive performance optimization techniques for pagination
+# and result shaping using direct REST API calls, including caching strategies, 
+# connection optimization, and monitoring best practices.
+#
+# Prerequisites:
+# - Azure AI Search service
+# - Sample data index with substantial data
+# - Valid API keys and service endpoint
+# - REST client with performance monitoring capabilities
+
+### Variables (Update these with your actual values)
+@searchEndpoint = https://your-search-service.search.windows.net
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+### 1. Baseline Performance Test - Simple Query
+# Establish baseline performance metrics
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 2. Optimized Query - Field Selection
+# Optimize with minimal field selection
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 3. Performance Test - No Count
+# Optimize by disabling count when not needed
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 4. Performance Test - With Count
+# Compare performance with count enabled
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName,rating",
+    "count": true
+}
+
+### 5. Page Size Optimization - Small Pages
+# Test performance with small page sizes
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "top": 10,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 6. Page Size Optimization - Medium Pages
+# Test performance with medium page sizes
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "top": 50,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 7. Page Size Optimization - Large Pages
+# Test performance with large page sizes
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "top": 100,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 8. Query Complexity - Simple Query
+# Test simple query performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 9. Query Complexity - Complex Query
+# Test complex query performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "(hotelName:luxury OR description:luxury) AND (tags:spa OR tags:pool)",
+    "queryType": "full",
+    "top": 20,
+    "select": "hotelId,hotelName,rating,tags"
+}
+
+### 10. Filter Performance - Simple Filter
+# Test simple filter performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "rating ge 4",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 11. Filter Performance - Complex Filter
+# Test complex filter performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "rating ge 4 and search.ismatch('luxury', 'tags') and lastRenovationDate ge 2020-01-01T00:00:00Z",
+    "top": 20,
+    "select": "hotelId,hotelName,rating,tags,lastRenovationDate"
+}
+
+### 12. Sorting Performance - Single Field
+# Test single field sorting performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "orderby": "rating desc",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 13. Sorting Performance - Multiple Fields
+# Test multiple field sorting performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "orderby": "rating desc, hotelName asc",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 14. Highlighting Performance - No Highlighting
+# Baseline without highlighting
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "top": 20,
+    "select": "hotelId,hotelName,description"
+}
+
+### 15. Highlighting Performance - With Highlighting
+# Test highlighting performance impact
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "top": 20,
+    "select": "hotelId,hotelName,description",
+    "highlight": "description",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>"
+}
+
+### 16. Faceting Performance - No Facets
+# Baseline without facets
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 17. Faceting Performance - With Facets
+# Test faceting performance impact
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 20,
+    "select": "hotelId,hotelName,rating",
+    "facets": ["rating", "tags,count:10"]
+}
+
+### 18. Deep Pagination Performance - Page 1
+# Test early page performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 20,
+    "skip": 0,
+    "select": "hotelId,hotelName"
+}
+
+### 19. Deep Pagination Performance - Page 10
+# Test medium depth pagination performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 20,
+    "skip": 200,
+    "select": "hotelId,hotelName"
+}
+
+### 20. Deep Pagination Performance - Page 50
+# Test deep pagination performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 20,
+    "skip": 1000,
+    "select": "hotelId,hotelName"
+}
+
+### 21. Range Pagination Performance - First Range
+# Test range-based pagination performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId ge '1' and hotelId lt '100'",
+    "orderby": "hotelId",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 22. Range Pagination Performance - Later Range
+# Test range-based pagination at depth
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId ge '500' and hotelId lt '600'",
+    "orderby": "hotelId",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 23. Payload Size Test - Minimal Fields
+# Test minimal payload size
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 50,
+    "select": "hotelId"
+}
+
+### 24. Payload Size Test - All Fields
+# Test maximum payload size
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 50
+}
+
+### 25. Concurrent Request Test 1
+# Simulate concurrent requests for performance testing
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 26. Concurrent Request Test 2
+# Second concurrent request
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "beach",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 27. Concurrent Request Test 3
+# Third concurrent request
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa",
+    "top": 20,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 28. Cache-Friendly Query Pattern
+# Repeatable query for cache testing
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "popular hotel query",
+    "top": 20,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 29. Geographic Query Performance
+# Test geographic query performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.12 47.67)') le 10",
+    "orderby": "geo.distance(location, geography'POINT(-122.12 47.67)')",
+    "top": 20,
+    "select": "hotelId,hotelName,address"
+}
+
+### 30. Batch Query Performance Test
+# Large batch query for throughput testing
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 1000,
+    "select": "hotelId,hotelName",
+    "count": false
+}
+
+### 31. Memory-Efficient Query
+# Optimized for memory efficiency
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 100,
+    "select": "hotelId",
+    "count": false
+}
+
+### 32. Search Mode Performance - ANY
+# Test ANY search mode performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury beach resort",
+    "searchMode": "any",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 33. Search Mode Performance - ALL
+# Test ALL search mode performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury beach resort",
+    "searchMode": "all",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 34. Query Type Performance - Simple
+# Test simple query type performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury hotel",
+    "queryType": "simple",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+### 35. Query Type Performance - Full
+# Test full Lucene query type performance
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotelName:luxury^2 OR description:luxury",
+    "queryType": "full",
+    "top": 20,
+    "select": "hotelId,hotelName"
+}
+
+###
+# Performance Optimization Guidelines:
+#
+# 1. Query Optimization:
+#    - Use simple queries when possible
+#    - Avoid complex nested queries
+#    - Use appropriate search modes (any vs all)
+#    - Consider query type impact (simple vs full)
+#
+# 2. Field Selection:
+#    - Always use $select to limit returned fields
+#    - Include only necessary fields for the use case
+#    - Minimize payload size for better performance
+#    - Consider field size impact on transfer time
+#
+# 3. Pagination Strategy:
+#    - Use skip/top for small datasets
+#    - Use range-based pagination for large datasets
+#    - Avoid deep pagination (skip > 1000)
+#    - Consider search-after pattern for real-time data
+#
+# 4. Count Management:
+#    - Set count=false when total count not needed
+#    - Use count=true only for pagination UI
+#    - Consider caching count results
+#    - Monitor count operation performance impact
+#
+# 5. Filtering and Sorting:
+#    - Use filters instead of search when possible
+#    - Index fields used in filters and sorting
+#    - Avoid complex filter expressions
+#    - Use appropriate data types for filters
+#
+# 6. Highlighting and Facets:
+#    - Use highlighting only when needed
+#    - Limit highlighted fields
+#    - Use facets judiciously
+#    - Consider facet count limits
+#
+# 7. Caching Strategies:
+#    - Cache frequently used queries
+#    - Implement client-side caching
+#    - Use appropriate cache TTL
+#    - Consider cache invalidation strategies
+#
+# 8. Connection Optimization:
+#    - Use connection pooling
+#    - Implement proper timeout handling
+#    - Use appropriate retry policies
+#    - Monitor connection health
+#
+# 9. Monitoring and Metrics:
+#    - Track query response times
+#    - Monitor payload sizes
+#    - Measure throughput (queries/second)
+#    - Log slow queries for analysis
+#
+# 10. Best Practices:
+#     - Establish performance baselines
+#     - Test with realistic data volumes
+#     - Monitor performance in production
+#     - Optimize based on actual usage patterns
+#     - Consider geographic distribution
+#     - Plan for peak load scenarios

@@ -1,0 +1,379 @@
+###
+# Module 7: Basic Pagination with Skip/Top
+# 
+# This file demonstrates fundamental pagination using skip and top parameters
+# in Azure AI Search REST API calls.
+
+# Set variables for your Azure AI Search service
+@searchService = your-search-service
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+###
+# 1. Basic Pagination - First Page
+# Get the first 10 results (page 1)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 2. Basic Pagination - Second Page
+# Get results 11-20 (page 2)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": 10,
+    "$count": true
+}
+
+###
+# 3. Basic Pagination - Third Page
+# Get results 21-30 (page 3)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": 20,
+    "$count": false
+}
+
+###
+# 4. Search with Pagination
+# Search for "luxury" with pagination
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$top": 5,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 5. Search with Pagination - Next Page
+# Continue searching for "luxury" on next page
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$top": 5,
+    "$skip": 5,
+    "$count": false
+}
+
+###
+# 6. Large Page Size
+# Get 50 results at once
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 50,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 7. Small Page Size for Mobile
+# Get 3 results for mobile interface
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$top": 3,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 8. Deep Pagination Example
+# Access page 100 (results 991-1000)
+# Note: This may be slow due to large skip value
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": 990,
+    "$count": false
+}
+
+###
+# 9. Pagination with Sorting
+# Paginate through results sorted by rating
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": 0,
+    "$orderby": "rating desc",
+    "$count": true
+}
+
+###
+# 10. Pagination with Sorting - Next Page
+# Continue with same sorting
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": 10,
+    "$orderby": "rating desc",
+    "$count": false
+}
+
+###
+# 11. Pagination with Filters
+# Paginate through filtered results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "rating ge 4.0",
+    "$top": 10,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 12. Pagination with Filters - Next Page
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$filter": "rating ge 4.0",
+    "$top": 10,
+    "$skip": 10,
+    "$count": false
+}
+
+###
+# 13. Pagination Performance Test
+# Compare with and without count
+
+# With count (slower)
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 20,
+    "$skip": 100,
+    "$count": true
+}
+
+###
+# Without count (faster)
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 20,
+    "$skip": 100,
+    "$count": false
+}
+
+###
+# 14. Maximum Page Size Test
+# Test maximum allowed page size
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 1000,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 15. Error Handling - Invalid Skip Value
+# This should return an error for negative skip
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10,
+    "$skip": -1,
+    "$count": true
+}
+
+###
+# 16. Error Handling - Invalid Top Value
+# This should return an error for top value exceeding limit
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$top": 10000,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 17. Pagination with Complex Query
+# Combine search, filter, sort, and pagination
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "$filter": "rating ge 4.0 and category eq 'Resort'",
+    "$orderby": "rating desc, hotelName asc",
+    "$top": 5,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# 18. URL Parameter Style (Alternative Syntax)
+# Same as above but using URL parameters instead of JSON body
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=luxury&$top=10&$skip=0&$count=true
+api-key: {{apiKey}}
+
+###
+# 19. Pagination State Tracking Example
+# Simulate tracking pagination state across requests
+
+# First request - get total count and first page
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$top": 5,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# Subsequent requests - skip count for performance
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$top": 5,
+    "$skip": 5,
+    "$count": false
+}
+
+###
+# 20. Pagination with Facets
+# Combine pagination with faceted search
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "facets": ["category", "rating"],
+    "$top": 10,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# Expected Response Format for Pagination:
+# {
+#   "@odata.context": "...",
+#   "@odata.count": 50,           // Total count (if requested)
+#   "value": [                    // Array of results
+#     {
+#       "@search.score": 1.0,
+#       "hotelId": "1",
+#       "hotelName": "Hotel Name",
+#       // ... other fields
+#     }
+#   ]
+# }
+
+###
+# Pagination Best Practices:
+# 1. Use $count=true only on first page request
+# 2. Keep page sizes reasonable (10-50 items)
+# 3. Avoid deep pagination with large skip values
+# 4. Consider range-based pagination for large datasets
+# 5. Include stable sorting for consistent results
+# 6. Handle errors gracefully (invalid parameters)
+# 7. Cache total counts when possible
+# 8. Use appropriate timeouts for large result sets
+
+###
+# Common Pagination Patterns:
+
+# Pattern 1: First page with count
+# GET .../docs?search=*&$top=20&$skip=0&$count=true
+
+# Pattern 2: Subsequent pages without count
+# GET .../docs?search=*&$top=20&$skip=20&$count=false
+
+# Pattern 3: Jump to specific page
+# GET .../docs?search=*&$top=20&$skip=100&$count=false
+
+# Pattern 4: Last page calculation
+# lastPageSkip = Math.floor((totalCount - 1) / pageSize) * pageSize

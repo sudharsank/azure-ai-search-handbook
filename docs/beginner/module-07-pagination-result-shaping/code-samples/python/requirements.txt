@@ -1,0 +1,37 @@
+# Azure AI Search Pagination & Result Shaping - Python Requirements
+# Module 7: Pagination & Result Shaping
+
+# Core Azure AI Search SDK
+azure-search-documents>=11.4.0
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# Data analysis and visualization
+pandas>=1.5.0
+numpy>=1.24.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+
+# Interactive notebooks (optional)
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Performance and monitoring
+psutil>=5.9.0
+
+# HTTP and async support
+aiohttp>=3.8.0
+requests>=2.28.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# Code formatting and linting (optional)
+black>=23.0.0
+flake8>=6.0.0
+
+# Type hints (optional)
+mypy>=1.0.0
+types-requests>=2.28.0

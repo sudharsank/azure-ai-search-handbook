@@ -1,0 +1,415 @@
+###
+# Module 7: Pagination & Result Shaping - Large Result Sets
+# Azure AI Search REST API Examples
+#
+# This file demonstrates efficient techniques for handling large result sets in Azure AI Search
+# using direct REST API calls, including streaming, batching, and optimization strategies.
+#
+# Prerequisites:
+# - Azure AI Search service
+# - Sample data index with substantial data
+# - Valid API keys and service endpoint
+# - REST client (VS Code REST Client extension, Postman, etc.)
+
+### Variables (Update these with your actual values)
+@searchEndpoint = https://your-search-service.search.windows.net
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+### 1. Basic Large Result Set - First Batch
+# Start with the first batch of a large result set
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 100,
+    "skip": 0,
+    "select": "hotelId,hotelName,rating",
+    "count": true
+}
+
+### 2. Large Result Set - Second Batch
+# Continue with the second batch
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 100,
+    "skip": 100,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 3. Large Result Set - Third Batch
+# Continue with the third batch
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 100,
+    "skip": 200,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 4. Optimized Field Selection for Large Sets
+# Use minimal field selection to reduce payload size
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "top": 1000,
+    "skip": 0,
+    "select": "hotelId,hotelName",
+    "count": true
+}
+
+### 5. Range-Based Pagination - First Range
+# Use range-based pagination for better performance with large datasets
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId ge '1' and hotelId lt '100'",
+    "orderby": "hotelId",
+    "top": 50,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 6. Range-Based Pagination - Second Range
+# Continue with the next range
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId ge '100' and hotelId lt '200'",
+    "orderby": "hotelId",
+    "top": 50,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 7. Date Range Pagination for Time-Series Data
+# Use date ranges for time-based large datasets
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "lastRenovationDate ge 2020-01-01T00:00:00Z and lastRenovationDate lt 2021-01-01T00:00:00Z",
+    "orderby": "lastRenovationDate",
+    "top": 100,
+    "select": "hotelId,hotelName,lastRenovationDate"
+}
+
+### 8. Parallel Range Search - High Rating Hotels
+# Search high-rating hotels in parallel with other ranges
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "filter": "rating ge 4",
+    "top": 100,
+    "select": "hotelId,hotelName,rating,address"
+}
+
+### 9. Parallel Range Search - Medium Rating Hotels
+# Search medium-rating hotels in parallel
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "filter": "rating ge 3 and rating lt 4",
+    "top": 100,
+    "select": "hotelId,hotelName,rating,address"
+}
+
+### 10. Parallel Range Search - Low Rating Hotels
+# Search low-rating hotels in parallel
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "filter": "rating lt 3",
+    "top": 100,
+    "select": "hotelId,hotelName,rating,address"
+}
+
+### 11. Geographic Range Search - West Coast
+# Search by geographic regions for parallel processing
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-122.0 37.0)') le 500",
+    "top": 200,
+    "select": "hotelId,hotelName,address,location"
+}
+
+### 12. Geographic Range Search - East Coast
+# Search by geographic regions for parallel processing
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "geo.distance(location, geography'POINT(-74.0 40.7)') le 500",
+    "top": 200,
+    "select": "hotelId,hotelName,address,location"
+}
+
+### 13. Category-Based Range Search - Luxury Hotels
+# Search by categories for parallel processing
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "search.ismatch('luxury', 'tags')",
+    "top": 150,
+    "select": "hotelId,hotelName,tags,rating"
+}
+
+### 14. Category-Based Range Search - Budget Hotels
+# Search budget category in parallel
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "search.ismatch('budget', 'tags')",
+    "top": 150,
+    "select": "hotelId,hotelName,tags,rating"
+}
+
+### 15. Large Export Query - Batch 1 (0-999)
+# Export large datasets in manageable batches
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 1000,
+    "skip": 0,
+    "select": "hotelId,hotelName,description,rating,address,tags",
+    "count": true
+}
+
+### 16. Large Export Query - Batch 2 (1000-1999)
+# Continue export with next batch
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 1000,
+    "skip": 1000,
+    "select": "hotelId,hotelName,description,rating,address,tags",
+    "count": false
+}
+
+### 17. Streaming Query with Minimal Payload
+# Optimize for streaming with minimal data transfer
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 1000,
+    "skip": 0,
+    "select": "hotelId,hotelName",
+    "count": false
+}
+
+### 18. Deep Pagination Performance Test - Page 50
+# Test performance at deeper pagination levels
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 20,
+    "skip": 1000,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 19. Deep Pagination Performance Test - Page 100
+# Test performance at very deep pagination levels
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 20,
+    "skip": 2000,
+    "select": "hotelId,hotelName,rating",
+    "count": false
+}
+
+### 20. Memory-Efficient Query with Sorting
+# Large result set with efficient sorting
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "rating desc, hotelId",
+    "top": 500,
+    "skip": 0,
+    "select": "hotelId,hotelName,rating",
+    "count": true
+}
+
+### 21. Bulk Data Analysis Query - All Hotels
+# Query for bulk data analysis
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 1000,
+    "skip": 0,
+    "select": "rating,tags,lastRenovationDate",
+    "count": true
+}
+
+### 22. Aggregation-Style Query for Large Sets
+# Use facets for aggregation over large datasets
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 0,
+    "facets": [
+        "rating,count:50",
+        "tags,count:100",
+        "address/city,count:50"
+    ],
+    "count": true
+}
+
+### 23. Search After Pattern Simulation - First Page
+# Simulate search-after pattern using filters
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "orderby": "hotelId",
+    "top": 100,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 24. Search After Pattern Simulation - Next Page
+# Continue with search-after pattern using last ID from previous result
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "filter": "hotelId gt 'LAST_ID_FROM_PREVIOUS_RESULT'",
+    "orderby": "hotelId",
+    "top": 100,
+    "select": "hotelId,hotelName,rating"
+}
+
+### 25. Performance Monitoring Query
+# Query to monitor performance with large result sets
+POST {{searchEndpoint}}/indexes/{{indexName}}/docs/search?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "top": 1,
+    "count": true,
+    "select": "hotelId"
+}
+
+###
+# Large Result Set Handling Tips:
+#
+# 1. Pagination Strategies:
+#    - Use skip/top for small to medium datasets
+#    - Use range-based pagination for large datasets
+#    - Consider search-after pattern for real-time data
+#    - Avoid deep pagination (skip > 1000) when possible
+#
+# 2. Performance Optimization:
+#    - Use field selection to reduce payload size
+#    - Disable count when not needed (count=false)
+#    - Use appropriate page sizes (100-1000 for bulk operations)
+#    - Consider parallel range searches
+#
+# 3. Memory Management:
+#    - Process results in batches
+#    - Stream data when possible
+#    - Use minimal field selection
+#    - Implement proper error handling
+#
+# 4. Parallel Processing:
+#    - Split large datasets by ranges
+#    - Use geographic or category-based splits
+#    - Process ranges in parallel
+#    - Aggregate results as needed
+#
+# 5. Error Handling:
+#    - Handle timeout errors gracefully
+#    - Implement retry logic with exponential backoff
+#    - Monitor for rate limiting
+#    - Validate result completeness
+#
+# 6. Monitoring and Metrics:
+#    - Track processing time per batch
+#    - Monitor memory usage
+#    - Measure throughput (documents/second)
+#    - Log errors and retries
+#
+# 7. Best Practices:
+#    - Start with smaller batches and scale up
+#    - Use consistent ordering for reliable pagination
+#    - Implement progress tracking
+#    - Consider data freshness requirements
+#    - Plan for concurrent data changes
+#
+# 8. Azure AI Search Limits:
+#    - Maximum skip value: 100,000
+#    - Maximum top value: 1,000
+#    - Request timeout: 30 seconds (default)
+#    - Consider these limits in your design

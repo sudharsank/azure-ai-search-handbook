@@ -1,0 +1,414 @@
+###
+# Module 7: Field Selection and Result Optimization
+# 
+# This file demonstrates how to use the $select parameter to control which
+# fields are returned, optimizing response size and performance.
+
+# Set variables for your Azure AI Search service
+@searchService = your-search-service
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+###
+# 1. All Fields (Default Behavior)
+# Returns all retrievable fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$top": 3
+}
+
+###
+# 2. Minimal Field Selection
+# Return only essential fields for list view
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$select": "hotelId,hotelName,rating",
+    "$top": 3
+}
+
+###
+# 3. Search Results Field Selection
+# Fields appropriate for search results display
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$select": "hotelId,hotelName,description,rating,category",
+    "$top": 3
+}
+
+###
+# 4. Map View Field Selection
+# Fields needed for map display
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,location,rating",
+    "$filter": "geo.distance(location, geography'POINT(-122.12 47.67)') le 50",
+    "$top": 5
+}
+
+###
+# 5. Detail View Field Selection
+# Comprehensive fields for detail pages
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$select": "hotelId,hotelName,description,category,rating,location,address,tags,parkingIncluded,smokingAllowed",
+    "$top": 2
+}
+
+###
+# 6. Comparison View Field Selection
+# Fields useful for comparing hotels
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,rating,category,tags,parkingIncluded",
+    "$filter": "rating ge 4.0",
+    "$top": 5
+}
+
+###
+# 7. Mobile-Optimized Field Selection
+# Minimal fields for mobile interfaces
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$select": "hotelId,hotelName,rating",
+    "$top": 10
+}
+
+###
+# 8. Analytics Field Selection
+# Fields for reporting and analytics
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,category,rating,lastRenovationDate",
+    "$top": 20
+}
+
+###
+# 9. Autocomplete Field Selection
+# Minimal fields for autocomplete/suggestions
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "lux*",
+    "$select": "hotelId,hotelName",
+    "$top": 10
+}
+
+###
+# 10. Complex Type Field Selection
+# Selecting nested/complex fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,address/streetAddress,address/city,address/stateProvince",
+    "$top": 5
+}
+
+###
+# 11. Collection Field Selection
+# Selecting collection fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,tags",
+    "$top": 5
+}
+
+###
+# 12. Field Selection with Pagination
+# Combine field selection with pagination
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,rating,category",
+    "$top": 10,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# Next page with same field selection
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,rating,category",
+    "$top": 10,
+    "$skip": 10,
+    "$count": false
+}
+
+###
+# 13. Field Selection with Sorting
+# Select fields and sort results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,rating",
+    "$orderby": "rating desc",
+    "$top": 10
+}
+
+###
+# 14. Field Selection with Filtering
+# Combine field selection with filters
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,rating,category",
+    "$filter": "rating ge 4.0 and category eq 'Resort'",
+    "$top": 10
+}
+
+###
+# 15. Performance Comparison - All Fields vs Selected Fields
+# First request: All fields (larger response)
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$top": 10
+}
+
+###
+# Second request: Selected fields only (smaller response)
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$select": "hotelId,hotelName,rating",
+    "$top": 10
+}
+
+###
+# 16. Error Handling - Invalid Field Names
+# This should return an error for non-existent fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,nonExistentField,anotherBadField",
+    "$top": 5
+}
+
+###
+# 17. Error Handling - Non-Retrievable Fields
+# This may return an error if fields are not marked as retrievable
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,someNonRetrievableField",
+    "$top": 5
+}
+
+###
+# 18. Single Field Selection
+# Select only one field
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelName",
+    "$top": 10
+}
+
+###
+# 19. Field Selection with Search Scores
+# Include search scores with selected fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "$select": "hotelId,hotelName,rating",
+    "$top": 5
+}
+
+###
+# 20. URL Parameter Style Field Selection
+# Using URL parameters instead of JSON body
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=luxury&$select=hotelId,hotelName,rating&$top=5
+api-key: {{apiKey}}
+
+###
+# 21. Dynamic Field Selection Based on Context
+# Different field selections for different use cases
+
+# List view context
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$select": "hotelId,hotelName,rating,category",
+    "$top": 20
+}
+
+###
+# Card view context
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$select": "hotelId,hotelName,description,rating,tags",
+    "$top": 12
+}
+
+###
+# Table view context
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "$select": "hotelId,hotelName,category,rating,parkingIncluded,smokingAllowed",
+    "$top": 25
+}
+
+###
+# 22. Field Selection for Export/Download
+# Select all necessary fields for data export
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "$select": "hotelId,hotelName,description,category,rating,address,tags",
+    "$top": 1000
+}
+
+###
+# Expected Response Format with Field Selection:
+# {
+#   "@odata.context": "...",
+#   "value": [
+#     {
+#       "@search.score": 1.0,
+#       "hotelId": "1",           // Only selected fields are returned
+#       "hotelName": "Hotel Name",
+#       "rating": 4.5
+#       // Other fields are excluded
+#     }
+#   ]
+# }
+
+###
+# Field Selection Best Practices:
+# 1. Always select only the fields you need
+# 2. Use minimal field sets for list views
+# 3. Use comprehensive field sets for detail views
+# 4. Consider mobile vs desktop field requirements
+# 5. Validate field names against index schema
+# 6. Test performance impact of field selection
+# 7. Use consistent field selection across pagination
+# 8. Consider security implications of field exposure
+
+###
+# Common Field Selection Patterns:
+
+# Pattern 1: List View
+# $select=id,title,summary,thumbnail
+
+# Pattern 2: Search Results
+# $select=id,title,description,score,category
+
+# Pattern 3: Map View
+# $select=id,title,location,rating
+
+# Pattern 4: Comparison
+# $select=id,title,price,rating,features
+
+# Pattern 5: Mobile Minimal
+# $select=id,title,rating
+
+# Pattern 6: Analytics
+# $select=id,category,date,metrics

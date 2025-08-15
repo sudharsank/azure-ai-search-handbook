@@ -1,0 +1,454 @@
+###
+# Module 7: Hit Highlighting Implementation
+# 
+# This file demonstrates how to implement hit highlighting to emphasize
+# search terms in results using the highlight parameter.
+
+# Set variables for your Azure AI Search service
+@searchService = your-search-service
+@apiKey = your-api-key
+@indexName = hotels-sample
+@apiVersion = 2023-11-01
+
+###
+# 1. Basic Hit Highlighting
+# Highlight search terms in the description field
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury hotel",
+    "highlight": "description",
+    "$top": 5
+}
+
+###
+# 2. Multi-Field Highlighting
+# Highlight search terms across multiple fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa resort",
+    "highlight": "hotelName,description,category",
+    "$top": 5
+}
+
+###
+# 3. Custom Highlighting Tags
+# Use custom HTML tags for highlighting
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "ocean view",
+    "highlight": "description",
+    "highlightPreTag": "<strong>",
+    "highlightPostTag": "</strong>",
+    "$top": 5
+}
+
+###
+# 4. CSS Class Highlighting
+# Use CSS classes for styling highlights
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa",
+    "highlight": "description,hotelName",
+    "highlightPreTag": "<span class=\"search-highlight\">",
+    "highlightPostTag": "</span>",
+    "$top": 5
+}
+
+###
+# 5. Simple Text Highlighting
+# Use simple text markers for highlighting
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "beach resort",
+    "highlight": "description",
+    "highlightPreTag": "[",
+    "highlightPostTag": "]",
+    "$top": 5
+}
+
+###
+# 6. Highlighting with Field Selection
+# Combine highlighting with field selection
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "highlight": "hotelName,description",
+    "$select": "hotelId,hotelName,description,rating",
+    "$top": 5
+}
+
+###
+# 7. Highlighting with Pagination
+# Use highlighting across paginated results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "highlight": "hotelName,description",
+    "$top": 3,
+    "$skip": 0,
+    "$count": true
+}
+
+###
+# Next page with same highlighting
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "hotel",
+    "highlight": "hotelName,description",
+    "$top": 3,
+    "$skip": 3,
+    "$count": false
+}
+
+###
+# 8. Highlighting with Filters
+# Combine highlighting with filtered results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "highlight": "description",
+    "$filter": "rating ge 4.0",
+    "$top": 5
+}
+
+###
+# 9. Highlighting with Sorting
+# Highlight results with custom sorting
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa",
+    "highlight": "description,hotelName",
+    "$orderby": "rating desc",
+    "$top": 5
+}
+
+###
+# 10. Complex Query with Highlighting
+# Advanced search with multiple features and highlighting
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury spa resort",
+    "highlight": "hotelName,description,category",
+    "$filter": "rating ge 4.0",
+    "$orderby": "rating desc",
+    "$select": "hotelId,hotelName,description,category,rating",
+    "$top": 5
+}
+
+###
+# 11. Highlighting Collection Fields
+# Highlight terms in collection/array fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "wifi pool",
+    "highlight": "tags",
+    "$top": 5
+}
+
+###
+# 12. Highlighting with Phrase Search
+# Highlight exact phrases in results
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "\"ocean view\"",
+    "highlight": "description",
+    "$top": 5
+}
+
+###
+# 13. Highlighting with Wildcard Search
+# Highlight wildcard search terms
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "lux*",
+    "highlight": "hotelName,description",
+    "$top": 5
+}
+
+###
+# 14. Multiple Highlight Configurations
+# Different highlighting for different fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury hotel spa",
+    "highlight": "hotelName,description,category",
+    "highlightPreTag": "<mark>",
+    "highlightPostTag": "</mark>",
+    "$top": 5
+}
+
+###
+# 15. Highlighting Performance Test
+# Compare performance with and without highlighting
+
+# Without highlighting (faster)
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "$top": 10
+}
+
+###
+# With highlighting (slightly slower)
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "highlight": "description",
+    "$top": 10
+}
+
+###
+# 16. Error Handling - Invalid Highlight Fields
+# This should return an error for non-searchable fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "highlight": "rating",
+    "$top": 5
+}
+
+###
+# 17. Error Handling - Non-Existent Fields
+# This should return an error for non-existent fields
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "highlight": "nonExistentField",
+    "$top": 5
+}
+
+###
+# 18. Highlighting with Empty Search
+# Note: Highlighting typically doesn't work with wildcard-only searches
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "*",
+    "highlight": "description",
+    "$top": 5
+}
+
+###
+# 19. Advanced Highlighting with Search Fields
+# Limit search to specific fields and highlight them
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "searchFields": "hotelName,description",
+    "highlight": "hotelName,description",
+    "$top": 5
+}
+
+###
+# 20. URL Parameter Style Highlighting
+# Using URL parameters instead of JSON body
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}&search=luxury&highlight=description&$top=5
+api-key: {{apiKey}}
+
+###
+# 21. Highlighting for Autocomplete/Suggestions
+# Highlight matching terms in suggestions
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "lux",
+    "highlight": "hotelName",
+    "$select": "hotelId,hotelName",
+    "$top": 10
+}
+
+###
+# 22. Highlighting with Faceted Search
+# Combine highlighting with facets
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "spa",
+    "highlight": "description",
+    "facets": ["category", "rating"],
+    "$top": 10
+}
+
+###
+# 23. Highlighting with Geographic Search
+# Highlight terms in location-based searches
+
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "beach resort",
+    "highlight": "description,hotelName",
+    "$filter": "geo.distance(location, geography'POINT(-122.12 47.67)') le 100",
+    "$top": 5
+}
+
+###
+# 24. Highlighting Different Search Types
+# Test highlighting with different search query types
+
+# Simple search
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury",
+    "queryType": "simple",
+    "highlight": "description",
+    "$top": 3
+}
+
+###
+# Full Lucene search
+GET https://{{searchService}}.search.windows.net/indexes/{{indexName}}/docs?api-version={{apiVersion}}
+Content-Type: application/json
+api-key: {{apiKey}}
+
+{
+    "search": "luxury AND spa",
+    "queryType": "full",
+    "highlight": "description",
+    "$top": 3
+}
+
+###
+# Expected Response Format with Highlighting:
+# {
+#   "@odata.context": "...",
+#   "value": [
+#     {
+#       "@search.score": 1.0,
+#       "@search.highlights": {
+#         "description": [
+#           "This <mark>luxury</mark> hotel offers...",
+#           "...with <mark>spa</mark> facilities..."
+#         ],
+#         "hotelName": [
+#           "<mark>Luxury</mark> Resort & Spa"
+#         ]
+#       },
+#       "hotelId": "1",
+#       "hotelName": "Luxury Resort & Spa",
+#       "description": "This luxury hotel offers...",
+#       // ... other fields
+#     }
+#   ]
+# }
+
+###
+# Hit Highlighting Best Practices:
+# 1. Only highlight searchable fields
+# 2. Use appropriate HTML tags for your UI
+# 3. Limit highlighting to relevant fields
+# 4. Test performance impact with multiple fields
+# 5. Handle cases where no highlights are found
+# 6. Use consistent highlighting across pagination
+# 7. Consider accessibility when choosing highlight styles
+# 8. Validate highlight field names against index schema
+
+###
+# Common Highlighting Patterns:
+
+# Pattern 1: Basic HTML highlighting
+# "highlightPreTag": "<mark>", "highlightPostTag": "</mark>"
+
+# Pattern 2: CSS class highlighting
+# "highlightPreTag": "<span class=\"highlight\">", "highlightPostTag": "</span>"
+
+# Pattern 3: Bold text highlighting
+# "highlightPreTag": "<strong>", "highlightPostTag": "</strong>"
+
+# Pattern 4: Simple text markers
+# "highlightPreTag": "[", "highlightPostTag": "]"
+
+# Pattern 5: Custom styling
+# "highlightPreTag": "<em class=\"search-term\">", "highlightPostTag": "</em>"
